@@ -1,0 +1,21 @@
+﻿using Broiler.JavaScript.ExpressionCompiler.Expressions;
+
+namespace Broiler.JavaScript.ExpressionCompiler.Generator;
+
+public partial class ILCodeGenerator
+{
+    protected override CodeInfo VisitLabel(YLabelExpression yLabelExpression)
+    {
+        var l = labels[yLabelExpression.Target];
+
+        if(yLabelExpression.Default != null)
+        {
+            Visit(yLabelExpression.Default);
+            il.MarkLabel(l);
+            return true;
+        }
+
+        il.MarkLabel(l);
+        return true;
+    }
+}

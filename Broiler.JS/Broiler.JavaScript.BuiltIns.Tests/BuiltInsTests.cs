@@ -915,6 +915,33 @@ public class BuiltInsTests
     }
 
     [Fact]
+    public void RegExp_Escape_Exposes_Expected_Metadata_And_Descriptors()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = new JSContext();
+        var result = ctx.Eval(@"(function () {
+            var descriptor = Object.getOwnPropertyDescriptor(RegExp, 'escape');
+            var lengthDescriptor = Object.getOwnPropertyDescriptor(RegExp.escape, 'length');
+            var nameDescriptor = Object.getOwnPropertyDescriptor(RegExp.escape, 'name');
+
+            return [
+                RegExp.escape.length,
+                RegExp.escape.name,
+                descriptor.writable,
+                descriptor.enumerable,
+                descriptor.configurable,
+                lengthDescriptor.writable,
+                lengthDescriptor.enumerable,
+                lengthDescriptor.configurable,
+                nameDescriptor.writable,
+                nameDescriptor.enumerable,
+                nameDescriptor.configurable
+            ].join('|');
+        })();");
+        Assert.Equal("1|escape|true|false|true|false|false|true|false|false|true", result.ToString());
+    }
+
+    [Fact]
     public void Primitive_Wrapper_Addition_Uses_The_Wrapped_Primitive_Value()
     {
         EnsureBuiltInsLoaded();

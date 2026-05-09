@@ -2,6 +2,40 @@
 
 This document turns the remaining compliance work into a small-step execution plan. It is intentionally evidence-first: Broiler.JS should not claim “100% compliant” until the public-suite totals, raw logs, and remaining known gaps all agree.
 
+## Progress tracker
+
+Use this checklist as the issue-level summary for roadmap progress. Update the matching item here whenever a roadmap bucket is completed or split into linked sub-issues.
+
+- [ ] 1. Pin and automate `test262`
+- [ ] 2. Add `engine262` cross-check coverage
+- [ ] 3. Publish raw artifacts
+- [ ] 4. Build the comparison matrix
+- [ ] 5. Implement `for await (...)`
+- [ ] 6. Implement async object accessors
+- [ ] 7. Fix BigInt comparison parse failures
+- [ ] 8. Finish non-strict/global semantics validation
+- [ ] 9. Align unresolved-reference behavior in `+` and `===`
+- [ ] 10. Verify promise jobs and async scheduling
+- [ ] 11. Finish `Array.isArray`
+- [ ] 12. Validate `Intl`
+- [ ] 13. Prove `Proxy` invariants and revocation behavior
+- [ ] 14. Cover typed arrays, `ArrayBuffer`, and `DataView`
+- [ ] 15. Finish `RegExp.escape` and related `RegExp` conformance
+- [ ] 16. Validate error subclassing
+- [ ] 17. Convert the remaining open gaps into tracked batches
+- [ ] 18. Define the final “ready to claim” checklist
+
+## Issue update template
+
+When posting a progress checkpoint in the tracking issue, use this format so blockers, milestones, and linked work stay consistent:
+
+- **Status:** not started / in progress / blocked / done
+- **Roadmap item:** `<number and title from the checklist above>`
+- **Completed since last update:** `<tests, fixes, or docs landed>`
+- **Blockers:** `<none or list>`
+- **Links:** `<PRs, sub-issues, failing suite directory, regression test, implementation file>`
+- **Next checkpoint:** `<next concrete step>`
+
 ## What “100% compliant” means here
 
 Treat the goal as all of the following being true at the same time:

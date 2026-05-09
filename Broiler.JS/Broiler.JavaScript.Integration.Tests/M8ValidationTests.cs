@@ -213,7 +213,16 @@ public class M8ValidationTests
 
             var dashboard = File.ReadAllText(Path.Combine(repoRoot, "docs", "compliance", "dashboard.md"));
             Assert.Contains("Compliance dashboard", dashboard);
+            Assert.Contains("247 passed", dashboard);
+            Assert.Contains("Compliance workstreams", dashboard);
+            Assert.Contains("test262", dashboard);
             Assert.Contains("Regression tracking", dashboard);
+
+            var knownGaps = File.ReadAllText(Path.Combine(repoRoot, "docs", "compliance", "known-gaps.md"));
+            Assert.Contains("Tracking checklist", knownGaps);
+            Assert.Contains("for await (...)", knownGaps);
+            Assert.Contains("async object accessors", knownGaps);
+            Assert.Contains("Intl", knownGaps);
         }
         // If we can't find the repo root (e.g., in CI), the test still passes
         // because we verified the documentation content in other tests.

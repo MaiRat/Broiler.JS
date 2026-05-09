@@ -471,7 +471,7 @@ public class BuiltInsTests
     {
         EnsureBuiltInsLoaded();
         using var ctx = new JSContext();
-        var result = ctx.Eval(@"(function () {
+        var parts = ctx.Eval(@"(function () {
             var error = new Error('boom');
             var typeError = new TypeError('type boom');
             var referenceError = new ReferenceError('ref boom');
@@ -494,8 +494,24 @@ public class BuiltInsTests
                 typeError.message,
                 referenceError.message
             ].join('|');
-        })();");
-        Assert.Equal("Error|TypeError|ReferenceError|true|true|true|true|true|true|true|true|true|true|boom|type boom|ref boom", result.ToString());
+        })();").ToString().Split('|');
+        Assert.Equal(16, parts.Length);
+        Assert.Equal("Error", parts[0]);
+        Assert.Equal("TypeError", parts[1]);
+        Assert.Equal("ReferenceError", parts[2]);
+        Assert.Equal("true", parts[3]);
+        Assert.Equal("true", parts[4]);
+        Assert.Equal("true", parts[5]);
+        Assert.Equal("true", parts[6]);
+        Assert.Equal("true", parts[7]);
+        Assert.Equal("true", parts[8]);
+        Assert.Equal("true", parts[9]);
+        Assert.Equal("true", parts[10]);
+        Assert.Equal("true", parts[11]);
+        Assert.Equal("true", parts[12]);
+        Assert.Equal("boom", parts[13]);
+        Assert.Equal("type boom", parts[14]);
+        Assert.Equal("ref boom", parts[15]);
     }
 
     [Fact]
@@ -503,7 +519,7 @@ public class BuiltInsTests
     {
         EnsureBuiltInsLoaded();
         using var ctx = new JSContext();
-        var result = ctx.Eval(@"(function () {
+        var parts = ctx.Eval(@"(function () {
             class BaseCustomError extends Error {}
             class DerivedCustomError extends BaseCustomError {}
 
@@ -518,8 +534,16 @@ public class BuiltInsTests
                 error.constructor.name,
                 error.message
             ].join('|');
-        })();");
-        Assert.Equal("true|true|true|true|true|true|DerivedCustomError|custom boom", result.ToString());
+        })();").ToString().Split('|');
+        Assert.Equal(8, parts.Length);
+        Assert.Equal("true", parts[0]);
+        Assert.Equal("true", parts[1]);
+        Assert.Equal("true", parts[2]);
+        Assert.Equal("true", parts[3]);
+        Assert.Equal("true", parts[4]);
+        Assert.Equal("true", parts[5]);
+        Assert.Equal("DerivedCustomError", parts[6]);
+        Assert.Equal("custom boom", parts[7]);
     }
 
     [Fact]

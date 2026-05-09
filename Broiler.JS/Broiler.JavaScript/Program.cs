@@ -1,7 +1,9 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
+using Broiler.JavaScript.Engine;
 using BroilerJS;
 using Broiler.JavaScript.ExpressionCompiler;
 using Broiler.JavaScript.ExpressionCompiler.Generator;
@@ -20,7 +22,10 @@ namespace BroilerJS
 
             ILCodeGenerator.GenerateLogs = true;
 
-            if (args.Length == 0)
+            var scriptHostMode = args.Contains("--script-host");
+            var scriptPath = args.FirstOrDefault(arg => !arg.StartsWith("-"));
+
+            if (scriptPath == null)
             {
                 // no parameter....
 
@@ -30,13 +35,23 @@ namespace BroilerJS
                 return;
             }
 
-            var file = new FileInfo(args[0]);
+            var file = new FileInfo(scriptPath);
             if (!file.Exists)
                 throw new FileNotFoundException(file.FullName);
 
             var filePath = new FileInfo(typeof(Program).Assembly.Location);
             var inbuilt = filePath.DirectoryName + "/modules";
             
+            if (scriptHostMode)
+            {
+                using var context = new JSContext();
+                var code = await File.ReadAllTextAsync(file.FullName);
+                var result = context.Eval(code, file.FullName, context);
+                if (!result.IsUndefined)
+                    Console.WriteLine(result);
+                return;
+            }
+
             var yc = new BroilerJSContext(file.DirectoryName);
             var r = await yc.RunAsync(
                 file.DirectoryName, "./" + file.Name, 
@@ -47,7 +62,6 @@ namespace BroilerJS
                 });
             if (!r.IsUndefined)
                 Console.WriteLine(r);
-            Console.WriteLine(DateTime.Now);
         }
     }
 

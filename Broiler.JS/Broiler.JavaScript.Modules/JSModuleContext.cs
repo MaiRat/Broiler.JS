@@ -174,7 +174,7 @@ public class JSModuleContext : JSContext
             CurrentPath,
             CurrentPath + "/node_modules",
             // system npm paths...
-            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "/yantra/node_modules"
+            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "/broilerjs/node_modules"
         ];
     }
 

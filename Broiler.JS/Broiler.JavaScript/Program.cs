@@ -2,15 +2,15 @@
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
-using YantraJS;
+using BroilerJSJS;
 using Broiler.JavaScript.Core.Core;
 using Broiler.JavaScript.ExpressionCompiler;
 using Broiler.JavaScript.ExpressionCompiler.Generator;
 using Broiler.JavaScript.Runtime;
-using YantraJS.Utils;
-using YantraJS.REPL;
+using BroilerJSJS.Utils;
+using BroilerJSJS.REPL;
 
-namespace Yantra
+namespace BroilerJS
 {
     public class Program
     {
@@ -26,7 +26,7 @@ namespace Yantra
                 // no parameter....
 
                 // start REPL
-                var c = new YantraRepl();
+                var c = new BroilerJSRepl();
                 c.Run();
                 return;
             }
@@ -38,7 +38,7 @@ namespace Yantra
             var filePath = new FileInfo(typeof(Program).Assembly.Location);
             var inbuilt = filePath.DirectoryName + "/modules";
             
-            var yc = new YantraContext(file.DirectoryName);
+            var yc = new BroilerJSContext(file.DirectoryName);
             var r = await yc.RunAsync(
                 file.DirectoryName, "./" + file.Name, 
                 new string[] { 

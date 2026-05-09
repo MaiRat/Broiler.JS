@@ -6,9 +6,9 @@ using Broiler.JavaScript.Core.Core;
 using Broiler.JavaScript.Engine;
 using Broiler.JavaScript.Runtime;
 
-namespace YantraJS.Utils
+namespace BroilerJSJS.Utils
 {
-    public class YantraConsole
+    public class BroilerJSConsole
     {
 
         public static JSValue Log(in Arguments a)

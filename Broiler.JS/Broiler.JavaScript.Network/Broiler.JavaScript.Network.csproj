@@ -2,12 +2,12 @@
 
   <PropertyGroup>
 	  <TargetFramework>net8.0</TargetFramework>
-	  <AssemblyName>YantraJS.Network</AssemblyName>
-	  <PackageId>YantraJS.Network</PackageId>
-	  <PackageTags>yantrajs.network,network</PackageTags>
-	  <Description>Network Services (fetch api) for YantraJS</Description>
-	  <PackageProjectUrl>http://yantrajs.com/</PackageProjectUrl>
-	  <RepositoryUrl>https://github.com/yantrajs/yantra</RepositoryUrl>
+	  <AssemblyName>BroilerJSJS.Network</AssemblyName>
+	  <PackageId>BroilerJSJS.Network</PackageId>
+	  <PackageTags>broilerjsjs.network,network</PackageTags>
+	  <Description>Network Services (fetch api) for BroilerJSJS</Description>
+	  <PackageProjectUrl>http://broilerjsjs.com/</PackageProjectUrl>
+	  <RepositoryUrl>https://github.com/broilerjsjs/broilerjs</RepositoryUrl>
 	  <Version>1.0.1</Version>
 	  <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
 	  <IncludeSymbols>true</IncludeSymbols>

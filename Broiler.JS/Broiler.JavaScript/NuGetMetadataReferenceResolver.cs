@@ -6,9 +6,9 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using YantraJS.Utils;
+using BroilerJSJS.Utils;
 
-namespace YantraJS
+namespace BroilerJSJS
 {
     /// <summary>
     /// A <see cref="MetadataReferenceResolver"/> decorator that handles

@@ -10,7 +10,7 @@ using Broiler.JavaScript.Core.Core.Storage;
 using Broiler.JavaScript.Extensions;
 using Broiler.JavaScript.Storage;
 
-namespace YantraJS.NodePollyfill
+namespace BroilerJSJS.NodePollyfill
 {
 
     public class Event

@@ -16,7 +16,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace YantraJS.Utils
+namespace BroilerJS.Utils
 {
     public class Loader
     {
@@ -35,7 +35,7 @@ namespace YantraJS.Utils
                 var tokens = name.Split(',');
                 Package = tokens[0].Trim();
                 Version = tokens[1].Trim().ToLower();
-                if (Package.StartsWith("YantraJS", StringComparison.OrdinalIgnoreCase))
+                if (Package.StartsWith("BroilerJS", StringComparison.OrdinalIgnoreCase))
                 {
                     PreRelease = true;
                 }

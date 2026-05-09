@@ -5,7 +5,7 @@ using Broiler.JavaScript.Clr;
 using Broiler.JavaScript.Runtime;
 using Broiler.JavaScript.ExpressionCompiler;
 
-namespace YantraJS.Network
+namespace BroilerJSJS.Network
 {
     [JSClassGenerator()]
     public partial class AbortController : JSObject

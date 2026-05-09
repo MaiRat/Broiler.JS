@@ -1,8 +1,8 @@
-#r "nuget: YantraJS.Core,1.2.1"
+#r "nuget: BroilerJSJS.Core,1.2.1"
 using System;
 using System.Linq;
-using YantraJS.Core;
-using YantraJS.Core.Clr;
+using BroilerJSJS.Core;
+using BroilerJSJS.Core.Clr;
 
 
 [Export]

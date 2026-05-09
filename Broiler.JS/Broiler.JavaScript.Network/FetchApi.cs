@@ -11,7 +11,7 @@ using Broiler.JavaScript.Runtime;
 using Broiler.JavaScript.Engine;
 using Broiler.JavaScript.Engine.Extensions;
 
-namespace YantraJS.Network
+namespace BroilerJSJS.Network
 {
     internal partial class FetchApi
     {

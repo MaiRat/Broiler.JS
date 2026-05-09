@@ -50,7 +50,7 @@ public class Program
         {
             var content = _files[item];
             var engine = new JSContext();
-            // By default YantraJS is strict mode only, in strict mode
+            // By default BroilerJSJS is strict mode only, in strict mode
             // unless you pass `this`, `this` in a global context is undefined.
             engine.Eval(content, item + ".js", engine);
         }

@@ -13,7 +13,7 @@ using Broiler.JavaScript.Engine;
 using Broiler.JavaScript.ExpressionCompiler;
 using Broiler.JavaScript.Storage;
 
-namespace YantraJS.Network
+namespace BroilerJSJS.Network
 {
     [JSRegistrationGenerator]
     public static partial class Names

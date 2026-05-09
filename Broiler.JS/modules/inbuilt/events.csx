@@ -1,14 +1,14 @@
-#r "nuget: YantraJS.Core,1.2.1"
-#r "nuget: YantraJS.NodePollyfill,1.1.107"
+#r "nuget: BroilerJSJS.Core,1.2.1"
+#r "nuget: BroilerJSJS.NodePollyfill,1.1.107"
 using System;
 using System.Linq;
 using System.Collections.Generic;
-using YantraJS.Core;
-using YantraJS.Core.Clr;
-using YantraJS.Core.Core.Storage;
+using BroilerJSJS.Core;
+using BroilerJSJS.Core.Clr;
+using BroilerJSJS.Core.Core.Storage;
 
 
 [Export]
-public class EventEmitter: YantraJS.NodePollyfill.EventEmitter {
+public class EventEmitter: BroilerJSJS.NodePollyfill.EventEmitter {
 
 }

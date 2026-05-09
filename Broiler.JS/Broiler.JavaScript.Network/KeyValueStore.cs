@@ -13,7 +13,7 @@ using Broiler.JavaScript.Engine.Extensions;
 using Broiler.JavaScript.Core.Core.Storage;
 using Broiler.JavaScript.ExpressionCompiler;
 
-namespace YantraJS.Network
+namespace BroilerJSJS.Network
 {
     [JSClassGenerator]
     public partial class KeyValueStore : JSObject

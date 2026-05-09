@@ -7,14 +7,14 @@ using Broiler.JavaScript.Core;
 using Broiler.JavaScript.Core.Core;
 using Broiler.JavaScript.Runtime;
 using Broiler.JavaScript.Storage;
-using YantraJS;
+using BroilerJSJS;
 
-namespace YantraJS.REPL
+namespace BroilerJSJS.REPL
 {
-    internal class YantraRepl: YantraContext
+    internal class BroilerJSRepl: BroilerJSContext
     {
 
-        public YantraRepl(): base(Environment.CurrentDirectory)
+        public BroilerJSRepl(): base(Environment.CurrentDirectory)
         {
             this[KeyStrings.require] = new JSFunction((in Arguments a1) => {
                 var r = this.LoadModuleAsync(System.Environment.CurrentDirectory, a1[0].ToString());
@@ -46,7 +46,7 @@ namespace YantraJS.REPL
                     result = ex.ToString();
                 }
                 return $"{result}\r\n";
-            }, "Yantra:>", "// Write .exit to stop..");
+            }, "BroilerJS:>", "// Write .exit to stop..");
             //while (true)
             //{
             //    string line = Console.ReadLine();

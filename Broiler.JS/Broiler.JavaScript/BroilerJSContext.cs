@@ -20,10 +20,10 @@ using Broiler.JavaScript.Extensions;
 using Broiler.JavaScript.Modules;
 using Broiler.JavaScript.Runtime;
 using Broiler.JavaScript.Storage;
-using YantraJS.Utils;
-using YantraJS.Network;
+using BroilerJSJS.Utils;
+using BroilerJSJS.Network;
 
-namespace YantraJS
+namespace BroilerJSJS
 {
 
     public delegate void ModuleDelegate(
@@ -34,12 +34,12 @@ namespace YantraJS
         string __dirname
         );
 
-    public class YantraContext: JSModuleContext
+    public class BroilerJSContext: JSModuleContext
     {
 
         private static ConcurrentDictionary<string, string> assemblyCache = new ConcurrentDictionary<string, string>();
 
-        static YantraContext()
+        static BroilerJSContext()
         {
             AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
         }
@@ -62,13 +62,13 @@ namespace YantraJS
         }
 
         readonly string folder;
-        public YantraContext(string folder, SynchronizationContext ctx = null): base(ctx)
+        public BroilerJSContext(string folder, SynchronizationContext ctx = null): base(ctx)
         {
             this.folder = folder;
             // reverse priority, select csx before js.
             this.extensions = new string[] { ".csx", ".js"  };
 
-            this[KeyStrings.console] = (typeof(YantraConsole)).Marshal();
+            this[KeyStrings.console] = (typeof(BroilerJSConsole)).Marshal();
 
             this.InstallNetworkServices();
         }
@@ -187,12 +187,12 @@ namespace YantraJS
 
                 var options = ScriptOptions.Default
                         .WithFilePath(filePath)
-                        .AddReferences(typeof(JSValue).Assembly, typeof(YantraContext).Assembly)
+                        .AddReferences(typeof(JSValue).Assembly, typeof(BroilerJSContext).Assembly)
                         .WithMetadataResolver(nugetResolver)
                         .WithOptimizationLevel(OptimizationLevel.Debug);
 
                 var oldCode = code;
-                // remove yantra code 
+                // remove broilerjs code 
                 code = RemoveReference(code);
 
                 var csCode = await CSharpScript.RunAsync<JSModuleDelegate>(code, options);
@@ -248,7 +248,7 @@ namespace YantraJS
                 if(l.StartsWith("#r \"nuget: "))
                 {
                     var name = ParseName(l);
-                    if (name == "YantraJS.Core")
+                    if (name == "BroilerJSJS.Core")
                         continue;
                 }
                 sb.AppendLine(line);

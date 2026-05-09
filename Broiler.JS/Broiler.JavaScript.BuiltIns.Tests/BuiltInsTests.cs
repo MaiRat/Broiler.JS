@@ -467,6 +467,62 @@ public class BuiltInsTests
     }
 
     [Fact]
+    public void Error_Constructors_Preserve_Names_Prototypes_And_Messages()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = new JSContext();
+        var result = ctx.Eval(@"(function () {
+            var error = new Error('boom');
+            var typeError = new TypeError('type boom');
+            var referenceError = new ReferenceError('ref boom');
+
+            return [
+                Error.name,
+                TypeError.name,
+                ReferenceError.name,
+                error.constructor === Error,
+                typeError.constructor === TypeError,
+                referenceError.constructor === ReferenceError,
+                Object.getPrototypeOf(TypeError.prototype) === Error.prototype,
+                Object.getPrototypeOf(ReferenceError.prototype) === Error.prototype,
+                error instanceof Error,
+                typeError instanceof TypeError,
+                typeError instanceof Error,
+                referenceError instanceof ReferenceError,
+                referenceError instanceof Error,
+                error.message,
+                typeError.message,
+                referenceError.message
+            ].join('|');
+        })();");
+        Assert.Equal("Error|TypeError|ReferenceError|true|true|true|true|true|true|true|true|true|true|boom|type boom|ref boom", result.ToString());
+    }
+
+    [Fact]
+    public void Custom_Error_Subclass_Chains_Preserve_Instanceof_And_Message()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = new JSContext();
+        var result = ctx.Eval(@"(function () {
+            class BaseCustomError extends Error {}
+            class DerivedCustomError extends BaseCustomError {}
+
+            var error = new DerivedCustomError('custom boom');
+            return [
+                error.constructor === DerivedCustomError,
+                Object.getPrototypeOf(DerivedCustomError.prototype) === BaseCustomError.prototype,
+                Object.getPrototypeOf(BaseCustomError.prototype) === Error.prototype,
+                error instanceof DerivedCustomError,
+                error instanceof BaseCustomError,
+                error instanceof Error,
+                error.constructor.name,
+                error.message
+            ].join('|');
+        })();");
+        Assert.Equal("true|true|true|true|true|true|DerivedCustomError|custom boom", result.ToString());
+    }
+
+    [Fact]
     public void Array_FromAsync_IsDisabled_WhenFlagIsOff()
     {
         EnsureBuiltInsLoaded();

@@ -972,6 +972,37 @@ public class BuiltInsTests
     }
 
     [Fact]
+    public void Array_IsArray_Exposes_Expected_Metadata_And_Non_Array_Results()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = new JSContext();
+        var result = ctx.Eval(@"(function () {
+            var descriptor = Object.getOwnPropertyDescriptor(Array, 'isArray');
+            var lengthDescriptor = Object.getOwnPropertyDescriptor(Array.isArray, 'length');
+            var nameDescriptor = Object.getOwnPropertyDescriptor(Array.isArray, 'name');
+
+            return [
+                Array.isArray([]),
+                Array.isArray({ length: 0 }),
+                Array.isArray(new Proxy({}, {})),
+                Array.isArray(new Proxy(new Proxy([], {}), {})),
+                Array.isArray.length,
+                Array.isArray.name,
+                descriptor.writable,
+                descriptor.enumerable,
+                descriptor.configurable,
+                lengthDescriptor.writable,
+                lengthDescriptor.enumerable,
+                lengthDescriptor.configurable,
+                nameDescriptor.writable,
+                nameDescriptor.enumerable,
+                nameDescriptor.configurable
+            ].join('|');
+        })();");
+        Assert.Equal("true|false|false|true|1|isArray|true|false|true|false|false|true|false|false|true", result.ToString());
+    }
+
+    [Fact]
     public void RegExp_Escape_Handles_Initial_Characters_And_Punctuators()
     {
         EnsureBuiltInsLoaded();

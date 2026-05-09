@@ -13,7 +13,6 @@ This file tracks areas that must be validated before Broiler.JS can make strong 
 
 ### Parser and execution semantics needing follow-up
 
-- [ ] Fix the strict-mode/global-object mismatch that blocks the official Node-style `test262-harness` prelude (`Function("return this")().require = require` currently fails before the test body runs).
 - [ ] Add coverage and implementation work for `for await (...)` loops, which are still rejected in `Broiler.JS/Broiler.JavaScript.Parser/FastParser.ForStatement.cs`.
 - [ ] Add coverage and implementation work for async object accessors; `Broiler.JS/Broiler.JavaScript.Parser/FastParser.ObjectLiteral.cs` still documents async getter/setter support as missing.
 - [ ] Validate non-strict/global semantics against the compliance suites; `Broiler.JS/OtherTests/JIntPerfTests/Program.cs` still documents the engine as strict-mode only by default.

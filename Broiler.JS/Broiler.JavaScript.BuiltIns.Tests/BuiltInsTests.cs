@@ -1008,6 +1008,22 @@ public class BuiltInsTests
     }
 
     [Fact]
+    public void NewFunction_Uses_Global_Object_As_Default_This()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = new JSContext();
+
+        var result = ctx.Eval(@"
+            this.__functionCtorGlobal = 7;
+            var globalObject = Function('return this')();
+            globalObject.__functionCtorGlobal = globalObject.__functionCtorGlobal + 1;
+            [globalObject === this, this.__functionCtorGlobal].join('|');
+        ");
+
+        Assert.Equal("true|8", result.ToString());
+    }
+
+    [Fact]
     public void Object_Symbol_Wrapper_Uses_Symbol_Coercion_Path()
     {
         EnsureBuiltInsLoaded();

@@ -116,13 +116,7 @@ public class JSContext : JSObject, IJSExecutionContext, IDisposable
             variable.Value = value;
 
         if (hasProperty)
-        {
             this[name] = value;
-        }
-        else
-        {
-            FastAddValue(name, value, JSPropertyAttributes.EnumerableConfigurableValue);
-        }
 
         return value;
     }

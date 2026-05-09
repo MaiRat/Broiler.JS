@@ -1001,7 +1001,7 @@ public class BuiltInsTests
         var result = ctx.Eval(@"
             var ret;
             (new Function('ret = ""ok"";'))();
-            ret;
+            this['ret'];
         ");
 
         Assert.Equal("ok", result.ToString());

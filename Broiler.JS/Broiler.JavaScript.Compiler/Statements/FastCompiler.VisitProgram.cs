@@ -69,7 +69,7 @@ partial class FastCompiler
                 var vs = scope.CreateVariable(v, null, true);
                 scope.Parent?.AddExternalVariable(v, vs);
 
-                vs.Expression = g;
+                vs.Expression = JSVariableBuilder.Property(vs.Variable);
                 vs.SetInit(JSVariableBuilder.New(g, v.Value));
             }
         }

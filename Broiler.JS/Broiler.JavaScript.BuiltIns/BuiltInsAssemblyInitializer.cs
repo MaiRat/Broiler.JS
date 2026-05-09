@@ -183,6 +183,8 @@ internal static class BuiltInsAssemblyInitializer
             new JSURIError(new Arguments(JSUndefined.Value, JSValue.CreateString(message)), function: function, filePath: filePath, line: line).Exception;
         JSEngine.CreateRangeError = static (message, function, filePath, line) =>
             new JSRangeError(new Arguments(JSUndefined.Value, JSValue.CreateString(message)), function: function, filePath: filePath, line: line).Exception;
+        JSEngine.CreateReferenceError = static (message, function, filePath, line) =>
+            new JSReferenceError(new Arguments(JSUndefined.Value, JSValue.CreateString(message)), function: function, filePath: filePath, line: line).Exception;
         JSEngine.CreateError = static (message, function, filePath, line) =>
             new JSError(new Arguments(JSUndefined.Value, JSValue.CreateString(message)), function: function, filePath: filePath, line: line).Exception;
         JSException.CreateJSError = static (ex, msg) => new JSError(ex, msg);

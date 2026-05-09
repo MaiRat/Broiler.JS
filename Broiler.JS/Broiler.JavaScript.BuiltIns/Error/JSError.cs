@@ -135,6 +135,14 @@ public partial class JSRangeError : JSError
     { }
 }
 
+[JSClassGenerator("ReferenceError"), JSBaseClass("Error")]
+public partial class JSReferenceError : JSError
+{
+    public JSReferenceError(in Arguments a, [CallerMemberName] string function = null, [CallerFilePath] string filePath = null, [CallerLineNumber] int line = 0) :
+        base(in a, function: function, filePath: filePath, line: line)
+    { }
+}
+
 [JSClassGenerator("EvalError"), JSBaseClass("Error")]
 public partial class JSEvalError : JSError
 {

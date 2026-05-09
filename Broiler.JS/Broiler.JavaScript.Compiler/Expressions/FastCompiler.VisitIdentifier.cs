@@ -5,7 +5,9 @@ namespace Broiler.JavaScript.Compiler;
 
 partial class FastCompiler
 {
-    protected override YExpression VisitIdentifier(AstIdentifier identifier)
+    protected override YExpression VisitIdentifier(AstIdentifier identifier) => VisitIdentifier(identifier, true);
+
+    private YExpression VisitIdentifier(AstIdentifier identifier, bool throwIfMissing)
     {
         if (identifier.Name.Equals("undefined"))
             return JSUndefinedBuilder.Value;
@@ -24,6 +26,9 @@ partial class FastCompiler
         if (var != null)
             return var.Expression;
 
-        return JSContextBuilder.Index(KeyOfName(identifier.Name));
+        var key = KeyOfName(identifier.Name);
+        return throwIfMissing
+            ? JSContextBuilder.ResolveIdentifier(key)
+            : JSContextBuilder.Index(key);
     }
 }

@@ -95,6 +95,14 @@ public class JSContext : JSObject, IJSExecutionContext, IDisposable
         }
     }
 
+    public JSValue ResolveIdentifier(in KeyString name)
+    {
+        if (!GetInternalProperty(name).IsEmpty)
+            return this[name];
+
+        throw JSEngine.NewReferenceError($"{name} is not defined");
+    }
+
     internal void FillStackTrace(StringBuilder sb) { }
 
     public JSContext(

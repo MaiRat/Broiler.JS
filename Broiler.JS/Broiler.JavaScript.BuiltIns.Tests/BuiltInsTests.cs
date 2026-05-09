@@ -966,6 +966,32 @@ public class BuiltInsTests
     }
 
     [Fact]
+    public void Unresolved_Identifier_Reads_Throw_ReferenceError_In_Binary_Expressions()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = new JSContext();
+
+        var addError = Assert.Throws<JSException>(() => ctx.Eval("missingValue + 1;"));
+        var strictEqualsError = Assert.Throws<JSException>(() => ctx.Eval("missingValue === 1;"));
+
+        Assert.Equal("ReferenceError", addError.Error?.prototypeChain.Object[KeyStrings.constructor][KeyStrings.name].ToString());
+        Assert.Equal("ReferenceError", strictEqualsError.Error?.prototypeChain.Object[KeyStrings.constructor][KeyStrings.name].ToString());
+        Assert.Equal("missingValue is not defined", addError.Error?.Message);
+        Assert.Equal("missingValue is not defined", strictEqualsError.Error?.Message);
+    }
+
+    [Fact]
+    public void Typeof_Unresolved_Identifier_Still_Returns_Undefined()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = new JSContext();
+
+        var result = ctx.Eval("typeof missingValue;");
+
+        Assert.Equal("undefined", result.ToString());
+    }
+
+    [Fact]
     public void String_IsWellFormed_Detects_Paired_And_Lone_Surrogates()
     {
         EnsureBuiltInsLoaded();

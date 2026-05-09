@@ -102,6 +102,9 @@ partial class FastCompiler
                 return JSUndefinedBuilder.Value;
 
             case UnaryOperator.@typeof:
+                if (target is AstIdentifier identifier)
+                    return JSValueBuilder.TypeOf(VisitIdentifier(identifier, false));
+
                 return JSValueBuilder.TypeOf(VisitExpression(target));
 
             case UnaryOperator.Increment:

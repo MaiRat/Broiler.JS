@@ -299,8 +299,19 @@ public partial class JSFunction : JSObject, IPropertyAccessor, IJSFunction
 
         // parse and create method...
         var fx1 = CoreScript.Compile(bodyText, "internal", sargs, codeCache: context?.CodeCache);
-        fx.f = fx1;
+        fx.f = (in Arguments a) => fx1(a.OverrideThis(CoerceNonStrictThis(a.This)));
         return fx;
+    }
+
+    private static JSValue CoerceNonStrictThis(JSValue value)
+    {
+        if (value == null || value.IsNullOrUndefined)
+            return JSEngine.CurrentContext as JSValue ?? JSUndefined.Value;
+
+        if (value.IsObject)
+            return value;
+
+        return JSObject.CreatePrimitiveObject(value);
     }
 
     public override bool ConvertTo(Type type, out object value)

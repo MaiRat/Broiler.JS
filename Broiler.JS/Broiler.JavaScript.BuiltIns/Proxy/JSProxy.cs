@@ -16,6 +16,7 @@ public partial class JSProxy : JSObject
 {
     readonly JSObject target;
     private readonly JSObject handler;
+    private bool revoked;
 
     protected JSProxy((JSObject target, JSObject handler) p) : base((JSEngine.Current as IJSExecutionContext)?.ObjectPrototype)
     {
@@ -31,8 +32,19 @@ public partial class JSProxy : JSObject
 
     public override bool Equals(JSValue value) => target.Equals(value);
 
+    internal JSObject RequireTarget()
+    {
+        if (revoked)
+            throw JSEngine.NewTypeError("Cannot perform operation on a revoked Proxy");
+
+        return target;
+    }
+
+    internal void Revoke() => revoked = true;
+
     public override JSValue InvokeFunction(in Arguments a)
     {
+        var target = RequireTarget();
         var fx = handler[KeyStrings.apply];
         if (fx is JSFunction fxFunction)
         {
@@ -45,6 +57,7 @@ public partial class JSProxy : JSObject
 
     public override JSValue CreateInstance(in Arguments a)
     {
+        var target = RequireTarget();
         var fx = handler[KeyStrings.constructor];
         if (fx is JSFunction fxFunction)
         {
@@ -57,6 +70,7 @@ public partial class JSProxy : JSObject
 
     public override JSValue DefineProperty(JSValue key, JSObject propertyDescription)
     {
+        var target = RequireTarget();
         var fx = handler[KeyStrings.defineProperty];
         if (fx is JSFunction fxFunction)
             return fxFunction.InvokeFunction(new Arguments(target, target, key, propertyDescription));
@@ -66,6 +80,7 @@ public partial class JSProxy : JSObject
 
     public override JSValue Delete(JSValue index)
     {
+        var target = RequireTarget();
         var fx = handler[KeyStrings.deleteProperty];
         if (fx is JSFunction fxFunction)
             return fxFunction.InvokeFunction(new Arguments(target, target, index));
@@ -75,6 +90,7 @@ public partial class JSProxy : JSObject
 
     internal protected override JSValue GetValue(IJSSymbol key, JSValue receiver, bool throwError = true)
     {
+        var target = RequireTarget();
         var fx = handler[KeyStrings.get];
         if (fx is JSFunction fxFunction)
             return fxFunction.InvokeFunction(new Arguments(target, target, (JSValue)(JSSymbol)key, receiver));
@@ -84,6 +100,7 @@ public partial class JSProxy : JSObject
 
     internal protected override JSValue GetValue(KeyString key, JSValue receiver, bool throwError = true)
     {
+        var target = RequireTarget();
         var fx = handler[KeyStrings.get];
         if (fx is JSFunction fxFunction)
             return fxFunction.InvokeFunction(new Arguments(target, target, key.ToJSValue(), receiver));
@@ -93,6 +110,7 @@ public partial class JSProxy : JSObject
 
     public override JSValue GetValue(uint key, JSValue receiver, bool throwError = true)
     {
+        var target = RequireTarget();
         var fx = handler[KeyStrings.get];
         if (fx is JSFunction fxFunction)
             return fxFunction.InvokeFunction(new Arguments(target, target, new JSNumber(key), receiver));
@@ -102,6 +120,7 @@ public partial class JSProxy : JSObject
 
     internal protected override bool SetValue(IJSSymbol name, JSValue value, JSValue receiver, bool throwError = true)
     {
+        var target = RequireTarget();
         var fx = handler[KeyStrings.set];
         if (fx is JSFunction fxFunction)
         {
@@ -114,6 +133,7 @@ public partial class JSProxy : JSObject
 
     internal protected override bool SetValue(KeyString name, JSValue value, JSValue receiver, bool throwError = true)
     {
+        var target = RequireTarget();
         var fx = handler[KeyStrings.set];
         if (fx is JSFunction fxFunction)
         {
@@ -126,6 +146,7 @@ public partial class JSProxy : JSObject
 
     public override bool SetValue(uint name, JSValue value, JSValue receiver, bool throwError = true)
     {
+        var target = RequireTarget();
         var fx = handler[KeyStrings.set];
         if (fx is JSFunction fxFunction)
         {
@@ -138,6 +159,7 @@ public partial class JSProxy : JSObject
 
     public override JSValue GetPrototypeOf()
     {
+        var target = RequireTarget();
         var fx = handler[KeyStrings.getPrototypeOf];
         if (fx is JSFunction fxFunction)
             return fxFunction.InvokeFunction(new Arguments(target));
@@ -147,6 +169,7 @@ public partial class JSProxy : JSObject
 
     public override void SetPrototypeOf(JSValue proto)
     {
+        var target = RequireTarget();
         var fx = handler[KeyStrings.setPrototypeOf];
         if (fx is JSFunction fxFunction)
         {
@@ -159,6 +182,7 @@ public partial class JSProxy : JSObject
 
     public override IElementEnumerator GetAllKeys(bool showEnumerableOnly = true, bool inherited = true)
     {
+        var target = RequireTarget();
         var fx = handler[KeyStrings.ownKeys];
         if (fx is JSFunction fxFunction)
             return fxFunction.InvokeFunction(new Arguments(target)).GetElementEnumerator();
@@ -166,16 +190,36 @@ public partial class JSProxy : JSObject
         return target.GetAllKeys(showEnumerableOnly, inherited);
     }
 
-    public override bool StrictEquals(JSValue value) => target.StrictEquals(value);
+    public override bool StrictEquals(JSValue value) => RequireTarget().StrictEquals(value);
 
-    public override JSValue TypeOf() => target.TypeOf();
+    public override JSValue TypeOf() => RequireTarget().TypeOf();
 
-    internal override PropertyKey ToKey(bool create = false) => target.ToKey();
+    internal override PropertyKey ToKey(bool create = false) => RequireTarget().ToKey();
 
     [JSExport(IsConstructor = true)]
     public new static JSValue Constructor(in Arguments a)
     {
         var (f, s) = a.Get2();
         return new JSProxy((f as JSObject, s as JSObject));
+    }
+
+    [JSExport("revocable", Length = 2)]
+    public static JSValue Revocable(in Arguments a)
+    {
+        var (target, handler) = a.Get2();
+        var proxy = new JSProxy((target as JSObject, handler as JSObject));
+        var result = new JSObject();
+
+        result.FastAddValue("proxy", proxy, JSPropertyAttributes.ConfigurableValue);
+        result.FastAddValue(
+            "revoke",
+            JSValue.CreateFunction((in Arguments _) =>
+            {
+                proxy.Revoke();
+                return JSUndefined.Value;
+            }, "revoke", length: 0, createPrototype: false),
+            JSPropertyAttributes.ConfigurableValue);
+
+        return result;
     }
 }

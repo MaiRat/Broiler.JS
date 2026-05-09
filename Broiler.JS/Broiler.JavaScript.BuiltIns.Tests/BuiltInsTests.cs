@@ -901,7 +901,7 @@ public class BuiltInsTests
         EnsureBuiltInsLoaded();
         using var ctx = new JSContext();
         var result = ctx.Eval(@"RegExp.escape('hello.world?+[test]{x}(y)|/\\^$');");
-        Assert.Equal(@"hello\.world\?\+\[test\]\{x\}\(y\)\|\/\\\^\$", result.ToString());
+        Assert.Equal(@"\x68ello\.world\?\+\[test\]\{x\}\(y\)\|\/\\\^\$", result.ToString());
     }
 
     [Fact]
@@ -912,6 +912,176 @@ public class BuiltInsTests
         var result = ctx.Eval(@"RegExp.escape('\uFEFF \u00A0\u202F');");
         Assert.Equal(@"\ufeff\x20\xa0\u202f", result.ToString());
         Assert.Throws<JSException>(() => ctx.Eval("RegExp.escape(123);"));
+    }
+
+    [Fact]
+    public void Primitive_Wrapper_Addition_Uses_The_Wrapped_Primitive_Value()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = new JSContext();
+        var result = ctx.Eval(@"[
+            new Number(1) + 1,
+            new Boolean(true) + 1,
+            '' + Object(1n),
+            Object(1n) == '1'
+        ].join('|');");
+        Assert.Equal("2|2|1|true", result.ToString());
+    }
+
+    [Fact]
+    public void BigInt_Wrapper_Addition_Preserves_BigInt_Mixing_Rules()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = new JSContext();
+        var result = ctx.Eval(@"[
+            (function () {
+                try {
+                    return Object(1n) + 1;
+                } catch (e) {
+                    return e.constructor.name + '|' + e.message;
+                }
+            })(),
+            (function () {
+                var value = Object(1n) + 1n;
+                return typeof value + '|' + String(value);
+            })()
+        ].join('||');");
+        Assert.Equal("TypeError|Cannot mix BigInt and other types, use explicit conversions||bigint|2", result.ToString());
+    }
+
+    [Fact]
+    public void Array_IsArray_Recognizes_ArrayPrototype_And_Proxy_Targets()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = new JSContext();
+        var result = ctx.Eval(@"[
+            Array.isArray(Array.prototype),
+            Array.isArray(new Proxy([], {})),
+            (function () {
+                var revoked = Proxy.revocable([], {});
+                revoked.revoke();
+                try {
+                    Array.isArray(revoked.proxy);
+                    return 'no-throw';
+                } catch (e) {
+                    return e instanceof TypeError;
+                }
+            })()
+        ].join('|');");
+        Assert.Equal("true|true|true", result.ToString());
+    }
+
+    [Fact]
+    public void RegExp_Escape_Handles_Initial_Characters_And_Punctuators()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = new JSContext();
+        var result = ctx.Eval(@"[
+            RegExp.escape('foo'),
+            RegExp.escape('1abc'),
+            RegExp.escape(','),
+            RegExp.escape('!'),
+            RegExp.escape('\uD800')
+        ].join('|');");
+        Assert.Equal(@"\x66oo|\x31abc|\x2c|\x21|\ud800", result.ToString());
+    }
+
+    [Fact]
+    public void Unresolved_Identifier_Reads_Throw_ReferenceError_In_Binary_Expressions()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = new JSContext();
+
+        var result = ctx.Eval(@"
+            [
+                (function () { try { missingValue + 1; return 'no-throw'; } catch (e) { return e.constructor.name + '|' + e.message; } })(),
+                (function () { try { missingValue === 1; return 'no-throw'; } catch (e) { return e.constructor.name + '|' + e.message; } })()
+            ].join('||');
+        ");
+
+        Assert.Equal("ReferenceError|missingValue is not defined||ReferenceError|missingValue is not defined", result.ToString());
+    }
+
+    [Fact]
+    public void Typeof_Unresolved_Identifier_Still_Returns_Undefined()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = new JSContext();
+
+        var result = ctx.Eval("typeof missingValue;");
+
+        Assert.Equal("undefined", result.ToString());
+    }
+
+    [Fact]
+    public void NewFunction_Can_Assign_To_Global_Var_Identifier()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = new JSContext();
+
+        var result = ctx.Eval(@"
+            var ret;
+            (new Function('ret = ""ok"";'))();
+            this['ret'];
+        ");
+
+        Assert.Equal("ok", result.ToString());
+    }
+
+    [Fact]
+    public void NewFunction_Uses_Global_Object_As_Default_This()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = new JSContext();
+
+        var result = ctx.Eval(@"
+            this.__functionCtorGlobal = 7;
+            var globalObject = Function('return this')();
+            globalObject.__functionCtorGlobal = globalObject.__functionCtorGlobal + 1;
+            [globalObject === this, this.__functionCtorGlobal].join('|');
+        ");
+
+        Assert.Equal("true|8", result.ToString());
+    }
+
+    [Fact]
+    public void Object_Symbol_Wrapper_Uses_Symbol_Coercion_Path()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = new JSContext();
+
+        var result = ctx.Eval(@"
+            (function () {
+                try {
+                    return Object(Symbol('x')) + '';
+                } catch (e) {
+                    return [
+                        typeof Object(Symbol('x')),
+                        e.constructor && e.constructor.name,
+                        e.message
+                    ].join('|');
+                }
+            })();
+        ");
+
+        Assert.Equal("object|TypeError|Cannot convert a Symbol value to a string.", result.ToString());
+    }
+
+    [Fact]
+    public void Prefixed_BigInt_Literals_Parse_And_Compare_Correctly()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = new JSContext();
+
+        var result = ctx.Eval(@"
+            [
+                typeof 0x1n, 0x1n === 1n,
+                typeof 0b1n, 0b1n === 1n,
+                typeof 0o1n, 0o1n === 1n
+            ].join('|');
+        ");
+
+        Assert.Equal("bigint|true|bigint|true|bigint|true", result.ToString());
     }
 
     [Fact]

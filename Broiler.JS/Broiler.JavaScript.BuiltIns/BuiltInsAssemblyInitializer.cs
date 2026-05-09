@@ -27,11 +27,18 @@ using Broiler.JavaScript.Engine;
 using Broiler.JavaScript.LinqExpressions.LinqExpressions.GeneratorsV2;
 using Broiler.JavaScript.LinqExpressions.LinqExpressions;
 using Broiler.JavaScript.Engine.Core;
+using Broiler.JavaScript.Storage;
 
 namespace Broiler.JavaScript.BuiltIns;
 
 internal static class BuiltInsAssemblyInitializer
 {
+    private static JSObject GetErrorPrototype(KeyString constructorName)
+        => (JSEngine.CurrentContext is JSObject global
+            && global[constructorName] is IJSFunction errorCtor)
+            ? errorCtor.Prototype as JSObject
+            : null;
+
     [ModuleInitializer]
     internal static void Initialize()
     {
@@ -67,6 +74,13 @@ internal static class BuiltInsAssemblyInitializer
         // array values without referencing the concrete type directly.
         JSValue.CreateArrayFactory = static () => new JSArray();
         JSValue.CreateArrayWithLengthFactory = static count => new JSArray(count);
+
+        JSObject.CreatePrimitiveObject = static value => value switch
+        {
+            JSPrimitive primitive => new JSPrimitiveObject(primitive),
+            JSSymbol symbol => new JSSymbolObject(symbol),
+            _ => throw JSEngine.NewTypeError($"Cannot convert {value} to object")
+        };
 
         // Initialize JSArrayBuilder with the concrete JSArray type so the
         // Compiler can build array expression trees without a direct reference.
@@ -176,15 +190,17 @@ internal static class BuiltInsAssemblyInitializer
         // Wire factory delegates for JSError types so Core can create
         // error instances without referencing the concrete types directly.
         JSEngine.CreateTypeError = static (message, function, filePath, line) =>
-            new JSTypeError(new Arguments(JSUndefined.Value, JSValue.CreateString(message)), function: function, filePath: filePath, line: line).Exception;
+            new JSException(message, GetErrorPrototype(KeyStrings.TypeError), function: function, filePath: filePath, line: line);
         JSEngine.CreateSyntaxError = static (message, function, filePath, line) =>
-            new JSSyntaxError(new Arguments(JSUndefined.Value, JSValue.CreateString(message)), function: function, filePath: filePath, line: line).Exception;
+            new JSException(message, GetErrorPrototype(KeyStrings.SyntaxError), function: function, filePath: filePath, line: line);
         JSEngine.CreateURIError = static (message, function, filePath, line) =>
-            new JSURIError(new Arguments(JSUndefined.Value, JSValue.CreateString(message)), function: function, filePath: filePath, line: line).Exception;
+            new JSException(message, GetErrorPrototype(KeyStrings.URIError), function: function, filePath: filePath, line: line);
         JSEngine.CreateRangeError = static (message, function, filePath, line) =>
-            new JSRangeError(new Arguments(JSUndefined.Value, JSValue.CreateString(message)), function: function, filePath: filePath, line: line).Exception;
+            new JSException(message, GetErrorPrototype(KeyStrings.RangeError), function: function, filePath: filePath, line: line);
+        JSEngine.CreateReferenceError = static (message, function, filePath, line) =>
+            new JSException(message, GetErrorPrototype(KeyStrings.ReferenceError), function: function, filePath: filePath, line: line);
         JSEngine.CreateError = static (message, function, filePath, line) =>
-            new JSError(new Arguments(JSUndefined.Value, JSValue.CreateString(message)), function: function, filePath: filePath, line: line).Exception;
+            new JSException(message, GetErrorPrototype(KeyStrings.Error), function: function, filePath: filePath, line: line);
         JSException.CreateJSError = static (ex, msg) => new JSError(ex, msg);
         JSException.CreateJSErrorWithPrototype = static (ex, prototype) => new JSError(ex, prototype);
         JSException.JSErrorFrom = static (ex) => JSError.From(ex);

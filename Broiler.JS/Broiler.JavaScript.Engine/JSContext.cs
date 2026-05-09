@@ -73,8 +73,9 @@ public class JSContext : JSObject, IJSExecutionContext, IDisposable
     {
         var v = variable.Value;
         var oldV = this[variable.Name];
+        var hasOwnProperty = !GetInternalProperty(variable.Name, false).IsEmpty;
 
-        if (oldV != v)
+        if (!hasOwnProperty || oldV != v)
         {
             this[variable.Name] = v;
         }
@@ -93,6 +94,31 @@ public class JSContext : JSObject, IJSExecutionContext, IDisposable
             if (globalVars.TryGetValue(name.Key, out var jsv))
                 jsv.Value = value;
         }
+    }
+
+    public JSValue ResolveIdentifier(in KeyString name)
+    {
+        if (!GetInternalProperty(name).IsEmpty)
+            return this[name];
+
+        throw JSEngine.NewReferenceError($"{name} is not defined");
+    }
+
+    public JSValue AssignIdentifier(in KeyString name, JSValue value)
+    {
+        var hasVariable = globalVars.TryGetValue(name.Key, out var variable);
+        var hasProperty = !GetInternalProperty(name).IsEmpty;
+
+        if (!hasVariable && !hasProperty)
+            throw JSEngine.NewReferenceError($"{name} is not defined");
+
+        if (hasVariable)
+            variable.Value = value;
+
+        if (hasProperty)
+            this[name] = value;
+
+        return value;
     }
 
     internal void FillStackTrace(StringBuilder sb) { }

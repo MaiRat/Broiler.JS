@@ -43,9 +43,7 @@ public partial class JSBigInt : JSPrimitive
         }
 
         var text = f.ToString();
-        text = text.TrimEnd('n').Replace("_", "");
-
-        if (!BigInteger.TryParse(text, out var v))
+        if (!TryParseBigIntLiteral(text, out var v))
             throw JSEngine.NewTypeError($"{f} is not a valid big integer");
 
         return new JSBigInt(v);
@@ -54,22 +52,101 @@ public partial class JSBigInt : JSPrimitive
     public JSBigInt(BigInteger value) => this.value = value;
     public JSBigInt(string stringValue)
     {
-        var v = stringValue.TrimEnd('n').Replace("_", "");
-        if (!BigInteger.TryParse(v, out var n))
+        if (!TryParseBigIntLiteral(stringValue, out var n))
             throw JSEngine.NewTypeError($"{stringValue} is not a valid big integer");
         value = n;
     }
 
+    private static bool TryParseBigIntLiteral(string value, out BigInteger result)
+    {
+        var text = value.Trim().TrimEnd('n').Replace("_", "");
+        var sign = 1;
+
+        if (text.StartsWith("+", StringComparison.Ordinal))
+            text = text[1..];
+        else if (text.StartsWith("-", StringComparison.Ordinal))
+        {
+            sign = -1;
+            text = text[1..];
+        }
+
+        if (text.StartsWith("0x", StringComparison.OrdinalIgnoreCase))
+            return TryParsePrefixedDigits(text.AsSpan(2), 16, sign, out result);
+
+        if (text.StartsWith("0b", StringComparison.OrdinalIgnoreCase))
+            return TryParsePrefixedDigits(text.AsSpan(2), 2, sign, out result);
+
+        if (text.StartsWith("0o", StringComparison.OrdinalIgnoreCase))
+            return TryParsePrefixedDigits(text.AsSpan(2), 8, sign, out result);
+
+        if (!BigInteger.TryParse(sign < 0 ? "-" + text : text, out result))
+        {
+            result = default;
+            return false;
+        }
+
+        return true;
+    }
+
+    private static bool TryParsePrefixedDigits(ReadOnlySpan<char> digits, int numberBase, int sign, out BigInteger result)
+    {
+        if (digits.Length == 0)
+        {
+            result = default;
+            return false;
+        }
+
+        result = BigInteger.Zero;
+
+        foreach (var ch in digits)
+        {
+            int digit = ch switch
+            {
+                >= '0' and <= '9' => ch - '0',
+                >= 'a' and <= 'f' => ch - 'a' + 10,
+                >= 'A' and <= 'F' => ch - 'A' + 10,
+                _ => -1
+            };
+
+            if (digit < 0 || digit >= numberBase)
+            {
+                result = default;
+                return false;
+            }
+
+            result = (result * numberBase) + digit;
+        }
+
+        if (sign < 0)
+            result = BigInteger.Negate(result);
+
+        return true;
+    }
+
     public override bool Equals(JSValue value)
     {
+        if (value is JSPrimitiveObject primitiveObject)
+            value = primitiveObject.ValueOf();
+
         if (value is JSBigInt bigint)
             return this.value == bigint.value;
 
-        var n = (long)value.DoubleValue;
-        return this.value == n;
+        if (value is JSString str && BigInteger.TryParse(str.ToString(), out var bigintFromString))
+            return this.value == bigintFromString;
+
+        if (!value.IsNumber)
+            return false;
+
+        var number = value.DoubleValue;
+        if (double.IsNaN(number) || double.IsInfinity(number) || Math.Truncate(number) != number)
+            return false;
+
+        return this.value == new BigInteger(number);
     }
 
-    public override string ToString() => value.ToString() + "n";
+    public override string ToString() => value.ToString();
+
+    public override string ToDetailString() => value.ToString() + "n";
 
     public override JSValue InvokeFunction(in Arguments a) => throw new NotImplementedException();
 
@@ -175,7 +252,7 @@ public partial class JSBigInt : JSPrimitive
             throw CannotMix();
 
         if (value is JSString @string)
-            return new JSString(this.value.ToString() + "n" + @string.ToString());
+            return new JSString(this.value.ToString() + @string.ToString());
 
         if (value is JSObject @object)
             return new JSString(this.value + @object.StringValue);

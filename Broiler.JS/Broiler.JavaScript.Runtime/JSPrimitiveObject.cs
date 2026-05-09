@@ -16,6 +16,8 @@ public class JSPrimitiveObject : JSObject
 
     public override string ToString() => value.ToString();
 
+    public override JSValue ValueOf() => value;
+
     public override double DoubleValue => value.DoubleValue;
 
     public override long BigIntValue => value.BigIntValue;

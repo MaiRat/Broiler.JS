@@ -915,6 +915,57 @@ public class BuiltInsTests
     }
 
     [Fact]
+    public void Primitive_Wrapper_Addition_Uses_The_Wrapped_Primitive_Value()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = new JSContext();
+        var result = ctx.Eval(@"[
+            new Number(1) + 1,
+            new Boolean(true) + 1,
+            '' + Object(1n),
+            Object(1n) == '1'
+        ].join('|');");
+        Assert.Equal("2|2|1|true", result.ToString());
+    }
+
+    [Fact]
+    public void Array_IsArray_Recognizes_ArrayPrototype_And_Proxy_Targets()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = new JSContext();
+        var result = ctx.Eval(@"[
+            Array.isArray(Array.prototype),
+            Array.isArray(new Proxy([], {})),
+            (function () {
+                var revoked = Proxy.revocable([], {});
+                revoked.revoke();
+                try {
+                    Array.isArray(revoked.proxy);
+                    return 'no-throw';
+                } catch (e) {
+                    return e.name;
+                }
+            })()
+        ].join('|');");
+        Assert.Equal("true|true|TypeError", result.ToString());
+    }
+
+    [Fact]
+    public void RegExp_Escape_Handles_Initial_Characters_And_Punctuators()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = new JSContext();
+        var result = ctx.Eval(@"[
+            RegExp.escape('foo'),
+            RegExp.escape('1abc'),
+            RegExp.escape(','),
+            RegExp.escape('!'),
+            RegExp.escape('\uD800')
+        ].join('|');");
+        Assert.Equal(@"\x66oo|\x31abc|\x2c|\x21|\ud800", result.ToString());
+    }
+
+    [Fact]
     public void String_IsWellFormed_Detects_Paired_And_Lone_Surrogates()
     {
         EnsureBuiltInsLoaded();

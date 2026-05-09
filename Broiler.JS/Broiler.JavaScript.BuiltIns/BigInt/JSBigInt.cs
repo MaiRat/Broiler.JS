@@ -62,14 +62,28 @@ public partial class JSBigInt : JSPrimitive
 
     public override bool Equals(JSValue value)
     {
+        if (value is JSPrimitiveObject primitiveObject)
+            value = primitiveObject.ValueOf();
+
         if (value is JSBigInt bigint)
             return this.value == bigint.value;
 
-        var n = (long)value.DoubleValue;
-        return this.value == n;
+        if (value is JSString str && BigInteger.TryParse(str.ToString(), out var bigintFromString))
+            return this.value == bigintFromString;
+
+        if (!value.IsNumber)
+            return false;
+
+        var number = value.DoubleValue;
+        if (double.IsNaN(number) || double.IsInfinity(number) || Math.Truncate(number) != number)
+            return false;
+
+        return this.value == new BigInteger(number);
     }
 
-    public override string ToString() => value.ToString() + "n";
+    public override string ToString() => value.ToString();
+
+    public override string ToDetailString() => value.ToString() + "n";
 
     public override JSValue InvokeFunction(in Arguments a) => throw new NotImplementedException();
 
@@ -175,7 +189,7 @@ public partial class JSBigInt : JSPrimitive
             throw CannotMix();
 
         if (value is JSString @string)
-            return new JSString(this.value.ToString() + "n" + @string.ToString());
+            return new JSString(this.value.ToString() + @string.ToString());
 
         if (value is JSObject @object)
             return new JSString(this.value + @object.StringValue);

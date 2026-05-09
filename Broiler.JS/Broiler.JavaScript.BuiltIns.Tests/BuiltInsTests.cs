@@ -993,6 +993,21 @@ public class BuiltInsTests
     }
 
     [Fact]
+    public void NewFunction_Can_Assign_To_Global_Var_Identifier()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = new JSContext();
+
+        var result = ctx.Eval(@"
+            var ret;
+            (new Function('ret = ""ok"";'))();
+            ret;
+        ");
+
+        Assert.Equal("ok", result.ToString());
+    }
+
+    [Fact]
     public void String_IsWellFormed_Detects_Paired_And_Lone_Surrogates()
     {
         EnsureBuiltInsLoaded();

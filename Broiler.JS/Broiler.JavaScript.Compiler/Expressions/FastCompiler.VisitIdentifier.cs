@@ -7,6 +7,15 @@ partial class FastCompiler
 {
     protected override YExpression VisitIdentifier(AstIdentifier identifier) => VisitIdentifier(identifier, true);
 
+    private YExpression VisitIdentifierReference(AstIdentifier identifier)
+    {
+        var var = scope.Top.GetVariable(identifier.Name, true);
+        if (var != null)
+            return var.Expression;
+
+        return JSContextBuilder.Index(KeyOfName(identifier.Name));
+    }
+
     private YExpression VisitIdentifier(AstIdentifier identifier, bool throwIfMissing)
     {
         if (identifier.Name.Equals("undefined"))
@@ -22,13 +31,9 @@ partial class FastCompiler
             return vs.Expression;
         }
 
-        var var = scope.Top.GetVariable(identifier.Name, true);
-        if (var != null)
-            return var.Expression;
-
-        var key = KeyOfName(identifier.Name);
+        var reference = VisitIdentifierReference(identifier);
         return throwIfMissing
-            ? JSContextBuilder.ResolveIdentifier(key)
-            : JSContextBuilder.Index(key);
+            ? JSContextBuilder.ResolveIdentifier(KeyOfName(identifier.Name))
+            : reference;
     }
 }

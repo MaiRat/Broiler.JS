@@ -198,6 +198,22 @@ public class M8ValidationTests
                 "docs/architecture/module-initializers.md should exist");
             Assert.True(File.Exists(Path.Combine(repoRoot, "docs", "architecture", "contributing-builtins.md")),
                 "docs/architecture/contributing-builtins.md should exist");
+            Assert.True(File.Exists(Path.Combine(repoRoot, "docs", "public-api.md")),
+                "docs/public-api.md should exist");
+            Assert.True(File.Exists(Path.Combine(repoRoot, "docs", "compliance", "process.md")),
+                "docs/compliance/process.md should exist");
+            Assert.True(File.Exists(Path.Combine(repoRoot, "docs", "compliance", "dashboard.md")),
+                "docs/compliance/dashboard.md should exist");
+            Assert.True(File.Exists(Path.Combine(repoRoot, "docs", "compliance", "known-gaps.md")),
+                "docs/compliance/known-gaps.md should exist");
+
+            var process = File.ReadAllText(Path.Combine(repoRoot, "docs", "compliance", "process.md"));
+            Assert.Contains("test262", process);
+            Assert.Contains("suite revision", process);
+
+            var dashboard = File.ReadAllText(Path.Combine(repoRoot, "docs", "compliance", "dashboard.md"));
+            Assert.Contains("Compliance dashboard", dashboard);
+            Assert.Contains("Regression tracking", dashboard);
         }
         // If we can't find the repo root (e.g., in CI), the test still passes
         // because we verified the documentation content in other tests.

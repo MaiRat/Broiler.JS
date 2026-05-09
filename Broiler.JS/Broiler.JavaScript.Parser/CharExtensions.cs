@@ -46,7 +46,7 @@ public static class CharExtensions
             case '5':
             case '6':
             case '7':
-                if (binary)
+                if (binary || octal)
                     return false;
 
                 return true;

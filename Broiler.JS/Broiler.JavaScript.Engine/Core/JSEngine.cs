@@ -188,7 +188,11 @@ public static class JSEngine
     /// </summary>
     internal static void EnsureBuiltInsAssemblyLoaded()
     {
-        if (BuiltInRegistry != null)
+        if (BuiltInRegistry != null
+            && CreateFunctionClass != null
+            && CreateObjectClass != null
+            && CreateTypeError != null
+            && CreateError != null)
             return;
 
         TryLoadAssembly("Broiler.JavaScript.Engine");

@@ -943,11 +943,11 @@ public class BuiltInsTests
                     Array.isArray(revoked.proxy);
                     return 'no-throw';
                 } catch (e) {
-                    return e.constructor && e.constructor.name || 'threw';
+                    return e instanceof TypeError;
                 }
             })()
         ].join('|');");
-        Assert.Equal("true|true|Proxy", result.ToString());
+        Assert.Equal("true|true|true", result.ToString());
     }
 
     [Fact]

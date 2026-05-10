@@ -1255,6 +1255,28 @@ public class BuiltInsTests
     }
 
     [Fact]
+    public void Unresolved_Identifier_Reads_Throw_ReferenceError_In_Grouped_And_Reversed_Binary_Expressions()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = new JSContext();
+
+        var result = ctx.Eval(@"
+            [
+                (function () { try { 1 + missingValue; return 'no-throw'; } catch (e) { return e.constructor.name + '|' + e.message; } })(),
+                (function () { try { (missingValue) + 1; return 'no-throw'; } catch (e) { return e.constructor.name + '|' + e.message; } })(),
+                (function () { try { 1 + (missingValue); return 'no-throw'; } catch (e) { return e.constructor.name + '|' + e.message; } })(),
+                (function () { try { 1 === missingValue; return 'no-throw'; } catch (e) { return e.constructor.name + '|' + e.message; } })(),
+                (function () { try { (missingValue) === 1; return 'no-throw'; } catch (e) { return e.constructor.name + '|' + e.message; } })(),
+                (function () { try { 1 === (missingValue); return 'no-throw'; } catch (e) { return e.constructor.name + '|' + e.message; } })()
+            ].join('||');
+        ");
+
+        Assert.Equal(
+            "ReferenceError|missingValue is not defined||ReferenceError|missingValue is not defined||ReferenceError|missingValue is not defined||ReferenceError|missingValue is not defined||ReferenceError|missingValue is not defined||ReferenceError|missingValue is not defined",
+            result.ToString());
+    }
+
+    [Fact]
     public void Typeof_Unresolved_Identifier_Still_Returns_Undefined()
     {
         EnsureBuiltInsLoaded();

@@ -1337,6 +1337,48 @@ public class BuiltInsTests
     }
 
     [Fact]
+    public void BigInt_Relational_Comparisons_Work_For_BigInt_And_Number_Operands()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = new JSContext();
+
+        var result = ctx.Eval(@"
+            [
+                10n < 2n,
+                10n > 2n,
+                10n <= 10n,
+                10n >= 10n,
+                1n < 2,
+                2 > 1n,
+                1n < 2.5,
+                2.5 > 1n,
+                1n < Number.NaN,
+                Number.NaN < 1n
+            ].join('|');
+        ");
+
+        Assert.Equal("false|true|true|true|true|true|true|true|false|false", result.ToString());
+    }
+
+    [Fact]
+    public void BigInt_Relational_Comparisons_Respect_Equality_Precedence()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = new JSContext();
+
+        var result = ctx.Eval(@"
+            [
+                1n < 2 === true,
+                1n === 1n < 2,
+                1n < 2n === true,
+                1n === 1n < 2n
+            ].join('|');
+        ");
+
+        Assert.Equal("true|false|true|false", result.ToString());
+    }
+
+    [Fact]
     public void String_IsWellFormed_Detects_Paired_And_Lone_Surrogates()
     {
         EnsureBuiltInsLoaded();

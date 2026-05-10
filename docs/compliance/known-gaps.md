@@ -17,7 +17,7 @@ This file tracks areas that must be validated before Broiler.JS can make strong 
 - [ ] Add coverage and implementation work for async object accessors; `Broiler.JS/Broiler.JavaScript.Parser/FastParser.ObjectLiteral.cs` still documents async getter/setter support as missing.
 - [ ] Validate non-strict/global semantics against the compliance suites; `Broiler.JS/OtherTests/JIntPerfTests/Program.cs` still documents the engine as strict-mode only by default.
 - [ ] Align unresolved-reference semantics with test262 in `+` and `===` expressions; the 2026-05-09 subset run still returned values for cases such as `x + 1` and `x === 1` where Chromium threw `ReferenceError`.
-- [ ] Resolve remaining parser failures in executed BigInt comparison tests, including subset failures that reported `Unexpected token StrictlyEqual` for valid `===` cases accepted by Chromium.
+- [ ] Re-run the failing BigInt comparison public-suite files; local regression coverage now includes mixed BigInt/Number relational semantics plus `===` precedence-adjacent cases, but the original subset parser failures still need measured confirmation.
 - [ ] Verify host-defined promise job queue and async interaction behavior against public suites, not only repository unit tests.
 
 ### Built-in areas with implementation but incomplete standards evidence

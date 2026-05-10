@@ -212,7 +212,7 @@ public class M8ValidationTests
             Assert.Contains("suite revision", process);
 
             var roadmap = File.ReadAllText(Path.Combine(repoRoot, "docs", "compliance", "roadmap-to-100-percent.md"));
-            Assert.Contains("async object accessor", roadmap);
+            Assert.Contains("Resolve the async object accessor parser note", roadmap);
             Assert.Contains("invalid ECMAScript syntax", roadmap);
 
             var dashboard = File.ReadAllText(Path.Combine(repoRoot, "docs", "compliance", "dashboard.md"));

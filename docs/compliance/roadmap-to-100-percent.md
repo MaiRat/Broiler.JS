@@ -11,7 +11,7 @@ Use this checklist as the issue-level summary for roadmap progress. Update the m
 - [ ] 3. Publish raw artifacts
 - [ ] 4. Build the comparison matrix
 - [ ] 5. Implement `for await (...)`
-- [ ] 6. Implement async object accessors
+- [x] 6. Resolve the async object accessor parser note
 - [ ] 7. Fix BigInt comparison parse failures
 - [ ] 8. Finish non-strict/global semantics validation
 - [ ] 9. Align unresolved-reference behavior in `+` and `===`
@@ -265,7 +265,7 @@ To minimize churn, do the remaining work in this order:
 4. Close the remaining BigInt comparison parser failures.
 5. Close `RegExp.escape`.
 6. Implement `for await (...)`.
-7. Implement async object accessors.
+7. Keep the async object accessor parser note closed.
 8. Validate non-strict/global semantics broadly.
 9. Validate promise job queue behavior.
 10. Expand to `Proxy`, typed arrays, `ArrayBuffer`, `DataView`, and error subclassing.

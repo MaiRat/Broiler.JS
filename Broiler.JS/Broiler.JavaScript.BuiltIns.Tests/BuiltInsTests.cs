@@ -1271,9 +1271,8 @@ public class BuiltInsTests
             ].join('||');
         ");
 
-        Assert.Equal(
-            "ReferenceError|missingValue is not defined||ReferenceError|missingValue is not defined||ReferenceError|missingValue is not defined||ReferenceError|missingValue is not defined||ReferenceError|missingValue is not defined||ReferenceError|missingValue is not defined",
-            result.ToString());
+        var expected = string.Join("||", Enumerable.Repeat("ReferenceError|missingValue is not defined", 6));
+        Assert.Equal(expected, result.ToString());
     }
 
     [Fact]

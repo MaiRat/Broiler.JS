@@ -223,6 +223,7 @@ public class M8ValidationTests
             Assert.Contains("dotnet test Broiler.JS.slnx", dashboard);
             Assert.Contains("Compliance workstreams", dashboard);
             Assert.Contains("test262", dashboard);
+            Assert.Contains("29 executed, Broiler passed 29 and failed 0", dashboard);
             Assert.Contains("Regression tracking", dashboard);
 
             var knownGaps = File.ReadAllText(Path.Combine(repoRoot, "docs", "compliance", "known-gaps.md"));

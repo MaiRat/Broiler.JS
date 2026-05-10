@@ -1296,6 +1296,54 @@ public class BuiltInsTests
     }
 
     [Fact]
+    public void Function_Prototype_Methods_Inherit_Bind_In_A_Fresh_Context()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = new JSContext();
+        var result = ctx.Eval(@"[
+            typeof Function.prototype.call.bind,
+            Function.prototype.call.bind(Array.prototype.join)(['a', 'b'], ',')
+        ].join('|');");
+        Assert.Equal("function|a,b", result.ToString());
+    }
+
+    [Fact]
+    public void Array_IsArray_Is_Not_A_Constructor_In_ReflectConstruct()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = new JSContext();
+        var result = ctx.Eval(@"(function () {
+            try {
+                Reflect.construct(function () {}, [], Array.isArray);
+                return 'no-throw';
+            } catch (e) {
+                return e instanceof TypeError;
+            }
+        })();");
+        Assert.Equal("true", result.ToString());
+    }
+
+    [Fact]
+    public void Array_IsArray_And_Name_Properties_Are_Actually_Configurable()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = new JSContext();
+        var result = ctx.Eval(@"(function () {
+            var fn = Array.isArray;
+            var deleteMethod = delete Array.isArray;
+            var deleteName = delete fn.name;
+
+            return [
+                deleteMethod,
+                Object.prototype.hasOwnProperty.call(Array, 'isArray'),
+                deleteName,
+                Object.prototype.hasOwnProperty.call(fn, 'name')
+            ].join('|');
+        })();");
+        Assert.Equal("true|false|true|false", result.ToString());
+    }
+
+    [Fact]
     public void RegExp_Escape_Handles_Initial_Characters_And_Punctuators()
     {
         EnsureBuiltInsLoaded();

@@ -21,7 +21,6 @@ This file tracks areas that must be validated before Broiler.JS can make strong 
 
 ### Built-in areas with implementation but incomplete standards evidence
 
-- [ ] Re-run the matching `Array.isArray` public-suite subset; local regression coverage now includes `Array.prototype`, proxies / revoked proxies, nested proxies, and constructor / descriptor metadata checks, but the recorded test262 failures still need measured confirmation.
 - [ ] Validate `Intl` behavior against ECMA-402-focused suites before making internationalization compliance claims.
 - [ ] Run a matching public-suite subset for `Proxy` invariants and revocation edge cases; local regression coverage now covers revoked proxies plus `get`/`set`/`ownKeys` invariants around non-configurable properties.
 - [ ] Add public-suite and regression coverage for typed arrays, `ArrayBuffer`, and `DataView`, including detach/transfer edge cases.
@@ -32,6 +31,7 @@ This file tracks areas that must be validated before Broiler.JS can make strong 
 
 - test262 subset against Chromium: 126 executed / 1 skipped; Broiler passed 75 and failed 51 while Chromium passed all 126 executed files.
 - Largest failing executed areas were `addition`, `RegExp.escape`, `strict-equals`, and `Array.isArray`.
+- 2026-05-10 pinned `test262` rerun for `test/built-ins/Array/isArray`: 29 executed, 29 passed, 0 failed; the `Array.isArray` gap is closed and removed from the active checklist.
 - The repo-local `JIntPerfTests` / Dromaeo-derived script set passed 11/11 on both Broiler and Chromium, so the immediate compliance gaps are concentrated in standards edge cases rather than the basic compatibility smoke scripts.
 
 ## Gap lifecycle

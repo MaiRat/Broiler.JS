@@ -167,21 +167,60 @@ public partial class JSFunction : JSObject, IPropertyAccessor, IJSFunction
         }
     }
 
+    internal protected override JSValue GetValue(KeyString key, JSValue receiver, bool throwError = true)
+    {
+        if (prototypeChain == null
+            && (JSEngine.Current as IJSExecutionContext)?.FunctionPrototype is JSObject functionPrototype)
+        {
+            var property = functionPrototype.GetInternalProperty(key, false);
+            if (!property.IsEmpty)
+                return (receiver ?? this).GetValue(property);
+        }
+
+        return base.GetValue(key, receiver, throwError);
+    }
+
+    internal override JSFunctionDelegate GetMethod(in KeyString key)
+    {
+        var method = base.GetMethod(in key);
+        if (method != null || prototypeChain != null)
+            return method;
+
+        if ((JSEngine.Current as IJSExecutionContext)?.FunctionPrototype is JSObject functionPrototype)
+            return functionPrototype.GetMethod(in key);
+
+        return null;
+    }
+
     public override string ToDetailString() => source.Value;
     public override JSValue CreateInstance(in Arguments a)
     {
         if (prototype == null)
             throw JSEngine.NewTypeError($"{name} is not a constructor");
 
-        JSValue obj = new JSObject { BasePrototypeObject = prototype };
-        var a1 = a.OverrideThis(obj);
         var ec = JSEngine.Current as IJSExecutionContext;
-        if (ec != null) ec.CurrentNewTarget = this;
-        var r = f(a1);
+        var previousNewTarget = ec?.CurrentNewTarget;
+        var newTarget = previousNewTarget as IJSFunction ?? this;
+        var instancePrototype = newTarget.Prototype as JSObject ?? prototype;
+        JSValue obj = new JSObject { BasePrototypeObject = instancePrototype };
+        var a1 = a.OverrideThis(obj);
+        if (ec != null)
+            ec.CurrentNewTarget = previousNewTarget ?? this;
+
+        JSValue r;
+        try
+        {
+            r = f(a1);
+        }
+        finally
+        {
+            if (ec != null)
+                ec.CurrentNewTarget = previousNewTarget;
+        }
 
         if (r.IsObject)
         {
-            r.BasePrototypeObject = prototype;
+            r.BasePrototypeObject = instancePrototype;
             return r;
         }
 

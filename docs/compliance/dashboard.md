@@ -8,6 +8,7 @@ This dashboard is the public status page for Broiler.JS standards compliance. It
 | --- | --- | --- |
 | Repository xUnit tests | 2026-05-09 local baseline on commit `2907ab8fee53adfeb9af0d1974eab5052a97c241`: 247 passed, 0 failed, 0 skipped | `dotnet test Broiler.JS.slnx --no-build --logger trx --results-directory /tmp/broiler-tests-final` |
 | test262 (real subset, custom raw-script runner) | 2026-05-09 snapshot of `tc39/test262` `main` at `ccaac100ff49d81e9ff47a75ff4c60e0bd3f262e`: 126 executed / 1 skipped across `Array.isArray`, `addition`, `strict-equals`, and `RegExp.escape`; Broiler passed 75 and failed 51 while Chromium passed 126 and failed 0 | Downloaded the upstream suite outside the repo, prepended the standard harness files (`assert.js`, `sta.js`, and per-test includes), then executed the same files through the repaired Broiler CLI script host and Chromium 147.0.7727.0. |
+| test262 `Array.isArray` subset rerun | 2026-05-10 rerun of pinned `test/built-ins/Array/isArray`: 29 executed, Broiler passed 29 and failed 0 | Reused the same pinned `tc39/test262` snapshot and custom raw-script runner, executed all files in `test/built-ins/Array/isArray` with `assert.js`, `sta.js`, and per-test includes through the Broiler CLI script host. |
 | test262-harness smoke | Official `test262-harness` now launches the Broiler CLI, but the Node-style host prelude still fails before real test execution because Broiler does not yet match the expected global/CommonJS setup | `npx test262-harness --host-type node --host-path /tmp/broilerjs-host .../Array/isArray/15.4.3.2-0-1.js` currently aborts at `Function(\"return this;\")().require = require`. |
 | engine262 tests | Pending harness integration | Add command and totals after the first run. |
 | JInt compatibility/performance scripts | 2026-05-09 local comparison: 11 executed, Broiler passed 11 and Chromium passed 11 | Ran every script in `Broiler.JS/OtherTests/JIntPerfTests/Scripts` through the repaired Broiler script host and Chromium 147.0.7727.0. |
@@ -35,6 +36,12 @@ This dashboard is the public status page for Broiler.JS standards compliance. It
 - Multiple unresolved-reference tests in `addition` and `strict-equals` returned values instead of throwing `ReferenceError`.
 - Some BigInt comparison cases still failed during parsing, including `===`-based tests that Chromium accepted.
 - `RegExp.escape` diverged on initial-character escaping, punctuator escaping, surrogate handling, and several property-descriptor checks.
+
+## 2026-05-10 `Array.isArray` follow-up
+
+- Rebuilt the Broiler CLI, reran the pinned `test262` `test/built-ins/Array/isArray` subset, and executed all 29 files successfully.
+- The rerun covered the earlier failing proxy, revoked-proxy, descriptor, and metadata cases.
+- `Array.isArray` is now closed in the roadmap and removed from the active gap checklist.
 
 ## Compliance workstreams
 

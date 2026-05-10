@@ -16,7 +16,7 @@ Use this checklist as the issue-level summary for roadmap progress. Update the m
 - [ ] 8. Finish non-strict/global semantics validation
 - [ ] 9. Align unresolved-reference behavior in `+` and `===`
 - [ ] 10. Verify promise jobs and async scheduling
-- [ ] 11. Finish `Array.isArray`
+- [x] 11. Finish `Array.isArray`
 - [ ] 12. Validate `Intl`
 - [ ] 13. Prove `Proxy` invariants and revocation behavior
 - [ ] 14. Cover typed arrays, `ArrayBuffer`, and `DataView`
@@ -184,7 +184,7 @@ Primary source: `/home/runner/work/Broiler.JS/Broiler.JS/Broiler.JS/OtherTests/J
    - constructor/descriptor metadata
 2. Focused built-in regressions now cover each of those cases, including nested proxies and descriptor metadata.
 3. Keep the current array-brand check and proxy unwrapping path aligned with those regressions.
-4. Re-run the `test262` `Array/isArray` subset until it is clean before closing the item.
+4. The pinned `test262` `Array/isArray` subset is now clean on the recorded 2026-05-10 rerun, so this item is closed.
 
 ### 12. Validate `Intl`
 

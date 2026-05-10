@@ -149,6 +149,7 @@ public class JSContext : JSObject, IJSExecutionContext, IDisposable
 
         func.BasePrototypeObject = Object;
         FunctionPrototype.BasePrototypeObject = ObjectPrototype;
+        ReattachFunctionPrototypeMethods();
 
         if (JSEngine.BuiltInRegistry != null)
         {
@@ -160,6 +161,16 @@ public class JSContext : JSObject, IJSExecutionContext, IDisposable
         }
 
         this[KeyStrings.debug] = JSValue.CreateFunction(Debug);
+    }
+
+    private void ReattachFunctionPrototypeMethods()
+    {
+        var en = FunctionPrototype.GetOwnProperties(false).GetEnumerator();
+        while (en.MoveNext(out var _, out var property))
+        {
+            if (property.IsValue && property.value is JSValue value && value.IsFunction)
+                value.BasePrototypeObject = FunctionPrototype;
+        }
     }
 
     public bool HasExperimentalFeature(JavaScriptFeatureFlags feature)

@@ -97,6 +97,23 @@ public class ParserTests
         AssertAsyncMethod(properties[1], "set");
     }
 
+    [Fact]
+    public void ParseProgram_ForAwaitOf_In_AsyncFunction_Succeeds()
+    {
+        var stream = new FastTokenStream(new StringSpan("async function run() { for await (const value of source) { value; } }"));
+        var parser = new FastParser(stream);
+        var program = parser.ParseProgram();
+        Assert.NotNull(program);
+    }
+
+    [Fact]
+    public void ParseProgram_ForAwaitIn_ThrowsFastParseException()
+    {
+        var stream = new FastTokenStream(new StringSpan("async function run() { for await (value in source) { } }"));
+        var parser = new FastParser(stream);
+        Assert.Throws<FastParseException>(() => parser.ParseProgram());
+    }
+
     private static void AssertAsyncMethod(AstNode node, string expectedName)
     {
         var property = Assert.IsType<AstClassProperty>(node);

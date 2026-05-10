@@ -656,6 +656,41 @@ public class BuiltInsTests
     }
 
     [Fact]
+    public void Error_Constructor_Is_Callable_And_Global_Descriptor_Is_Not_Enumerable()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = new JSContext();
+        var result = ctx.Eval(@"[
+            Error('boom') instanceof Error,
+            Object.getPrototypeOf(Error) === Function.prototype,
+            Object.prototype.propertyIsEnumerable.call(this, 'Error'),
+            Error.name,
+            Error.length
+        ].join('|');");
+
+        Assert.Equal("true|true|false|Error|1", result.ToString());
+    }
+
+    [Fact]
+    public void Intl_Constructors_Expose_Function_Metadata()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = new JSContext();
+        var result = ctx.Eval(@"[
+            Object.isExtensible(Intl),
+            Object.getPrototypeOf(Intl) === Object.prototype,
+            Object.prototype.toString.call(Intl.DateTimeFormat),
+            Object.getPrototypeOf(Intl.DateTimeFormat) === Function.prototype,
+            Object.prototype.toString.call(Intl.RelativeTimeFormat),
+            Object.getPrototypeOf(Intl.RelativeTimeFormat) === Function.prototype,
+            Intl.RelativeTimeFormat.name,
+            Intl.RelativeTimeFormat.length
+        ].join('|');");
+
+        Assert.Equal("true|true|[object Function]|true|[object Function]|true|RelativeTimeFormat|0", result.ToString());
+    }
+
+    [Fact]
     public void Array_FromAsync_IsDisabled_WhenFlagIsOff()
     {
         EnsureBuiltInsLoaded();
@@ -1476,6 +1511,64 @@ public class BuiltInsTests
         var result = ctx.Eval("globalThis === this;");
 
         Assert.Equal("true", result.ToString());
+    }
+
+    [Fact]
+    public void Bare_Function_Calls_And_Implicit_Global_Assignments_Use_NonStrict_Global_Semantics()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = new JSContext();
+
+        var result = ctx.Eval(@"[
+            (function () { return this === globalThis; })(),
+            (function () { implicitGlobalValue = 1; return globalThis.implicitGlobalValue === 1; })(),
+            (function () { var declared = 1; return [delete declared, delete globalThis.declared].join('|'); })()
+        ].join('|');");
+
+        Assert.Equal("true|true|false|true", result.ToString());
+        ctx.Eval("delete globalThis.implicitGlobalValue;");
+    }
+
+    [Fact]
+    public async Task ForAwait_Over_Sync_And_AsyncIterator_Facades_Awaits_Each_Value()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = new JSContext();
+
+        var syncResult = ctx.Execute(@"
+            async function run() {
+                var values = [];
+                for await (var value of [Promise.resolve('a'), Promise.resolve('b')]) {
+                    values.push(value);
+                }
+                return values.join('|');
+            }
+
+            run();
+        ");
+
+        Assert.Equal("a|b", syncResult.ToString());
+
+        var asyncFacadeResult = ctx.Execute(@"
+            async function run() {
+                var values = [];
+                var iterable = {
+                    [Symbol.asyncIterator]() {
+                        return [Promise.resolve('x'), Promise.resolve('y')][Symbol.iterator]();
+                    }
+                };
+
+                for await (var value of iterable) {
+                    values.push(value);
+                }
+
+                return values.join('|');
+            }
+
+            run();
+        ");
+
+        Assert.Equal("x|y", asyncFacadeResult.ToString());
     }
 
     [Fact]

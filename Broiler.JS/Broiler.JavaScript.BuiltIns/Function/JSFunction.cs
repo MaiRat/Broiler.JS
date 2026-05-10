@@ -26,6 +26,7 @@ public partial class JSFunction : JSObject, IPropertyAccessor, IJSFunction
     public readonly StringSpan name;
 
     internal JSFunctionDelegate f;
+    public bool CoerceThisOnInvoke { get; set; }
 
     /// <summary>
     /// Gets or sets the underlying <see cref="JSFunctionDelegate"/> that implements
@@ -236,7 +237,8 @@ public partial class JSFunction : JSObject, IPropertyAccessor, IJSFunction
         return a.This;
     }
 
-    public override JSValue InvokeFunction(in Arguments a) => f(a);
+    public override JSValue InvokeFunction(in Arguments a)
+        => f(CoerceThisOnInvoke ? a.OverrideThis(CoerceNonStrictThis(a.This)) : a);
 
     [JSPrototypeMethod]
     [JSExport("valueOf", Length = 1)]
@@ -334,7 +336,10 @@ public partial class JSFunction : JSObject, IPropertyAccessor, IJSFunction
         var context = JSEngine.Current as IJSExecutionContext;
         context?.DispatchEvalEvent(ref bodyText, ref location);
 
-        var fx = new JSFunction(empty, "internal", bodyText);
+        var fx = new JSFunction(empty, "internal", bodyText)
+        {
+            CoerceThisOnInvoke = true
+        };
 
         // parse and create method...
         var fx1 = CoreScript.Compile(bodyText, "internal", sargs, codeCache: context?.CodeCache);
@@ -342,7 +347,7 @@ public partial class JSFunction : JSObject, IPropertyAccessor, IJSFunction
         return fx;
     }
 
-    private static JSValue CoerceNonStrictThis(JSValue value)
+    internal static JSValue CoerceNonStrictThis(JSValue value)
     {
         if (value == null || value.IsNullOrUndefined)
             return JSEngine.CurrentContext as JSValue ?? JSUndefined.Value;

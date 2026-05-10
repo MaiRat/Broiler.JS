@@ -46,7 +46,8 @@ public partial class JSObject
     /// <returns></returns>
     [JSPrototypeMethod][JSExport("toString")]
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "JavaScript Method Signature is Standard")]
-    public static JSValue ToString(in Arguments a) => JSValue.CreateString("[object Object]");
+    public static JSValue ToString(in Arguments a)
+        => JSValue.CreateString(a.This?.TypeOf() == JSConstants.Function ? "[object Function]" : "[object Object]");
 
     [JSExport("__proto__")]
     internal JSValue ObjectPrototype

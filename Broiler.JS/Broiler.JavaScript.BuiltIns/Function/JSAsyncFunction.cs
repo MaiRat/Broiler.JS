@@ -13,12 +13,16 @@ public class JSAsyncFunction
     {
         JSValue ToAsync(in Arguments a)
         {
-            var gen = gf.InvokeFunction(in a) as IJSGenerator;
+            var args = gf is JSFunction ? a.OverrideThis(JSFunction.CoerceNonStrictThis(a.This)) : a;
+            var gen = gf.InvokeFunction(in args) as IJSGenerator;
             return ToPromise(gen!, JSUndefined.Value);
         }
 
         var fn = gf as JSFunction;
-        return JSValue.CreateFunction(ToAsync, fn?.name.Value, null, gf.Length);
+        var result = JSValue.CreateFunction(ToAsync, fn?.name.Value, null, gf.Length);
+        if (result is JSFunction asyncFn)
+            asyncFn.CoerceThisOnInvoke = true;
+        return result;
     }
 
     private static JSValue ToPromise(IJSGenerator gen, JSValue lastResult)

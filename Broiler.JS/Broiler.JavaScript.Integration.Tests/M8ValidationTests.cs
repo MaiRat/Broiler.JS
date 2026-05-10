@@ -214,6 +214,8 @@ public class M8ValidationTests
             var roadmap = File.ReadAllText(Path.Combine(repoRoot, "docs", "compliance", "roadmap-to-100-percent.md"));
             Assert.Contains("Resolve the async object accessor parser note", roadmap);
             Assert.Contains("invalid ECMAScript syntax", roadmap);
+            Assert.Contains("Verify promise jobs and async scheduling", roadmap);
+            Assert.Contains("microtask ordering", roadmap);
 
             var dashboard = File.ReadAllText(Path.Combine(repoRoot, "docs", "compliance", "dashboard.md"));
             Assert.Contains("Compliance dashboard", dashboard);
@@ -226,6 +228,7 @@ public class M8ValidationTests
             var knownGaps = File.ReadAllText(Path.Combine(repoRoot, "docs", "compliance", "known-gaps.md"));
             Assert.Contains("Tracking checklist", knownGaps);
             Assert.Contains("for await (...)", knownGaps);
+            Assert.Contains("microtask ordering", knownGaps);
             Assert.Contains("Intl", knownGaps);
         }
         // If we can't find the repo root (e.g., in CI), the test still passes

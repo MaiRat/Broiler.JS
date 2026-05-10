@@ -164,8 +164,8 @@ Primary source: `/home/runner/work/Broiler.JS/Broiler.JS/Broiler.JS/OtherTests/J
 
 ### 10. Verify promise jobs and async scheduling
 
-1. Identify the current promise job queue entry points in the runtime.
-2. Add integration tests for:
+1. The current promise job queue entry points are already identified in the runtime, including promise reaction posting, async-function continuation queuing, and the synchronous async pump used by script execution.
+2. Focused local regressions now cover:
    - microtask ordering
    - nested promise resolution
    - `async`/`await` continuation order

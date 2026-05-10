@@ -182,9 +182,9 @@ Primary source: `/home/runner/work/Broiler.JS/Broiler.JS/Broiler.JS/OtherTests/J
    - proxies
    - revoked proxies
    - constructor/descriptor metadata
-2. Add focused built-in tests for each case.
-3. Inspect the current array-brand check and proxy unwrapping path.
-4. Re-run the `test262` `Array/isArray` subset until it is clean.
+2. Focused built-in regressions now cover each of those cases, including nested proxies and descriptor metadata.
+3. Keep the current array-brand check and proxy unwrapping path aligned with those regressions.
+4. Re-run the `test262` `Array/isArray` subset until it is clean before closing the item.
 
 ### 12. Validate `Intl`
 

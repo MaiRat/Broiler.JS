@@ -115,20 +115,15 @@ Primary source: `/home/runner/work/Broiler.JS/Broiler.JS/Broiler.JS/Broiler.Java
 5. Run the matching `test262` `for-await-of` subset.
 6. Update `known-gaps.md` only after parser and execution results both pass.
 
-### 6. Implement async object accessors
+### 6. Resolve the async object accessor parser note
 
 Primary source: `/home/runner/work/Broiler.JS/Broiler.JS/Broiler.JS/Broiler.JavaScript.Parser/FastParser.ObjectLiteral.cs`
 
-1. Remove the special-case rejection for async getters/setters.
-2. Confirm the intended supported syntax against `test262` before changing the parser.
-3. Add parser tests for async accessor forms in object literals and class bodies if both should be supported.
-4. Add runtime tests for:
-   - property definition shape
-   - descriptor flags
-   - invocation behavior
-   - rejection of invalid combinations
-5. Run the matching `test262` accessor subset.
-6. Document any intentionally unsupported syntax if the full standard surface is not implemented.
+1. Confirm the intended supported syntax against `test262` and a reference engine before changing the parser.
+2. Keep rejecting `async get foo()` / `async set foo()` if the public suite confirms they are invalid ECMAScript syntax.
+3. Add parser regressions proving those invalid forms are rejected in object literals and class bodies.
+4. Add parser coverage proving valid async methods named `get` and `set` still parse in object literals and class bodies.
+5. Document the distinction so the compliance notes do not treat invalid syntax as an implementation gap.
 
 ### 7. Fix BigInt comparison parse failures
 

@@ -23,7 +23,7 @@ Use this checklist as the issue-level summary for roadmap progress. Update the m
 - [ ] 15. Finish `RegExp.escape` and related `RegExp` conformance
 - [ ] 16. Validate error subclassing
 - [x] 17. Convert the remaining open gaps into tracked batches
-- [ ] 18. Define the final “ready to claim” checklist
+- [x] 18. Define the final “ready to claim” checklist
 
 ## Issue update template
 

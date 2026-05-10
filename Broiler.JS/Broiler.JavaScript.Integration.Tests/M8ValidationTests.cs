@@ -212,6 +212,7 @@ public class M8ValidationTests
             Assert.Contains("suite revision", process);
             Assert.Contains("scripts/compliance/run_test262.py", process);
             Assert.Contains("scripts/compliance/compare_engines.py", process);
+            Assert.Contains("async and `noStrict` files", process);
 
             var roadmap = File.ReadAllText(Path.Combine(repoRoot, "docs", "compliance", "roadmap-to-100-percent.md"));
             Assert.Contains("- [x] 1. Pin and automate `test262`", roadmap);
@@ -219,9 +220,12 @@ public class M8ValidationTests
             Assert.Contains("Resolve the async object accessor parser note", roadmap);
             Assert.Contains("invalid ECMAScript syntax", roadmap);
             Assert.Contains("- [x] 4. Build the comparison matrix", roadmap);
+            Assert.Contains("- [x] 7. Fix BigInt comparison parse failures", roadmap);
             Assert.Contains("- [x] 9. Align unresolved-reference behavior in `+` and `===`", roadmap);
-            Assert.Contains("Verify promise jobs and async scheduling", roadmap);
+            Assert.Contains("- [x] 10. Verify promise jobs and async scheduling", roadmap);
             Assert.Contains("- [x] 13. Prove `Proxy` invariants and revocation behavior", roadmap);
+            Assert.Contains("- [x] 14. Cover typed arrays, `ArrayBuffer`, and `DataView`", roadmap);
+            Assert.Contains("- [x] 15. Finish `RegExp.escape` and related `RegExp` conformance", roadmap);
             Assert.Contains("microtask ordering", roadmap);
             Assert.Contains("Tracked gap batches", roadmap);
             Assert.Contains("measurement-test262", roadmap);
@@ -238,9 +242,15 @@ public class M8ValidationTests
             Assert.Contains("29 executed, Broiler passed 29 and failed 0", dashboard);
             Assert.Contains("6 executed, Broiler passed 6 and failed 0", dashboard);
             Assert.Contains("8 executed, Broiler passed 8 and failed 0", dashboard);
+            Assert.Contains("5 executed, Broiler passed 5 and failed 0", dashboard);
+            Assert.Contains("7 executed, Broiler passed 7 and failed 0", dashboard);
             Assert.Contains("2 passed / 0 failed", dashboard);
             Assert.Contains("4 passed / 0 failed", dashboard);
             Assert.Contains("scripts/compliance/engine-scenarios.json", dashboard);
+            Assert.Contains("scripts/compliance/test262-bigint-comparisons.txt", dashboard);
+            Assert.Contains("scripts/compliance/test262-promise-jobs.txt", dashboard);
+            Assert.Contains("scripts/compliance/test262-binary-data.txt", dashboard);
+            Assert.Contains("scripts/compliance/test262-regexp.txt", dashboard);
             Assert.Contains("scripts/compliance/test262-unresolved-reference.txt", dashboard);
             Assert.Contains("Regression tracking", dashboard);
             Assert.Contains("Raw compliance log link", dashboard);
@@ -252,8 +262,12 @@ public class M8ValidationTests
             Assert.Contains("- [x] Pinned `test262` automation and totals", knownGaps);
             Assert.Contains("- [x] `engine262` smoke/cross-check command and totals", knownGaps);
             Assert.Contains("- [x] Comparative engine matrix in the dashboard", knownGaps);
+            Assert.Contains("- [x] BigInt comparison parser failures", knownGaps);
+            Assert.Contains("- [x] Promise-job / async scheduling public-suite evidence", knownGaps);
             Assert.Contains("- [x] Unresolved-reference behavior in `addition` and `strict-equals`", knownGaps);
             Assert.Contains("- [x] `Proxy` invariants and revocation public-suite evidence", knownGaps);
+            Assert.Contains("- [x] Typed arrays, `ArrayBuffer`, and `DataView` public-suite evidence", knownGaps);
+            Assert.Contains("- [x] `RegExp` public-suite evidence", knownGaps);
             Assert.Contains("semantics-promise-jobs", knownGaps);
             Assert.Contains("Intl", knownGaps);
             Assert.Contains("Tracked batch details live", knownGaps);

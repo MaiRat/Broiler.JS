@@ -11,6 +11,10 @@ This dashboard is the public status page for Broiler.JS standards compliance. It
 | test262 automated `Array.isArray` subset rerun | 2026-05-10 rerun of pinned `test/built-ins/Array/isArray`: 29 executed, Broiler passed 29 and failed 0 | `python scripts/compliance/run_test262.py --output /tmp/broiler-compliance/array-isarray-summary.json --path-file scripts/compliance/test262-array-isarray.txt` |
 | test262 automated unresolved-reference subset rerun | 2026-05-10 rerun of the unresolved-reference cases from `addition` and `strict-equals`: 6 executed, Broiler passed 6 and failed 0 | `python scripts/compliance/run_test262.py --output /tmp/broiler-compliance/unresolved-summary.json --path-file scripts/compliance/test262-unresolved-reference.txt` |
 | test262 automated `Proxy` subset rerun | 2026-05-10 rerun of a pinned `Proxy` invariants and revocation subset: 8 executed, Broiler passed 8 and failed 0 | `python scripts/compliance/run_test262.py --output /tmp/broiler-compliance/proxy-summary.json --path-file scripts/compliance/test262-proxy.txt` |
+| test262 automated BigInt comparison subset rerun | 2026-05-10 rerun of the pinned strict-equality BigInt comparison cases: 8 executed, Broiler passed 8 and failed 0 | `python scripts/compliance/run_test262.py --output /tmp/broiler-compliance/bigint-summary.json --path-file scripts/compliance/test262-bigint-comparisons.txt` |
+| test262 automated promise-job subset rerun | 2026-05-10 rerun of a pinned async promise-job and `await` scheduling subset: 5 executed, Broiler passed 5 and failed 0 | `python scripts/compliance/run_test262.py --output /tmp/broiler-compliance/promise-summary.json --path-file scripts/compliance/test262-promise-jobs.txt` |
+| test262 automated binary-data subset rerun | 2026-05-10 rerun of a pinned `ArrayBuffer` / `DataView` subset: 7 executed, Broiler passed 7 and failed 0 | `python scripts/compliance/run_test262.py --output /tmp/broiler-compliance/binary-summary.json --path-file scripts/compliance/test262-binary-data.txt` |
+| test262 automated `RegExp.escape` subset rerun | 2026-05-10 rerun of a pinned `RegExp.escape` subset: 7 executed, Broiler passed 7 and failed 0 | `python scripts/compliance/run_test262.py --output /tmp/broiler-compliance/regexp-summary.json --path-file scripts/compliance/test262-regexp.txt` |
 | test262-harness smoke | Official `test262-harness` now launches the Broiler CLI, but the Node-style host prelude still fails before real test execution because Broiler does not yet match the expected global/CommonJS setup | `npx test262-harness --host-type node --host-path /tmp/broilerjs-host .../Array/isArray/15.4.3.2-0-1.js` currently aborts at `Function(\"return this;\")().require = require`. |
 | engine262 cross-check scenarios | 2026-05-10 local cross-check over `scripts/compliance/engine-scenarios.json`: Broiler passed 2/6 while Node/V8 and engine262 each passed 6/6 on the same reference-resolution and global-semantics cases | `python scripts/compliance/compare_engines.py --manifest scripts/compliance/engine-scenarios.json --engine262-bin /tmp/engine262-cli/node_modules/.bin/engine262 --output /tmp/broiler-compliance/engine-scenarios-summary.json` |
 | JInt compatibility/performance scripts | 2026-05-09 local comparison: 11 executed, Broiler passed 11 and Chromium passed 11 | Ran every script in `Broiler.JS/OtherTests/JIntPerfTests/Scripts` through the repaired Broiler script host and Chromium 147.0.7727.0. |
@@ -64,6 +68,33 @@ This dashboard is the public status page for Broiler.JS standards compliance. It
 - Installed `@magic-works/engine262` `0.0.1-941d619dbc7464602f91d811b1b3ce61e372cdfa` locally for the first recorded run and executed the shared matrix command against Node `v24.14.1`.
 - The first matrix shows Broiler matching Node/V8 and engine262 on unresolved-reference checks while still diverging on the current non-strict/global semantics scenarios; that gives the project a repeatable cross-check and a dashboard matrix without overstating full conformance.
 
+## 2026-05-10 BigInt comparison follow-up
+
+- Added the pinned `scripts/compliance/test262-bigint-comparisons.txt` manifest for the strict-equality BigInt comparison cases that previously sat next to the parser-gap note.
+- Fixed the CLI script host so the standard global bindings (`Infinity`, `Intl`, and `globalThis`) are available during pinned public-suite reruns, which removed the remaining false host failure from the BigInt comparison subset.
+- Reran the pinned BigInt comparison subset: 8 executed, 8 passed, 0 failed.
+- The BigInt comparison parser bucket is now closed in both the roadmap and the active gap checklist.
+
+## 2026-05-10 promise-job follow-up
+
+- Extended `scripts/compliance/run_test262.py` so the pinned runner can execute async `test262` files that only depend on the standard harness plus `$DONE`, and so it no longer skips `noStrict` script-host cases.
+- Added the pinned `scripts/compliance/test262-promise-jobs.txt` manifest for promise resolution, rejection timing, `finally`, and `await` scheduling.
+- Reran the pinned promise-job subset: 5 executed, 5 passed, 0 failed.
+- The promise-job / async scheduling evidence gap is now closed in both the roadmap and the active gap checklist.
+
+## 2026-05-10 binary-data follow-up
+
+- Added the pinned `scripts/compliance/test262-binary-data.txt` manifest for constructor metadata and basic `ArrayBuffer` / `DataView` behavior.
+- Corrected `ArrayBuffer.length` and `DataView.length` to the spec-required value `1`.
+- Reran the pinned binary-data subset: 7 executed, 7 passed, 0 failed.
+- Typed-array / binary-data public-suite evidence is now closed in both the roadmap and the active gap checklist.
+
+## 2026-05-10 `RegExp.escape` follow-up
+
+- Added the pinned `scripts/compliance/test262-regexp.txt` manifest for the `RegExp.escape` public cases that match the existing local regressions.
+- Reran the pinned `RegExp.escape` subset: 7 executed, 7 passed, 0 failed.
+- The `RegExp` public-suite evidence gap is now closed in both the roadmap and the active gap checklist.
+
 ## Comparative engine matrix
 
 | Scenario set | Broiler | Node/V8 | engine262 |
@@ -77,8 +108,8 @@ This dashboard is the public status page for Broiler.JS standards compliance. It
 - [x] Record the repository-test baseline required by `process.md`.
 - [x] Add a pinned `test262` harness run and publish suite totals here.
 - [x] Add an `engine262` cross-check run and publish suite totals here.
-- [ ] Expand syntax-compliance coverage for parser gaps called out in `known-gaps.md`.
-- [ ] Expand built-in compliance coverage for the high-risk areas called out in `known-gaps.md`.
+- [x] Expand syntax-compliance coverage for parser gaps called out in `known-gaps.md`.
+- [x] Expand built-in compliance coverage for the high-risk areas called out in `known-gaps.md`.
 - [x] Publish a comparative engine matrix for release-time regression tracking.
 
 ## Regression tracking

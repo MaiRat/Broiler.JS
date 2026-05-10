@@ -763,6 +763,15 @@ public class BuiltInsTests
         Assert.Equal(3.14, result.DoubleValue, 2);
     }
 
+    [Fact]
+    public void ArrayBuffer_And_DataView_Constructors_Expose_Spec_Length()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = new JSContext();
+        var result = ctx.Eval("[ArrayBuffer.length, DataView.length].join('|');");
+        Assert.Equal("1|1", result.ToString());
+    }
+
     // ── M2: ArrayBuffer transfer tests ───────────────────────────────
 
     [Fact]
@@ -1456,6 +1465,17 @@ public class BuiltInsTests
         ");
 
         Assert.Equal("true|8", result.ToString());
+    }
+
+    [Fact]
+    public void GlobalThis_Resolves_To_The_Current_Global_Object()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = new JSContext();
+
+        var result = ctx.Eval("globalThis === this;");
+
+        Assert.Equal("true", result.ToString());
     }
 
     [Fact]

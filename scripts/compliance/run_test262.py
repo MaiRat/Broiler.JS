@@ -21,7 +21,7 @@ DEFAULT_BROILER_DLL = str(
     REPO_ROOT / "Broiler.JS/Broiler.JavaScript/bin/Debug/net8.0/BroilerJS.dll"
 )
 TEMP_DIRECTORY = Path(tempfile.gettempdir()) / "broiler-test262"
-UNSUPPORTED_FLAGS = {"async", "module", "raw", "onlyStrict", "noStrict"}
+UNSUPPORTED_FLAGS = {"module", "raw", "onlyStrict"}
 USER_AGENT = "Broiler.JS compliance runner"
 
 
@@ -135,7 +135,29 @@ def run_test(
     parts = [harness_text("assert.js"), harness_text("sta.js")]
     for include in metadata["includes"]:
         parts.append(harness_text(include))
+    if "async" in metadata["flags"]:
+        parts.append(
+            """
+const __broilerDonePromise = new Promise((resolve, reject) => {
+  let settled = false;
+  globalThis.$DONE = function(error) {
+    if (settled) {
+      reject(new Error("$DONE called multiple times"));
+      return;
+    }
+    settled = true;
+    if (error === undefined) {
+      resolve(undefined);
+      return;
+    }
+    reject(error);
+  };
+});
+""".strip()
+        )
     parts.append(body)
+    if "async" in metadata["flags"]:
+        parts.append("__broilerDonePromise")
 
     with tempfile.NamedTemporaryFile(
         "w",

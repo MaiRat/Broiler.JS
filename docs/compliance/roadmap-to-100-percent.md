@@ -12,15 +12,15 @@ Use this checklist as the issue-level summary for roadmap progress. Update the m
 - [x] 4. Build the comparison matrix
 - [ ] 5. Implement `for await (...)`
 - [x] 6. Resolve the async object accessor parser note
-- [ ] 7. Fix BigInt comparison parse failures
+- [x] 7. Fix BigInt comparison parse failures
 - [ ] 8. Finish non-strict/global semantics validation
 - [x] 9. Align unresolved-reference behavior in `+` and `===`
-- [ ] 10. Verify promise jobs and async scheduling
+- [x] 10. Verify promise jobs and async scheduling
 - [x] 11. Finish `Array.isArray`
 - [ ] 12. Validate `Intl`
 - [x] 13. Prove `Proxy` invariants and revocation behavior
-- [ ] 14. Cover typed arrays, `ArrayBuffer`, and `DataView`
-- [ ] 15. Finish `RegExp.escape` and related `RegExp` conformance
+- [x] 14. Cover typed arrays, `ArrayBuffer`, and `DataView`
+- [x] 15. Finish `RegExp.escape` and related `RegExp` conformance
 - [ ] 16. Validate error subclassing
 - [x] 17. Convert the remaining open gaps into tracked batches
 - [x] 18. Define the final “ready to claim” checklist
@@ -140,6 +140,8 @@ Primary source: parser handling for `===` and BigInt literals, especially valid 
 3. Fix tokenization or expression parsing so valid BigInt comparisons survive to runtime.
 4. Re-run the exact failing `test262` files before widening the subset.
 
+The pinned `scripts/compliance/test262-bigint-comparisons.txt` subset is now clean on the recorded 2026-05-10 rerun, so this item is closed.
+
 ## Phase 3: close execution-semantic gaps
 
 ### 8. Finish non-strict/global semantics validation
@@ -180,6 +182,8 @@ The pinned unresolved-reference subset is now clean on the recorded 2026-05-10 r
    - rejection timing
 3. Cross-check those results with `engine262` or a reference engine.
 4. Add public-suite coverage before closing the gap.
+
+The pinned `scripts/compliance/test262-promise-jobs.txt` subset is now clean on the recorded 2026-05-10 rerun, so this item is closed.
 
 ## Phase 4: close built-in conformance gaps
 
@@ -223,6 +227,8 @@ The local regressions and the pinned `scripts/compliance/test262-proxy.txt` subs
 3. Then run the relevant `test262` built-in directories.
 4. Treat detach/transfer edge cases as release blockers because they often expose host/runtime bugs.
 
+The pinned `scripts/compliance/test262-binary-data.txt` subset is now clean on the recorded 2026-05-10 rerun, so this item is closed.
+
 ### 15. Finish `RegExp.escape` and related `RegExp` conformance
 
 1. Start from the dashboard’s already-known divergences:
@@ -234,6 +240,8 @@ The local regressions and the pinned `scripts/compliance/test262-proxy.txt` subs
 3. Fix `RegExp.escape` behavior first.
 4. Expand to flags, captures, and Unicode edge cases after the escape subset is clean.
 5. Re-run the same `test262` files after every change.
+
+The pinned `scripts/compliance/test262-regexp.txt` subset is now clean on the recorded 2026-05-10 rerun, so this item is closed.
 
 ### 16. Validate error subclassing
 

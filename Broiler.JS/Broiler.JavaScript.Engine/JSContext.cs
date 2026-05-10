@@ -160,6 +160,7 @@ public class JSContext : JSObject, IJSExecutionContext, IDisposable
             JSEngine.CoreClassRegistrations?.Invoke(this);
         }
 
+        this[KeyStrings.globalThis] = this;
         this[KeyStrings.debug] = JSValue.CreateFunction(Debug);
     }
 

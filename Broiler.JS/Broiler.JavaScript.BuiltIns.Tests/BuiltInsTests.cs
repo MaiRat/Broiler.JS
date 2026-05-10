@@ -1064,11 +1064,11 @@ public class BuiltInsTests
     }
 
     [Fact]
-    public async Task Promise_Reactions_Run_After_Synchronous_Code()
+    public void Promise_Reactions_Run_After_Synchronous_Code()
     {
         EnsureBuiltInsLoaded();
         using var ctx = new JSContext();
-        var result = await ctx.ExecuteAsync(@"
+        var result = ctx.Execute(@"
             var order = [];
             var promise = Promise.resolve('ok').then(value => {
                 order.push('then:' + value);
@@ -1082,11 +1082,11 @@ public class BuiltInsTests
     }
 
     [Fact]
-    public async Task Promise_Nested_Resolution_Assimilates_Inner_Promise()
+    public void Promise_Nested_Resolution_Assimilates_Inner_Promise()
     {
         EnsureBuiltInsLoaded();
         using var ctx = new JSContext();
-        var result = await ctx.ExecuteAsync(@"
+        var result = ctx.Execute(@"
             Promise.resolve('outer')
                 .then(value => Promise.resolve(value + ':inner'))
                 .then(value => value);
@@ -1096,11 +1096,11 @@ public class BuiltInsTests
     }
 
     [Fact]
-    public async Task Async_Await_Continuation_Runs_After_Synchronous_Code()
+    public void Async_Await_Continuation_Runs_After_Synchronous_Code()
     {
         EnsureBuiltInsLoaded();
         using var ctx = new JSContext();
-        var result = await ctx.ExecuteAsync(@"
+        var result = ctx.Execute(@"
             var order = [];
             async function run() {
                 order.push('start');
@@ -1118,11 +1118,11 @@ public class BuiltInsTests
     }
 
     [Fact]
-    public async Task Promise_Rejection_Handlers_Run_In_Microtask_Order()
+    public void Promise_Rejection_Handlers_Run_In_Microtask_Order()
     {
         EnsureBuiltInsLoaded();
         using var ctx = new JSContext();
-        var result = await ctx.ExecuteAsync(@"
+        var result = ctx.Execute(@"
             var order = [];
             var promise = Promise.reject('boom').then(value => value, reason => {
                 order.push('reject:' + reason);

@@ -52,7 +52,7 @@ def parse_negative_metadata(source: str) -> dict[str, str] | None:
         if value_match is not None:
             summary[key] = value_match.group(1)
 
-    return summary or {}
+    return summary if summary else None
 
 
 def classify_test(source: str) -> dict[str, object]:
@@ -200,6 +200,11 @@ def main() -> int:
         output_path.write_text(json.dumps(summary, indent=2), encoding="utf-8")
 
     print(json.dumps(summary, indent=2))
+
+    # The current raw script-host runner only produces trustworthy pass/fail totals for
+    # manifests whose entries are script-host-verifiable. Failing here prevents CI from
+    # silently reporting coverage for unsupported-flag or negative-metadata files that
+    # this workflow does not validate correctly yet.
     return 1 if summary["manifestUnsupportedTests"] or summary["manifestNegativeTests"] else 0
 
 

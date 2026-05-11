@@ -67,7 +67,11 @@ class AuditTest262Tests(unittest.TestCase):
         self.assertEqual(2, summary["manifestUniqueTests"])
         self.assertEqual(2, summary["manifestScriptHostVerifiableTests"])
         self.assertEqual(40.0, summary["manifestCoverageOfSuitePercent"])
-        self.assertAlmostEqual(66.6666666667, summary["manifestCoverageOfScriptHostVerifiablePercent"])
+        expected_script_host_coverage = 2 * 100.0 / 3
+        self.assertAlmostEqual(
+            expected_script_host_coverage,
+            summary["manifestCoverageOfScriptHostVerifiablePercent"],
+        )
 
     def test_manifest_includes_negative_and_unsupported_tests(self) -> None:
         unsupported_path = self.write_test(

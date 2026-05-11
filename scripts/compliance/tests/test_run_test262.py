@@ -104,6 +104,10 @@ class RunTest262Tests(unittest.TestCase):
             ["test/language/example.js"],
             run_test262.apply_shard(["test/language/example.js"], 2, -1),
         )
+        self.assertEqual(
+            ["a.js", "b.js", "c.js"],
+            run_test262.apply_shard(["a.js", "b.js", "c.js"], 8, -1),
+        )
 
         with self.assertRaisesRegex(ValueError, "shard_index must be -1 or between 0 and 1"):
             run_test262.apply_shard(["test/language/example.js"], 2, -2)

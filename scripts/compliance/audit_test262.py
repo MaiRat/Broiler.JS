@@ -40,6 +40,7 @@ def collect_suite_test_paths(repo: Test262Repository, suite_root: Path | None) -
 
 
 def directory_bucket(path: str, depth: int) -> str:
+    """Return a slash-separated bucket prefix, or the full path when depth exceeds it."""
     if depth <= 0:
         raise ValueError(f"depth must be at least 1, got {depth}")
     parts = path.split("/")
@@ -47,7 +48,7 @@ def directory_bucket(path: str, depth: int) -> str:
 
 
 def summarize_buckets(paths: list[str], depth: int, limit: int | None = None) -> list[dict[str, object]]:
-    """Group paths by bucket depth, sort by largest count, and optionally limit the result."""
+    """Group paths by bucket depth, clamping to the full path when depth exceeds it."""
     counts = Counter(directory_bucket(path, depth) for path in paths)
     rows = [
         {"bucket": bucket, "count": count}

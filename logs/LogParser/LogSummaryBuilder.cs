@@ -9,6 +9,7 @@ public static class LogSummaryBuilder
 {
     private const string UnknownStatus = "unknown";
     private const string AllPathsBucket = "(all paths)";
+    private const string UnhandledExceptionPrefix = "Unhandled exception. ";
 
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
@@ -33,7 +34,8 @@ public static class LogSummaryBuilder
             LogRun = logRun,
             BucketDepth = bucketDepth,
             StatusGroups = SummarizeGroups(logRun.Results, entry => entry.Status, notableEntryLimit),
-            PathGroups = SummarizeGroups(logRun.Results, entry => GetPathBucket(entry.Path, bucketDepth), notableEntryLimit)
+            PathGroups = SummarizeGroups(logRun.Results, entry => GetPathBucket(entry.Path, bucketDepth), notableEntryLimit),
+            ExceptionSummary = SummarizeExceptions(logRun.Results, notableEntryLimit)
         };
     }
 
@@ -63,6 +65,53 @@ public static class LogSummaryBuilder
         return segments.Length <= depth
             ? path
             : string.Join('/', segments.Take(depth));
+    }
+
+    public static ExceptionAnalysisSummary SummarizeExceptions(IEnumerable<LogEntry> entries, int exampleLimit = 3)
+    {
+        var allEntries = entries.ToArray();
+        var exceptionEntries = allEntries
+            .Where(entry => entry.Exception is not null)
+            .Select(entry => (Entry: entry, Exception: entry.Exception!))
+            .ToArray();
+
+        var totalEntryCount = allEntries.Length;
+        var totalExceptionCount = exceptionEntries.Length;
+
+        return new ExceptionAnalysisSummary
+        {
+            TotalEntriesWithExceptions = totalExceptionCount,
+            OccurrenceRate = totalEntryCount == 0 ? 0 : totalExceptionCount / (double)totalEntryCount,
+            TypeGroups = exceptionEntries
+                .GroupBy(item => item.Exception.Type, StringComparer.OrdinalIgnoreCase)
+                .Select(group => new ExceptionTypeSummary
+                {
+                    Type = group.Key,
+                    Count = group.Count(),
+                    OccurrenceRate = totalEntryCount == 0 ? 0 : group.Count() / (double)totalEntryCount,
+                    DistinctMessageCount = group
+                        .Select(item => item.Exception.Message)
+                        .Distinct(StringComparer.OrdinalIgnoreCase)
+                        .Count(),
+                    Examples = SelectExceptionExamples(group, exampleLimit)
+                })
+                .OrderByDescending(group => group.Count)
+                .ThenBy(group => group.Type, StringComparer.OrdinalIgnoreCase)
+                .ToArray(),
+            MessageGroups = exceptionEntries
+                .GroupBy(item => item.Exception.Message, StringComparer.OrdinalIgnoreCase)
+                .Select(group => new ExceptionMessageSummary
+                {
+                    Message = group.Key,
+                    Count = group.Count(),
+                    OccurrenceRate = totalEntryCount == 0 ? 0 : group.Count() / (double)totalEntryCount,
+                    Examples = SelectExceptionExamples(group, exampleLimit)
+                })
+                .OrderByDescending(group => group.Count)
+                .ThenBy(group => group.Message, StringComparer.OrdinalIgnoreCase)
+                .ToArray(),
+            SuggestedPatterns = BuildSuggestedPatterns(exceptionEntries, totalExceptionCount)
+        };
     }
 
     private static LogGroupSummary SummarizeGroup(IGrouping<string, LogEntry> group, int notableEntryLimit)
@@ -118,10 +167,147 @@ public static class LogSummaryBuilder
                     Path = entry.Path ?? string.Empty,
                     Status = string.IsNullOrWhiteSpace(entry.Status) ? UnknownStatus : entry.Status,
                     Stdout = entry.Stdout,
-                    Stderr = entry.Stderr
+                    Stderr = entry.Stderr,
+                    Exception = TryParseException(entry.Stderr) ?? TryParseException(entry.Stdout)
                 })
                 .ToArray()
                 ?? []
         };
+    }
+
+    private static IReadOnlyList<ExceptionExample> SelectExceptionExamples(
+        IEnumerable<(LogEntry Entry, ParsedException Exception)> entries,
+        int exampleLimit)
+    {
+        return entries
+            .OrderBy(item => item.Entry.Path, StringComparer.OrdinalIgnoreCase)
+            .ThenBy(item => item.Exception.Message, StringComparer.OrdinalIgnoreCase)
+            .Take(Math.Max(0, exampleLimit))
+            .Select(item => new ExceptionExample
+            {
+                Path = item.Entry.Path ?? string.Empty,
+                Type = item.Exception.Type,
+                Message = item.Exception.Message,
+                LogLine = item.Exception.LogLine
+            })
+            .ToArray();
+    }
+
+    private static IReadOnlyList<string> BuildSuggestedPatterns(
+        IEnumerable<(LogEntry Entry, ParsedException Exception)> exceptionEntries,
+        int totalExceptionCount)
+    {
+        if (totalExceptionCount == 0)
+        {
+            return [];
+        }
+
+        var repeatedMessages = exceptionEntries
+            .GroupBy(item => item.Exception.Message, StringComparer.OrdinalIgnoreCase)
+            .Where(group => group.Count() > 1)
+            .OrderByDescending(group => group.Count())
+            .ThenBy(group => group.Key, StringComparer.OrdinalIgnoreCase)
+            .Take(3)
+            .Select(group =>
+                $"Repeated message \"{group.Key}\" appears {group.Count()} times ({group.Count() / (double)totalExceptionCount:P1} of exception entries).")
+            .ToArray();
+
+        if (repeatedMessages.Length > 0)
+        {
+            return repeatedMessages;
+        }
+
+        var repeatedTypes = exceptionEntries
+            .GroupBy(item => item.Exception.Type, StringComparer.OrdinalIgnoreCase)
+            .Where(group => group.Count() > 1)
+            .OrderByDescending(group => group.Count())
+            .ThenBy(group => group.Key, StringComparer.OrdinalIgnoreCase)
+            .Take(3)
+            .Select(group =>
+                $"Exception type \"{group.Key}\" appears {group.Count()} times across {group.Select(item => item.Exception.Message).Distinct(StringComparer.OrdinalIgnoreCase).Count()} distinct messages.")
+            .ToArray();
+
+        if (repeatedTypes.Length > 0)
+        {
+            return repeatedTypes;
+        }
+
+        return exceptionEntries
+            .GroupBy(item => item.Exception.Type, StringComparer.OrdinalIgnoreCase)
+            .OrderByDescending(group => group.Count())
+            .ThenBy(group => group.Key, StringComparer.OrdinalIgnoreCase)
+            .Take(3)
+            .Select(group =>
+                $"Most frequent exception type so far is \"{group.Key}\" with {group.Count()} occurrence(s); compare its message and stack examples first.")
+            .ToArray();
+    }
+
+    private static ParsedException? TryParseException(string? output)
+    {
+        if (string.IsNullOrWhiteSpace(output))
+        {
+            return null;
+        }
+
+        foreach (var line in output.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        {
+            if (TryParseExceptionLine(line, out var exceptionType, out var exceptionMessage))
+            {
+                return new ParsedException
+                {
+                    Type = exceptionType,
+                    Message = exceptionMessage,
+                    LogLine = line
+                };
+            }
+        }
+
+        return null;
+    }
+
+    private static bool TryParseExceptionLine(string line, out string exceptionType, out string exceptionMessage)
+    {
+        var candidate = line.Trim();
+        if (candidate.StartsWith(UnhandledExceptionPrefix, StringComparison.OrdinalIgnoreCase))
+        {
+            candidate = candidate[UnhandledExceptionPrefix.Length..].Trim();
+        }
+
+        var separatorIndex = candidate.IndexOf(": ", StringComparison.Ordinal);
+        if (separatorIndex <= 0)
+        {
+            exceptionType = string.Empty;
+            exceptionMessage = string.Empty;
+            return false;
+        }
+
+        var typeCandidate = candidate[..separatorIndex].Trim();
+        if (!LooksLikeExceptionType(typeCandidate))
+        {
+            exceptionType = string.Empty;
+            exceptionMessage = string.Empty;
+            return false;
+        }
+
+        exceptionType = typeCandidate;
+        exceptionMessage = candidate[(separatorIndex + 2)..].Trim();
+        if (string.IsNullOrEmpty(exceptionMessage))
+        {
+            exceptionMessage = "(no message)";
+        }
+
+        return true;
+    }
+
+    private static bool LooksLikeExceptionType(string typeCandidate)
+    {
+        if (string.IsNullOrWhiteSpace(typeCandidate) || typeCandidate.Any(char.IsWhiteSpace))
+        {
+            return false;
+        }
+
+        return typeCandidate.EndsWith("Exception", StringComparison.Ordinal)
+            || typeCandidate.EndsWith("Error", StringComparison.Ordinal)
+            || typeCandidate.Contains('.', StringComparison.Ordinal);
     }
 }

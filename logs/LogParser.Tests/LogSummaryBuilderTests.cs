@@ -58,6 +58,90 @@ public class LogSummaryBuilderTests
         Assert.Contains("File: sample-shard.json", formatted, StringComparison.Ordinal);
         Assert.Contains("Status groups:", formatted, StringComparison.Ordinal);
         Assert.Contains("Path groups (depth 4):", formatted, StringComparison.Ordinal);
+        Assert.Contains("Exception summary:", formatted, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void ParseAndSummarize_ExtractsAndCountsExceptions()
+    {
+        var summary = LogSummaryBuilder.ParseAndSummarize(GetExceptionFixturePath());
+
+        Assert.Equal(3, summary.ExceptionSummary.TotalEntriesWithExceptions);
+        Assert.Equal(0.75, summary.ExceptionSummary.OccurrenceRate);
+
+        var jsExceptionGroup = Assert.Single(
+            summary.ExceptionSummary.TypeGroups,
+            group => group.Type == "Broiler.JavaScript.Runtime.JSException");
+        Assert.Equal(2, jsExceptionGroup.Count);
+        Assert.Equal(0.5, jsExceptionGroup.OccurrenceRate);
+        Assert.Equal(1, jsExceptionGroup.DistinctMessageCount);
+
+        var parsedException = Assert.IsType<ParsedException>(Assert.Single(
+            summary.LogRun.Results,
+            entry => entry.Path == "test/annexB/alpha.js").Exception);
+        Assert.Equal("Broiler.JavaScript.Runtime.JSException", parsedException.Type);
+        Assert.Equal("Cannot get property set of undefined", parsedException.Message);
+        Assert.StartsWith("Unhandled exception.", parsedException.LogLine, StringComparison.Ordinal);
+
+        var repeatedMessageGroup = Assert.Single(
+            summary.ExceptionSummary.MessageGroups,
+            group => group.Message == "Cannot get property set of undefined");
+        Assert.Equal(2, repeatedMessageGroup.Count);
+        Assert.Contains(summary.ExceptionSummary.SuggestedPatterns,
+            pattern => pattern.Contains("Cannot get property set of undefined", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void Format_IncludesParsedExceptionDetailsAndExamples()
+    {
+        var formatted = LogReportFormatter.Format(
+        [
+            LogSummaryBuilder.ParseAndSummarize(GetExceptionFixturePath())
+        ]);
+
+        Assert.Contains("entries with parsed exceptions=3/4", formatted, StringComparison.Ordinal);
+        Assert.Contains("Broiler.JavaScript.Runtime.JSException: count=2", formatted, StringComparison.Ordinal);
+        Assert.Contains("Cannot get property set of undefined: count=2", formatted, StringComparison.Ordinal);
+        Assert.Contains("example: test/annexB/alpha.js => type=Broiler.JavaScript.Runtime.JSException, message=Cannot get property set of undefined", formatted, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void ParseAndSummarize_IgnoresExceptionTypesContainingNonSpaceWhitespace()
+    {
+        var path = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid():N}.json");
+
+        try
+        {
+            File.WriteAllText(path, """
+            {
+              "suiteRef": "fixture-tabs",
+              "broilerDll": "fixture/BroilerJS.dll",
+              "executed": 1,
+              "passed": 0,
+              "failed": 1,
+              "skipped": 0,
+              "results": [
+                {
+                  "path": "test/tabbed.js",
+                  "status": "failed",
+                  "stderr": "Unhandled exception. Invalid\tException: tabbed type\nat Demo in /repo/File.cs:line 1\n"
+                }
+              ]
+            }
+            """);
+
+            var summary = LogSummaryBuilder.ParseAndSummarize(path);
+
+            Assert.Equal(0, summary.ExceptionSummary.TotalEntriesWithExceptions);
+            Assert.Null(Assert.Single(summary.LogRun.Results).Exception);
+        }
+        finally
+        {
+            if (File.Exists(path))
+            {
+                File.Delete(path);
+            }
+        }
     }
 
     private static string GetShardSevenPath()
@@ -68,5 +152,10 @@ public class LogSummaryBuilderTests
     private static string GetFixturePath()
     {
         return Path.Combine(AppContext.BaseDirectory, "TestData", "sample-shard.json");
+    }
+
+    private static string GetExceptionFixturePath()
+    {
+        return Path.Combine(AppContext.BaseDirectory, "TestData", "sample-exceptions.json");
     }
 }

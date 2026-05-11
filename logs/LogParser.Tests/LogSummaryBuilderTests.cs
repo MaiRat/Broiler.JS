@@ -81,7 +81,20 @@ public class LogSummaryBuilderTests
             entry => entry.Path == "test/annexB/alpha.js").Exception);
         Assert.Equal("Broiler.JavaScript.Runtime.JSException", parsedException.Type);
         Assert.Equal("Cannot get property set of undefined", parsedException.Message);
+        Assert.Equal("InitializeFactories", parsedException.Context);
         Assert.StartsWith("Unhandled exception.", parsedException.LogLine, StringComparison.Ordinal);
+
+        var initializeFactoriesGroup = Assert.Single(
+            summary.ExceptionSummary.ContextGroups,
+            group => group.Type == "Broiler.JavaScript.Runtime.JSException"
+                && group.Context == "InitializeFactories");
+        Assert.Equal(1, initializeFactoriesGroup.Count);
+
+        var getDateGroup = Assert.Single(
+            summary.ExceptionSummary.ContextGroups,
+            group => group.Type == "Broiler.JavaScript.Runtime.JSException"
+                && group.Context == "GetDate");
+        Assert.Equal(1, getDateGroup.Count);
 
         var repeatedMessageGroup = Assert.Single(
             summary.ExceptionSummary.MessageGroups,
@@ -101,8 +114,10 @@ public class LogSummaryBuilderTests
 
         Assert.Contains("entries with parsed exceptions=3/4", formatted, StringComparison.Ordinal);
         Assert.Contains("Broiler.JavaScript.Runtime.JSException: count=2", formatted, StringComparison.Ordinal);
+        Assert.Contains("Broiler.JavaScript.Runtime.JSException in InitializeFactories: count=1", formatted, StringComparison.Ordinal);
+        Assert.Contains("Broiler.JavaScript.Runtime.JSException in GetDate: count=1", formatted, StringComparison.Ordinal);
         Assert.Contains("Cannot get property set of undefined: count=2", formatted, StringComparison.Ordinal);
-        Assert.Contains("example: test/annexB/alpha.js => type=Broiler.JavaScript.Runtime.JSException, message=Cannot get property set of undefined", formatted, StringComparison.Ordinal);
+        Assert.Contains("example: test/annexB/alpha.js => type=Broiler.JavaScript.Runtime.JSException, context=InitializeFactories, message=Cannot get property set of undefined", formatted, StringComparison.Ordinal);
     }
 
     [Fact]

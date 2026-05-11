@@ -14,7 +14,7 @@
     {
       "path": "test/annexB/beta.js",
       "status": "failed",
-      "stderr": "Unhandled exception. Broiler.JavaScript.Runtime.JSException: Cannot get property set of undefined\nat InitializeFactories in /repo/JSValueCoreExtensions.cs:line 17\n"
+      "stderr": "Unhandled exception. Broiler.JavaScript.Runtime.JSException: Cannot get property set of undefined\nat GetDate in /repo/DatePrototype.cs:line 99\n"
     },
     {
       "path": "test/language/gamma.js",

@@ -82,7 +82,20 @@ public static class LogReportFormatter
             foreach (var example in group.Examples)
             {
                 builder.AppendLine(
-                    $"        example: {example.Path} => type={example.Type}, message={example.Message}, log line=\"{example.LogLine}\"");
+                    $"        example: {example.Path} => type={example.Type}, context={example.Context ?? "(unknown context)"}, message={example.Message}, log line=\"{example.LogLine}\"");
+            }
+        }
+
+        builder.AppendLine("    - by type and context:");
+        foreach (var group in summary.ContextGroups)
+        {
+            builder.AppendLine(
+                $"      - {group.Type} in {group.Context}: count={group.Count}, rate={group.OccurrenceRate:P1}, distinct messages={group.DistinctMessageCount}");
+
+            foreach (var example in group.Examples)
+            {
+                builder.AppendLine(
+                    $"        example: {example.Path} => type={example.Type}, context={example.Context ?? "(unknown context)"}, message={example.Message}, log line=\"{example.LogLine}\"");
             }
         }
 
@@ -95,7 +108,7 @@ public static class LogReportFormatter
             foreach (var example in group.Examples)
             {
                 builder.AppendLine(
-                    $"        example: {example.Path} => type={example.Type}, message={example.Message}, log line=\"{example.LogLine}\"");
+                    $"        example: {example.Path} => type={example.Type}, context={example.Context ?? "(unknown context)"}, message={example.Message}, log line=\"{example.LogLine}\"");
             }
         }
 

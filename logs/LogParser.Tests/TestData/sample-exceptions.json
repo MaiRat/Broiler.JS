@@ -1,0 +1,30 @@
+{
+  "suiteRef": "fixture-exceptions",
+  "broilerDll": "fixture/BroilerJS.dll",
+  "executed": 4,
+  "passed": 1,
+  "failed": 3,
+  "skipped": 0,
+  "results": [
+    {
+      "path": "test/annexB/alpha.js",
+      "status": "failed",
+      "stderr": "Unhandled exception. Broiler.JavaScript.Runtime.JSException: Cannot get property set of undefined\nat InitializeFactories in /repo/JSValueCoreExtensions.cs:line 17\n"
+    },
+    {
+      "path": "test/annexB/beta.js",
+      "status": "failed",
+      "stderr": "Unhandled exception. Broiler.JavaScript.Runtime.JSException: Cannot get property set of undefined\nat InitializeFactories in /repo/JSValueCoreExtensions.cs:line 17\n"
+    },
+    {
+      "path": "test/language/gamma.js",
+      "status": "failed",
+      "stderr": "Unhandled exception. System.InvalidOperationException: Unexpected parser state\nat Compile in /repo/Parser.cs:line 42\n"
+    },
+    {
+      "path": "test/language/delta.js",
+      "status": "passed",
+      "stdout": "ok"
+    }
+  ]
+}

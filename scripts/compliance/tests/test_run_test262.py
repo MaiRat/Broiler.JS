@@ -95,10 +95,10 @@ class RunTest262Tests(unittest.TestCase):
         self.assertEqual(1, selection["shardIndex"])
 
     def test_apply_shard_rejects_invalid_parameters(self) -> None:
-        with self.assertRaises(ValueError):
+        with self.assertRaisesRegex(ValueError, "shard_count must be greater than 0"):
             run_test262.apply_shard(["test/language/example.js"], 0, 0)
 
-        with self.assertRaises(ValueError):
+        with self.assertRaisesRegex(ValueError, "shard_index must be between 0 and 1"):
             run_test262.apply_shard(["test/language/example.js"], 2, 2)
 
 

@@ -372,7 +372,7 @@ def collect_requested_paths(paths: list[str], path_files: list[str]) -> list[str
 def apply_shard(paths: list[str], shard_count: int, shard_index: int) -> list[str]:
     """Return one deterministic modulo-based shard from an ordered path list."""
     if shard_count <= 0:
-        raise ValueError(f"shard_count must be at least 1, got {shard_count}")
+        raise ValueError(f"shard_count must be greater than 0, got {shard_count}")
     if shard_index < 0 or shard_index >= shard_count:
         raise ValueError(
             f"shard_index must be between 0 and {shard_count - 1}, got {shard_index}"

@@ -68,6 +68,18 @@ internal static class Program
 
     private static string GetDefaultLogsDirectory()
     {
-        return Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", ".."));
+        var current = new DirectoryInfo(AppContext.BaseDirectory);
+        while (current is not null)
+        {
+            if (File.Exists(Path.Combine(current.FullName, "shard-7.json")))
+            {
+                return current.FullName;
+            }
+
+            current = current.Parent;
+        }
+
+        throw new DirectoryNotFoundException(
+            "Could not locate the logs directory automatically. Pass one or more log file paths explicitly.");
     }
 }

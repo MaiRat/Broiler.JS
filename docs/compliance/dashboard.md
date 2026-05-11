@@ -7,6 +7,7 @@ This dashboard is the public status page for Broiler.JS standards compliance. It
 | Area | Latest recorded result | Evidence |
 | --- | --- | --- |
 | Repository xUnit tests | 2026-05-10 local rerun: 293 passed, 0 failed, 0 skipped | `dotnet test Broiler.JS.slnx` |
+| test262 automated manifest coverage | 2026-05-11 local rerun of all pinned manifests: 163 executed, 163 passed, 0 failed, 0 skipped; audit found 53,469 upstream files, 48,214 script-host-verifiable files, and 163 unique manifest-covered files (0.30% of the suite / 0.34% of the script-host-verifiable subset) | `python scripts/compliance/audit_test262.py --suite-ref ccaac100ff49d81e9ff47a75ff4c60e0bd3f262e --suite-root <local-test262-checkout> --manifest-glob 'scripts/compliance/test262-*.txt'` plus the existing `.github/workflows/test262.yml` loop over every `scripts/compliance/test262-*.txt` manifest |
 | test262 (real subset, custom raw-script runner) | 2026-05-09 snapshot of `tc39/test262` `main` at `ccaac100ff49d81e9ff47a75ff4c60e0bd3f262e`: 126 executed / 1 skipped across `Array.isArray`, `addition`, `strict-equals`, and `RegExp.escape`; Broiler passed 75 and failed 51 while Chromium passed 126 and failed 0 | Downloaded the upstream suite outside the repo, prepended the standard harness files (`assert.js`, `sta.js`, and per-test includes), then executed the same files through the repaired Broiler CLI script host and Chromium 147.0.7727.0. |
 | test262 automated `Array.isArray` subset rerun | 2026-05-10 rerun of pinned `test/built-ins/Array/isArray`: 29 executed, Broiler passed 29 and failed 0 | `python scripts/compliance/run_test262.py --output /tmp/broiler-compliance/array-isarray-summary.json --path-file scripts/compliance/test262-array-isarray.txt` |
 | test262 automated unresolved-reference subset rerun | 2026-05-10 rerun of the unresolved-reference cases from `addition` and `strict-equals`: 6 executed, Broiler passed 6 and failed 0 | `python scripts/compliance/run_test262.py --output /tmp/broiler-compliance/unresolved-summary.json --path-file scripts/compliance/test262-unresolved-reference.txt` |
@@ -126,6 +127,13 @@ This dashboard is the public status page for Broiler.JS standards compliance. It
 - Added the pinned `scripts/compliance/test262-regexp.txt` manifest for the `RegExp.escape` public cases that match the existing local regressions.
 - Reran the pinned `RegExp.escape` subset: 7 executed, 7 passed, 0 failed.
 - The `RegExp` public-suite evidence gap is now closed in both the roadmap and the active gap checklist.
+
+## 2026-05-11 test262 coverage expansion follow-up
+
+- The previous workflow limit came from two explicit constraints: the CI job only executed the pinned `scripts/compliance/test262-*.txt` manifests, and the raw script-host runner still treated `onlyStrict` files as unsupported.
+- `scripts/compliance/run_test262.py` now executes `onlyStrict` tests by prepending a strict-mode directive before the test body, and the audit now counts those files as script-host-verifiable. The remaining raw-script exclusions are `module`, `raw`, and negative-metadata tests.
+- Expanded the manifest set from 89 unique test files to 163 by promoting the full `test/language/expressions/strict-equals` directory, adding a new `test262-language-basics.txt` manifest, and removing strict-equals duplicates from the unresolved-reference manifest.
+- Verified the new coverage directly: `test262-bigint-comparisons.txt` now runs 30/30 strict-equality files, and `test262-language-basics.txt` runs 55/55 additional language-basics files.
 
 ## Comparative engine matrix
 

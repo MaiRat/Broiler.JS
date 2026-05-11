@@ -21,7 +21,7 @@ DEFAULT_BROILER_DLL = str(
     REPO_ROOT / "Broiler.JS/Broiler.JavaScript/bin/Debug/net8.0/BroilerJS.dll"
 )
 TEMP_DIRECTORY = Path(tempfile.gettempdir()) / "broiler-test262"
-UNSUPPORTED_FLAGS = {"module", "raw", "onlyStrict"}
+UNSUPPORTED_FLAGS = {"module", "raw"}
 USER_AGENT = "Broiler.JS compliance runner"
 
 
@@ -162,6 +162,7 @@ def run_test(
             "reason": f"unsupported flags: {', '.join(unsupported)}",
         }
     is_async = "async" in metadata["flags"]
+    is_only_strict = "onlyStrict" in metadata["flags"]
 
     def harness_text(name: str) -> str:
         if name not in harness_cache:
@@ -191,6 +192,8 @@ const __broilerDonePromise = new Promise((resolve, reject) => {
 });
 """.strip()
         )
+    if is_only_strict:
+        parts.append('"use strict";')
     parts.append(body)
     if is_async:
         parts.append("__broilerDonePromise")

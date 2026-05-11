@@ -14,10 +14,13 @@ public static class LogSummaryBuilder
     private const string UnknownContext = "(unknown context)";
     // Matches common .NET and JavaScript stack frames such as:
     //   at InitializeFactories in /repo/File.cs:line 17
+    //   at MyClass.Method() in /repo/File.cs:line 17
     //   at Compile:/tmp/script.js:206,1
-    // The "method" group captures the method/function token after "at ".
+    // The "method" group captures the method/function token after "at " and trims any
+    // trailing whitespace. When parentheses are present, the captured value stops before
+    // the opening parenthesis so signatures and locations are not included in the context.
     private static readonly Regex StackFrameContextRegex = new(
-        @"^at\s+(?<method>.+?)(?:\s+in\s+|\s+\(|:|$)",
+        @"^\s*at\s+(?<method>.+?)(?:\s+in\s+|\(|:|$)",
         RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
     private static readonly JsonSerializerOptions JsonOptions = new()
@@ -301,7 +304,8 @@ public static class LogSummaryBuilder
     }
 
     /// <summary>
-    /// Extracts the method or function name from the first stack frame that follows a parsed exception line.
+    /// Extracts the method or function name from the first recognizable stack frame that follows a parsed
+    /// exception line, tolerating intervening wrapper lines until a stack frame is found.
     /// </summary>
     /// <param name="lines">All non-empty log lines from the captured output.</param>
     /// <param name="startIndex">The index immediately after the line that contained the exception header.</param>
@@ -310,7 +314,7 @@ public static class LogSummaryBuilder
     {
         for (var i = startIndex; i < lines.Count; i++)
         {
-            var match = StackFrameContextRegex.Match(lines[i].Trim());
+            var match = StackFrameContextRegex.Match(lines[i]);
             if (match.Success)
             {
                 var context = match.Groups["method"].Value.Trim();

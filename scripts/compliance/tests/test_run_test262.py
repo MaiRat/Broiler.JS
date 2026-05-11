@@ -143,7 +143,7 @@ class RunTest262Tests(unittest.TestCase):
                     {"path": first_path, "status": "passed"},
                     {"path": second_path, "status": "passed"},
                 ],
-            ),
+            ) as run_test_mock,
             redirect_stdout(stdout),
             redirect_stderr(stderr),
         ):
@@ -156,6 +156,11 @@ class RunTest262Tests(unittest.TestCase):
         self.assertEqual([first_path, second_path], summary["expandedPaths"])
         self.assertIn("Selected 2 runnable test(s) for shard all/8", stderr.getvalue())
         self.assertIn("Running 2 test(s) for shard all/8", stderr.getvalue())
+        self.assertEqual(2, run_test_mock.call_count)
+        self.assertEqual(
+            [first_path, second_path],
+            [call.args[2] for call in run_test_mock.call_args_list],
+        )
 
     def test_main_logs_major_checkpoints_to_stderr_and_preserves_json_stdout(self) -> None:
         path = self.write_test("test/language/example.js", "1 + 1;\n")

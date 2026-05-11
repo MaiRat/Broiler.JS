@@ -62,12 +62,6 @@ internal static class Program
                 continue;
             }
 
-            if (arg.StartsWith("output=", StringComparison.Ordinal))
-            {
-                outputFormat = NormalizeOutputFormat(arg["output=".Length..]);
-                continue;
-            }
-
             inputs.Add(arg);
         }
 

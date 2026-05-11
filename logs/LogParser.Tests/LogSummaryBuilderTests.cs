@@ -184,7 +184,6 @@ public class LogSummaryBuilderTests
     [InlineData(new[] { "--output", "json", "sample.json" }, "json", new[] { "sample.json" })]
     [InlineData(new[] { "--output=json", "sample.json" }, "json", new[] { "sample.json" })]
     [InlineData(new[] { "-o", "text", "sample.json" }, "text", new[] { "sample.json" })]
-    [InlineData(new[] { "output=json", "sample.json" }, "json", new[] { "sample.json" })]
     public void ParseOptions_ReadsSupportedOutputSyntaxes(string[] args, string expectedOutput, string[] expectedInputs)
     {
         var options = Program.ParseOptions(args);

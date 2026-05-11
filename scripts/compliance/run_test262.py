@@ -30,6 +30,7 @@ DOWNLOAD_TIMEOUT_SECONDS = 120
 MAX_ARCHIVE_SIZE_BYTES = 256 * 1024 * 1024
 HOST_HARNESS_INCLUDE_BLOCKERS = {"doneprintHandle.js"}
 HOST_HARNESS_REFERENCE_PATTERN = re.compile(r"\$262(?:\b|\.)")
+HOST_HARNESS_BLOCKER_NAME = "$262"
 
 
 class Test262Repository:
@@ -332,7 +333,7 @@ def classify_test(
     negative = parse_negative_metadata(source)
     host_harness_blockers: list[str] = []
     if HOST_HARNESS_REFERENCE_PATTERN.search(source):
-        host_harness_blockers.append("$262")
+        host_harness_blockers.append(HOST_HARNESS_BLOCKER_NAME)
     if repo is not None and harness_dependency_cache is not None:
         for include in metadata["includes"]:
             if include not in harness_dependency_cache:

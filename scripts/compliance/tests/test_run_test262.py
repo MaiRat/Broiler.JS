@@ -99,7 +99,7 @@ class RunTest262Tests(unittest.TestCase):
             run_test262.apply_shard(["test/language/example.js"], 0, 0)
 
         with self.assertRaises(ValueError):
-            run_test262.apply_shard(["test/language/example.js"], 1, 1)
+            run_test262.apply_shard(["test/language/example.js"], 2, 2)
 
 
 if __name__ == "__main__":

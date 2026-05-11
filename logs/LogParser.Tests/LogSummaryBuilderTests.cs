@@ -105,6 +105,45 @@ public class LogSummaryBuilderTests
         Assert.Contains("example: test/annexB/alpha.js => type=Broiler.JavaScript.Runtime.JSException, message=Cannot get property set of undefined", formatted, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void ParseAndSummarize_IgnoresExceptionTypesContainingNonSpaceWhitespace()
+    {
+        var path = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid():N}.json");
+
+        try
+        {
+            File.WriteAllText(path, """
+            {
+              "suiteRef": "fixture-tabs",
+              "broilerDll": "fixture/BroilerJS.dll",
+              "executed": 1,
+              "passed": 0,
+              "failed": 1,
+              "skipped": 0,
+              "results": [
+                {
+                  "path": "test/tabbed.js",
+                  "status": "failed",
+                  "stderr": "Unhandled exception. Invalid\tException: tabbed type\nat Demo in /repo/File.cs:line 1\n"
+                }
+              ]
+            }
+            """);
+
+            var summary = LogSummaryBuilder.ParseAndSummarize(path);
+
+            Assert.Equal(0, summary.ExceptionSummary.TotalEntriesWithExceptions);
+            Assert.Null(Assert.Single(summary.LogRun.Results).Exception);
+        }
+        finally
+        {
+            if (File.Exists(path))
+            {
+                File.Delete(path);
+            }
+        }
+    }
+
     private static string GetShardSevenPath()
     {
         return Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "shard-7.json"));

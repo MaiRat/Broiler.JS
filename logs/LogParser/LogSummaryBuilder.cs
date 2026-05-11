@@ -301,7 +301,7 @@ public static class LogSummaryBuilder
 
     private static bool LooksLikeExceptionType(string typeCandidate)
     {
-        if (string.IsNullOrWhiteSpace(typeCandidate) || typeCandidate.Contains(' ', StringComparison.Ordinal))
+        if (string.IsNullOrWhiteSpace(typeCandidate) || typeCandidate.Any(char.IsWhiteSpace))
         {
             return false;
         }

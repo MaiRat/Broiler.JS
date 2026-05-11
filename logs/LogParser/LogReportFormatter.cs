@@ -162,16 +162,16 @@ public static class LogReportFormatter
             builder.AppendLine($"        count: {group.Count}");
             builder.AppendLine($"        occurrenceRate: {group.OccurrenceRate:P1}");
             builder.AppendLine($"        distinctMessageCount: {group.DistinctMessageCount}");
-            builder.AppendLine("        examples:");
+            builder.AppendLine("        entries:");
 
-            foreach (var example in group.Examples)
+            foreach (var entry in group.Examples)
             {
                 builder.AppendLine("          -");
-                builder.AppendLine($"            path: {example.Path}");
-                builder.AppendLine($"            type: {example.Type}");
-                builder.AppendLine($"            context: {example.Context ?? "(unknown context)"}");
-                builder.AppendLine($"            message: {example.Message}");
-                builder.AppendLine($"            logLine: {example.LogLine}");
+                builder.AppendLine($"            path: {entry.Path}");
+                builder.AppendLine($"            type: {entry.Type}");
+                builder.AppendLine($"            context: {entry.Context ?? "(unknown context)"}");
+                builder.AppendLine($"            message: {entry.Message}");
+                builder.AppendLine($"            logLine: {entry.LogLine}");
             }
 
             if (group.Examples.Count == 0)
@@ -189,16 +189,16 @@ public static class LogReportFormatter
             builder.AppendLine($"        count: {group.Count}");
             builder.AppendLine($"        occurrenceRate: {group.OccurrenceRate:P1}");
             builder.AppendLine($"        distinctMessageCount: {group.DistinctMessageCount}");
-            builder.AppendLine("        examples:");
+            builder.AppendLine("        entries:");
 
-            foreach (var example in group.Examples)
+            foreach (var entry in group.Examples)
             {
                 builder.AppendLine("          -");
-                builder.AppendLine($"            path: {example.Path}");
-                builder.AppendLine($"            type: {example.Type}");
-                builder.AppendLine($"            context: {example.Context ?? "(unknown context)"}");
-                builder.AppendLine($"            message: {example.Message}");
-                builder.AppendLine($"            logLine: {example.LogLine}");
+                builder.AppendLine($"            path: {entry.Path}");
+                builder.AppendLine($"            type: {entry.Type}");
+                builder.AppendLine($"            context: {entry.Context ?? "(unknown context)"}");
+                builder.AppendLine($"            message: {entry.Message}");
+                builder.AppendLine($"            logLine: {entry.LogLine}");
             }
 
             if (group.Examples.Count == 0)
@@ -214,16 +214,16 @@ public static class LogReportFormatter
             builder.AppendLine($"        message: {group.Message}");
             builder.AppendLine($"        count: {group.Count}");
             builder.AppendLine($"        occurrenceRate: {group.OccurrenceRate:P1}");
-            builder.AppendLine("        examples:");
+            builder.AppendLine("        entries:");
 
-            foreach (var example in group.Examples)
+            foreach (var entry in group.Examples)
             {
                 builder.AppendLine("          -");
-                builder.AppendLine($"            path: {example.Path}");
-                builder.AppendLine($"            type: {example.Type}");
-                builder.AppendLine($"            context: {example.Context ?? "(unknown context)"}");
-                builder.AppendLine($"            message: {example.Message}");
-                builder.AppendLine($"            logLine: {example.LogLine}");
+                builder.AppendLine($"            path: {entry.Path}");
+                builder.AppendLine($"            type: {entry.Type}");
+                builder.AppendLine($"            context: {entry.Context ?? "(unknown context)"}");
+                builder.AppendLine($"            message: {entry.Message}");
+                builder.AppendLine($"            logLine: {entry.LogLine}");
             }
 
             if (group.Examples.Count == 0)

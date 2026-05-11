@@ -135,7 +135,17 @@ public static class LogSummaryBuilder
         var allEntries = entries.ToArray();
         var exceptionEntries = allEntries
             .Where(entry => entry.Exception is not null)
-            .Select(entry => (Entry: entry, Exception: entry.Exception!))
+            .Select(entry => (
+                Entry: entry,
+                Exception: entry.Exception!,
+                Example: new ExceptionExample
+                {
+                    Path = entry.Path ?? string.Empty,
+                    Type = entry.Exception!.Type,
+                    Message = entry.Exception.Message,
+                    Context = entry.Exception.Context,
+                    LogLine = entry.Exception.LogLine
+                }))
             .ToArray();
 
         var totalEntryCount = allEntries.Length;
@@ -259,26 +269,18 @@ public static class LogSummaryBuilder
     }
 
     private static IReadOnlyList<ExceptionExample> SelectExceptionExamples(
-        IEnumerable<(LogEntry Entry, ParsedException Exception)> entries,
+        IEnumerable<(LogEntry Entry, ParsedException Exception, ExceptionExample Example)> entries,
         int exampleLimit)
     {
         return entries
             .OrderBy(item => item.Entry.Path, StringComparer.OrdinalIgnoreCase)
             .ThenBy(item => item.Exception.Message, StringComparer.OrdinalIgnoreCase)
-            .Take(Math.Max(0, exampleLimit))
-                .Select(item => new ExceptionExample
-                {
-                    Path = item.Entry.Path ?? string.Empty,
-                    Type = item.Exception.Type,
-                    Message = item.Exception.Message,
-                    Context = item.Exception.Context,
-                    LogLine = item.Exception.LogLine
-                })
+            .Select(item => item.Example)
             .ToArray();
     }
 
     private static IReadOnlyList<string> BuildSuggestedPatterns(
-        IEnumerable<(LogEntry Entry, ParsedException Exception)> exceptionEntries,
+        IEnumerable<(LogEntry Entry, ParsedException Exception, ExceptionExample Example)> exceptionEntries,
         int totalExceptionCount)
     {
         if (totalExceptionCount == 0)

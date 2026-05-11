@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.RegularExpressions;
 
 namespace LogParser;
 
@@ -10,6 +11,17 @@ public static class LogSummaryBuilder
     private const string UnknownStatus = "unknown";
     private const string AllPathsBucket = "(all paths)";
     private const string UnhandledExceptionPrefix = "Unhandled exception. ";
+    private const string UnknownContext = "(unknown context)";
+    // Matches common .NET and JavaScript stack frames such as:
+    //   at InitializeFactories in /repo/File.cs:line 17
+    //   at MyClass.Method() in /repo/File.cs:line 17
+    //   at Compile:/tmp/script.js:206,1
+    // The "method" group captures the method/function token after "at " and trims any
+    // trailing whitespace. When parentheses are present, the captured value stops before
+    // the opening parenthesis so signatures and locations are not included in the context.
+    private static readonly Regex StackFrameContextRegex = new(
+        @"^\s*at\s+(?<method>.+?)(?:\s+in\s+|\(|:|$)",
+        RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
@@ -98,6 +110,26 @@ public static class LogSummaryBuilder
                 .OrderByDescending(group => group.Count)
                 .ThenBy(group => group.Type, StringComparer.OrdinalIgnoreCase)
                 .ToArray(),
+            ContextGroups = exceptionEntries
+                .GroupBy(item => item.Exception.Type, StringComparer.OrdinalIgnoreCase)
+                .SelectMany(typeGroup => typeGroup
+                    .GroupBy(item => item.Exception.Context ?? UnknownContext, StringComparer.OrdinalIgnoreCase)
+                    .Select(group => new ExceptionContextSummary
+                    {
+                        Type = typeGroup.Key,
+                        Context = group.Key,
+                        Count = group.Count(),
+                        OccurrenceRate = totalEntryCount == 0 ? 0 : group.Count() / (double)totalEntryCount,
+                        DistinctMessageCount = group
+                            .Select(item => item.Exception.Message)
+                            .Distinct(StringComparer.OrdinalIgnoreCase)
+                            .Count(),
+                        Examples = SelectExceptionExamples(group, exampleLimit)
+                    }))
+                .OrderByDescending(group => group.Count)
+                .ThenBy(group => group.Type, StringComparer.OrdinalIgnoreCase)
+                .ThenBy(group => group.Context, StringComparer.OrdinalIgnoreCase)
+                .ToArray(),
             MessageGroups = exceptionEntries
                 .GroupBy(item => item.Exception.Message, StringComparer.OrdinalIgnoreCase)
                 .Select(group => new ExceptionMessageSummary
@@ -183,13 +215,14 @@ public static class LogSummaryBuilder
             .OrderBy(item => item.Entry.Path, StringComparer.OrdinalIgnoreCase)
             .ThenBy(item => item.Exception.Message, StringComparer.OrdinalIgnoreCase)
             .Take(Math.Max(0, exampleLimit))
-            .Select(item => new ExceptionExample
-            {
-                Path = item.Entry.Path ?? string.Empty,
-                Type = item.Exception.Type,
-                Message = item.Exception.Message,
-                LogLine = item.Exception.LogLine
-            })
+                .Select(item => new ExceptionExample
+                {
+                    Path = item.Entry.Path ?? string.Empty,
+                    Type = item.Exception.Type,
+                    Message = item.Exception.Message,
+                    Context = item.Exception.Context,
+                    LogLine = item.Exception.LogLine
+                })
             .ToArray();
     }
 
@@ -249,7 +282,9 @@ public static class LogSummaryBuilder
             return null;
         }
 
-        foreach (var line in output.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        var lines = output.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        var lineIndex = 0;
+        foreach (var line in lines)
         {
             if (TryParseExceptionLine(line, out var exceptionType, out var exceptionMessage))
             {
@@ -257,8 +292,36 @@ public static class LogSummaryBuilder
                 {
                     Type = exceptionType,
                     Message = exceptionMessage,
+                    Context = TryParseExceptionContext(lines, lineIndex + 1),
                     LogLine = line
                 };
+            }
+
+            lineIndex++;
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Extracts the method or function name from the first recognizable stack frame that follows a parsed
+    /// exception line, tolerating intervening wrapper lines until a stack frame is found.
+    /// </summary>
+    /// <param name="lines">All non-empty log lines from the captured output.</param>
+    /// <param name="startIndex">The index immediately after the line that contained the exception header.</param>
+    /// <returns>The parsed method or function name, or <see langword="null"/> when no stack frame context is present.</returns>
+    private static string? TryParseExceptionContext(IReadOnlyList<string> lines, int startIndex)
+    {
+        for (var i = startIndex; i < lines.Count; i++)
+        {
+            var match = StackFrameContextRegex.Match(lines[i]);
+            if (match.Success)
+            {
+                var context = match.Groups["method"].Value.Trim();
+                if (!string.IsNullOrWhiteSpace(context))
+                {
+                    return context;
+                }
             }
         }
 

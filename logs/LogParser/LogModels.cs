@@ -31,12 +31,13 @@ public sealed class LogEntry
 }
 
 /// <summary>
-/// Structured exception details extracted from a log line.
+/// Structured exception details extracted from a log line and its stack trace context.
 /// </summary>
 public sealed class ParsedException
 {
     public required string Type { get; init; }
     public required string Message { get; init; }
+    public string? Context { get; init; }
     public required string LogLine { get; init; }
 }
 
@@ -89,6 +90,7 @@ public sealed class ExceptionAnalysisSummary
     public required int TotalEntriesWithExceptions { get; init; }
     public required double OccurrenceRate { get; init; }
     public required IReadOnlyList<ExceptionTypeSummary> TypeGroups { get; init; }
+    public required IReadOnlyList<ExceptionContextSummary> ContextGroups { get; init; }
     public required IReadOnlyList<ExceptionMessageSummary> MessageGroups { get; init; }
     public required IReadOnlyList<string> SuggestedPatterns { get; init; }
 }
@@ -99,6 +101,19 @@ public sealed class ExceptionAnalysisSummary
 public sealed class ExceptionTypeSummary
 {
     public required string Type { get; init; }
+    public required int Count { get; init; }
+    public required double OccurrenceRate { get; init; }
+    public required int DistinctMessageCount { get; init; }
+    public required IReadOnlyList<ExceptionExample> Examples { get; init; }
+}
+
+/// <summary>
+/// Aggregated statistics for a specific exception type within a parsed method or function context.
+/// </summary>
+public sealed class ExceptionContextSummary
+{
+    public required string Type { get; init; }
+    public required string Context { get; init; }
     public required int Count { get; init; }
     public required double OccurrenceRate { get; init; }
     public required int DistinctMessageCount { get; init; }
@@ -124,5 +139,6 @@ public sealed class ExceptionExample
     public required string Path { get; init; }
     public required string Type { get; init; }
     public required string Message { get; init; }
+    public string? Context { get; init; }
     public required string LogLine { get; init; }
 }

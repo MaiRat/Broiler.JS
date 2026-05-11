@@ -35,6 +35,10 @@ class AuditTest262Tests(unittest.TestCase):
             "test/language/async.js",
             "/*---\nflags: [async]\n---*/\n$DONE();\n",
         )
+        only_strict_path = self.write_test(
+            "test/language/only-strict.js",
+            "/*---\nflags: [onlyStrict]\n---*/\nthis;\n",
+        )
         self.write_test(
             "test/language/no-strict.js",
             "/*---\nflags: [noStrict]\n---*/\nthis;\n",
@@ -53,21 +57,21 @@ class AuditTest262Tests(unittest.TestCase):
             repo,
             self.suite_root,
             "suite-ref",
-            [positive_path, async_path],
+            [positive_path, async_path, only_strict_path],
             [],
         )
 
-        self.assertEqual(5, summary["suiteTestsDiscovered"])
+        self.assertEqual(6, summary["suiteTestsDiscovered"])
         self.assertEqual(1, summary["unsupportedFlaggedTests"])
         self.assertEqual({"module": 1}, summary["unsupportedFlagCounts"])
         self.assertEqual(1, summary["negativeTests"])
-        self.assertEqual(3, summary["scriptHostVerifiableTests"])
+        self.assertEqual(4, summary["scriptHostVerifiableTests"])
         self.assertEqual(1, summary["asyncScriptHostVerifiableTests"])
-        self.assertEqual(2, summary["manifestEntries"])
-        self.assertEqual(2, summary["manifestUniqueTests"])
-        self.assertEqual(2, summary["manifestScriptHostVerifiableTests"])
-        self.assertEqual(40.0, summary["manifestCoverageOfSuitePercent"])
-        expected_script_host_coverage = 2 * 100.0 / 3
+        self.assertEqual(3, summary["manifestEntries"])
+        self.assertEqual(3, summary["manifestUniqueTests"])
+        self.assertEqual(3, summary["manifestScriptHostVerifiableTests"])
+        self.assertEqual(50.0, summary["manifestCoverageOfSuitePercent"])
+        expected_script_host_coverage = 3 * 100.0 / 4
         self.assertAlmostEqual(
             expected_script_host_coverage,
             summary["manifestCoverageOfScriptHostVerifiablePercent"],

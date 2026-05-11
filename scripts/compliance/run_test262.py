@@ -349,7 +349,7 @@ def classify_test(
         "flags": flags,
         "unsupportedFlags": unsupported_flags,
         "negative": negative,
-        "hostHarnessBlockers": sorted(dict.fromkeys(host_harness_blockers)),
+        "hostHarnessBlockers": sorted(set(host_harness_blockers)),
         "isScriptHostVerifiable": (
             not unsupported_flags
             and negative is None

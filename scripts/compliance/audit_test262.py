@@ -11,6 +11,8 @@ from pathlib import Path
 
 from run_test262 import DEFAULT_SUITE_REF, Test262Repository, UNSUPPORTED_FLAGS, parse_metadata
 
+MAX_LARGEST_UNCOVERED_BUCKETS = 10
+
 
 def load_manifest_paths(manifests: list[str], manifest_globs: list[str]) -> tuple[list[str], list[str]]:
     manifest_files = [Path(path).resolve() for path in manifests]
@@ -183,7 +185,7 @@ def build_audit_summary(
         "largestUncoveredScriptHostVerifiableBuckets": summarize_buckets(
             uncovered_script_host_verifiable_paths,
             depth=3,
-            limit=10,
+            limit=MAX_LARGEST_UNCOVERED_BUCKETS,
         ),
         "manifestCoverageOfSuitePercent": (
             manifest_unique_tests * 100.0 / suite_tests_discovered if suite_tests_discovered else 0.0

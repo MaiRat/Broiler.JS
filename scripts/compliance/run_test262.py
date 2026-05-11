@@ -7,6 +7,7 @@ import json
 import os
 import re
 import shutil
+import socket
 import subprocess
 import sys
 import tarfile
@@ -82,7 +83,15 @@ class Test262Repository:
                                     "test262 archive exceeded the maximum cached size"
                                 )
                             handle.write(chunk)
+            except TimeoutError as exc:
+                raise RuntimeError(
+                    f"Timed out downloading pinned test262 archive from {url}"
+                ) from exc
             except urllib.error.URLError as exc:
+                if isinstance(exc.reason, socket.timeout):
+                    raise RuntimeError(
+                        f"Timed out downloading pinned test262 archive from {url}"
+                    ) from exc
                 raise RuntimeError(
                     f"Failed to download pinned test262 archive from {url}"
                 ) from exc

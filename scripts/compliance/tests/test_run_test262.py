@@ -11,6 +11,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import run_test262
 
+TEST_SUITE_REF = "test-suite-ref"
+TEST_ENGINE_PATH = "BroilerJS.test.dll"
+
 
 class RunTest262Tests(unittest.TestCase):
     def setUp(self) -> None:
@@ -39,7 +42,7 @@ class RunTest262Tests(unittest.TestCase):
             "test/language/only-strict.js",
             '/*---\nflags: [onlyStrict]\n---*/\nthis;\n',
         )
-        repo = run_test262.Test262Repository("suite-ref", str(self.suite_root))
+        repo = run_test262.Test262Repository(TEST_SUITE_REF, str(self.suite_root))
         captured_script = {}
 
         def fake_run(args: list[str], capture_output: bool, text: bool, check: bool):
@@ -48,7 +51,7 @@ class RunTest262Tests(unittest.TestCase):
             return subprocess.CompletedProcess(args, 0, "", "")
 
         with mock.patch.object(run_test262.subprocess, "run", side_effect=fake_run):
-            result = run_test262.run_test(repo, "BroilerJS.dll", path, {})
+            result = run_test262.run_test(repo, TEST_ENGINE_PATH, path, {})
 
         self.assertEqual({"path": path, "status": "passed"}, result)
         self.assertIn('"use strict";\n\nthis;\n', captured_script["contents"])

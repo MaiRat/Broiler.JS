@@ -154,6 +154,8 @@ public class JSException : Exception
 
     private static bool TryGetJSException(Exception exception, out JSException jsException)
     {
+        jsException = null;
+
         switch (exception)
         {
             case JSException direct:

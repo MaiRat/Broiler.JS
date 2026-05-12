@@ -101,4 +101,26 @@ public class RuntimeTests
         // Setter is not a function, so SetValue should return false
         Assert.False(result);
     }
+
+    [Fact]
+    public void JSException_From_RegularException_CreatesNewJSException()
+    {
+        var exception = new InvalidOperationException("boom");
+
+        var jsException = JSException.From(exception);
+
+        Assert.NotNull(jsException);
+        Assert.Contains("boom", jsException.Message);
+    }
+
+    [Fact]
+    public void JSException_From_AggregateException_ReturnsNestedJSException()
+    {
+        var expected = new JSException(new JSString("boom"));
+        var exception = new AggregateException(new InvalidOperationException("ignore"), expected);
+
+        var actual = JSException.From(exception);
+
+        Assert.Same(expected, actual);
+    }
 }

@@ -129,8 +129,11 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p "$RESULTS_DIR"
-          output_path="$RESULTS_DIR/shard-${{ matrix.shard-index }}.json"
+          shard_dir="$RESULTS_DIR/shard-${{ matrix.shard-index }}"
+          mkdir -p "$shard_dir"
+          output_path="$shard_dir/result.json"
+          log_path="$shard_dir/runner.log"
+          set +e
           python scripts/compliance/run_test262.py \
             --suite-ref "$TEST262_REF" \
             --suite-root "$TEST262_ROOT" \
@@ -140,7 +143,10 @@ jobs:
             --shard-index "${{ matrix.shard-index }}" \
             --test-timeout-seconds "$TEST_TIMEOUT_SECONDS" \
             --memory-limit-mb "$MEMORY_LIMIT_MB" \
-            --output "$output_path"
+            --output "$output_path" 2>&1 | tee "$log_path"
+          status=${PIPESTATUS[0]}
+          printf '%s\n' "$status" > "$shard_dir/exit-code.txt"
+          exit "$status"
 
       - name: Publish shard summary
         if: always()
@@ -152,7 +158,26 @@ jobs:
           from pathlib import Path
 
           shard_index = "${{ matrix.shard-index }}"
-          result_path = Path(os.environ["RESULTS_DIR"]) / f"shard-{shard_index}.json"
+          shard_dir = Path(os.environ["RESULTS_DIR"]) / f"shard-{shard_index}"
+          result_path = shard_dir / "result.json"
+
+          if not result_path.exists():
+              exit_code_path = shard_dir / "exit-code.txt"
+              exit_code = exit_code_path.read_text(encoding="utf-8").strip() if exit_code_path.exists() else "unknown"
+              Path(os.environ["GITHUB_STEP_SUMMARY"]).write_text(
+                  "\n".join(
+                      [
+                          f"## test262 full script-host shard {int(shard_index) + 1}/{os.environ['SHARD_COUNT']}",
+                          "",
+                          "- Runner did not produce a JSON summary.",
+                          f"- Exit code: {exit_code}",
+                          f"- Captured log: `shard-{shard_index}/runner.log`",
+                      ]
+                  ) + "\n",
+                  encoding="utf-8",
+              )
+              raise SystemExit(0)
+
           summary = json.loads(result_path.read_text(encoding="utf-8"))
 
           lines = [
@@ -181,9 +206,22 @@ jobs:
           )
           PY
 
-      - name: Upload shard result
+      - name: Upload shard logs
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: test262-full-script-host-shard-${{ matrix.shard-index }}
-          path: ${{ env.RESULTS_DIR }}/shard-${{ matrix.shard-index }}.json
+          path: ${{ env.RESULTS_DIR }}/shard-${{ matrix.shard-index }}
+
+  combine-logs:
+    needs: run
+    if: always() && needs.run.result != 'skipped'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Merge shard logs into one artifact
+        uses: actions/upload-artifact/merge@v4
+        with:
+          name: test262-full-script-host-logs
+          pattern: test262-full-script-host-shard-*
+          separate-directories: true
+          delete-merged: true

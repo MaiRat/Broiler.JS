@@ -106,7 +106,7 @@ public partial class JSBoolean : JSPrimitive
 
     public override bool StrictEquals(JSValue value) => ReferenceEquals(this, value);
 
-    public override JSValue InvokeFunction(in Arguments a) => throw new NotImplementedException("boolean is not a function");
+    public override JSValue InvokeFunction(in Arguments a) => throw JSEngine.NewTypeError("boolean is not a function");
 
     internal override PropertyKey ToKey(bool create = false) => _value ? KeyStrings.@true : KeyStrings.@false;
 }

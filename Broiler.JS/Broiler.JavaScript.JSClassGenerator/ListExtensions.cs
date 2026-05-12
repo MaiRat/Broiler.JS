@@ -29,12 +29,12 @@ internal static class ListExtensions
                 return $"(JSNumber)JSValueToClrConverter.ToJSNumber({name}, \"{parameter}\")";
             case "JSObject":
             case "Broiler.JavaScript.Core.JSObject":
-                return $"{name} is JSObject obj{parameter} ? obj{parameter} : throw new JSException(\"{parameter} is not an object\")";
+                return $"{name} is JSObject obj{parameter} ? obj{parameter} : JSException.ThrowTypeError<JSObject>(\"{parameter} is not an object\")";
             case "JSFunction":
             case "Broiler.JavaScript.Core.JSFunction":
             case "JSFunction?":
             case "Broiler.JavaScript.Core.JSFunction?":
-                return $"{name} is JSFunction obj{parameter} ? obj{parameter} : throw new JSException(\"{parameter} is not a function\")";
+                return $"{name} is JSFunction obj{parameter} ? obj{parameter} : JSException.ThrowTypeError<JSFunction>(\"{parameter} is not a function\")";
             case "Int32":
             case "int":
                 return $"JSValueToClrConverter.ToInt({name}, \"{parameter}\")";

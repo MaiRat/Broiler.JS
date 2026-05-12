@@ -10,6 +10,7 @@ using System.CodeDom.Compiler;
 using System.IO;
 using System.Runtime.CompilerServices;
 using Broiler.JavaScript.BuiltIns.Number;
+using Broiler.JavaScript.BuiltIns.BigInt;
 using Broiler.JavaScript.Runtime;
 using Broiler.JavaScript.BuiltIns.Function;
 
@@ -167,6 +168,9 @@ public partial class JSJSON : JSObject
             case JSString str:
                 QuoteString(str.value, sb);
                 return;
+
+            case JSBigInt:
+                throw JSEngine.NewTypeError("Do not know how to serialize a BigInt");
 
             case JSFunction _:
                 return;

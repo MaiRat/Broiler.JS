@@ -42,6 +42,39 @@ public class BuiltInsTests
     }
 
     [Fact]
+    public void Function_Prototype_Apply_With_Primitive_Receiver_Throws_TypeError()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = new JSContext();
+
+        var ex = Assert.Throws<JSException>(() => ctx.Eval("Function.prototype.apply.call(true, null, []);"));
+
+        Assert.Equal("TypeError", ex.Error[KeyStrings.constructor][KeyStrings.name].ToString());
+    }
+
+    [Fact]
+    public void Function_Prototype_Bind_With_NonCallable_Receiver_Throws_TypeError()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = new JSContext();
+
+        var ex = Assert.Throws<JSException>(() => ctx.Eval("Function.prototype.bind.call({}, null);"));
+
+        Assert.Equal("TypeError", ex.Error[KeyStrings.constructor][KeyStrings.name].ToString());
+    }
+
+    [Fact]
+    public void JSON_Stringify_BigInt_Throws_TypeError()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = new JSContext();
+
+        var ex = Assert.Throws<JSException>(() => ctx.Eval("JSON.stringify(1n);"));
+
+        Assert.Equal("TypeError", ex.Error[KeyStrings.constructor][KeyStrings.name].ToString());
+    }
+
+    [Fact]
     public void WeakRef_TypeOf_IsObject()
     {
         EnsureBuiltInsLoaded();

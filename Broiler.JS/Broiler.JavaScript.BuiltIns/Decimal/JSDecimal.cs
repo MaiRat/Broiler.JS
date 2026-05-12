@@ -75,7 +75,7 @@ public partial class JSDecimal : JSPrimitive
 
     public override string ToString() => value.ToString() + "n";
 
-    public override JSValue InvokeFunction(in Arguments a) => throw new NotImplementedException();
+    public override JSValue InvokeFunction(in Arguments a) => throw JSEngine.NewTypeError($"{this} is not a function");
 
     public override JSValue CreateInstance(in Arguments a)
     {

@@ -207,7 +207,7 @@ public partial class JSBigInt : JSPrimitive
 
     public override string ToDetailString() => value.ToString() + "n";
 
-    public override JSValue InvokeFunction(in Arguments a) => throw new NotImplementedException();
+    public override JSValue InvokeFunction(in Arguments a) => throw JSEngine.NewTypeError($"{this} is not a function");
 
     public override JSValue CreateInstance(in Arguments a)
     {

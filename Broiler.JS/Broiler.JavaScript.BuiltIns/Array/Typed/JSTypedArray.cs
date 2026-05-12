@@ -101,7 +101,7 @@ public partial class JSTypedArray: JSObject
         var copyByIndex = false;
         if (length == -1
             && source is JSObject arrayLike
-            && (JSValue.SymbolIterator == null || source.PropertyOrUndefined(JSValue.SymbolIterator).IsUndefined))
+            && IsNonIterableArrayLike(source))
         {
             length = arrayLike.Length;
             copyByIndex = length >= 0;
@@ -230,6 +230,9 @@ public partial class JSTypedArray: JSObject
     public override IElementEnumerator GetAllKeys(bool showEnumerableOnly = true, bool inherited = true) => new IntKeyEnumerator(length);
 
     internal JSGenerator GetKeys() => new(new IntKeyEnumerator(length), "Array Iterator");
+
+    private static bool IsNonIterableArrayLike(JSValue source) =>
+        JSValue.SymbolIterator == null || source.PropertyOrUndefined(JSValue.SymbolIterator).IsUndefined;
 
     struct ElementEnumerator(JSTypedArray typedArray, int startIndex = 0) : IElementEnumerator
     {

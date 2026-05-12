@@ -264,8 +264,9 @@ public partial class JSFunction : JSObject, IPropertyAccessor, IJSFunction
     [JSExport("bind", Length = 1)]
     public static JSValue Bind(in Arguments a)
     {
-        var fOriginal = a.This as JSFunction;
-        var original = a;
+        if (a.This is not JSFunction fOriginal)
+            throw JSEngine.NewTypeError($"{a.This} is not a function");
+
         var copy = a;
         var fx = new JSFunction((in Arguments a2) => { return fOriginal.InvokeFunction(copy.CopyForBind(a2)); })
         {

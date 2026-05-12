@@ -120,6 +120,12 @@ public class JSException : Exception
         throw (NewSyntaxErrorFactory ?? throw new InvalidOperationException("JSException.NewSyntaxErrorFactory delegate is not initialized. Ensure the Core assembly module initializer has run."))
             (value);
 
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static T ThrowTypeError<T>(string value) =>
+        throw (NewTypeErrorFactory ?? throw new InvalidOperationException("JSException.NewTypeErrorFactory delegate is not initialized. Ensure the Core assembly module initializer has run."))
+            (value);
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static JSValue ThrowNotFunction(JSValue value) =>
         throw (NewTypeErrorFactory ?? throw new InvalidOperationException("JSException.NewTypeErrorFactory delegate is not initialized. Ensure the Core assembly module initializer has run."))

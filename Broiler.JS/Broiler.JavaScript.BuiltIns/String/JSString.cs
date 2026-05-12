@@ -277,7 +277,7 @@ public partial class JSString : JSPrimitive
         return false;
     }
 
-    public override JSValue InvokeFunction(in Arguments a) => throw new NotImplementedException($"\"{value}\" is not a function");
+    public override JSValue InvokeFunction(in Arguments a) => throw JSEngine.NewTypeError($"\"{value}\" is not a function");
 
     internal override JSValue Is(JSValue value)
     {

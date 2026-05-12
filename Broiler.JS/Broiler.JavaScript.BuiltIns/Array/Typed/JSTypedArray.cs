@@ -98,6 +98,15 @@ public partial class JSTypedArray: JSObject
                 length = typed.Length;
                 break;
         }
+        var copyByIndex = false;
+        if (length == -1
+            && source is JSObject arrayLike
+            && (JSValue.SymbolIterator == null || source.PropertyOrUndefined(JSValue.SymbolIterator).IsUndefined))
+        {
+            length = arrayLike.Length;
+            copyByIndex = length >= 0;
+        }
+
         IElementEnumerator en2;
         /*
          * If length is unknown, create a List and get its count
@@ -109,7 +118,8 @@ public partial class JSTypedArray: JSObject
             var elements = new List<JSValue>();
             while (en.MoveNext(out var hasValue, out var item, out var index))
             {
-                elements.Add(item);
+                if (hasValue)
+                    elements.Add(item);
             }
             length = elements.Count;
             en2 = new ListElementEnumerator(elements.GetEnumerator());
@@ -121,14 +131,30 @@ public partial class JSTypedArray: JSObject
 
         buffer = new JSArrayBuffer(length * bytesPerElement);
 
-        if (p.map == null || p.map.IsUndefined)
+        if (copyByIndex)
+        {
+            for (uint i = 0; i < length; i++)
+            {
+                var item = source[i];
+                if (p.map == null || p.map.IsUndefined)
+                {
+                    this[i] = item;
+                }
+                else
+                {
+                    this[i] = p.map.Call(p.thisArg, item, new JSNumber(i));
+                }
+            }
+        }
+        else if (p.map == null || p.map.IsUndefined)
         {
             uint i = 0;
             while (en2.MoveNext(out var item))
             {
                 this[i++] = item;
             }
-        } else
+        }
+        else
         {
             uint i = 0;
             while (en2.MoveNext(out var item))

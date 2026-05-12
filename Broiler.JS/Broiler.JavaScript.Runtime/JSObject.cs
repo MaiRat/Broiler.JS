@@ -143,6 +143,10 @@ public partial class JSObject : JSValue
 
                 return v.DoubleValue;
             }
+            catch (JSException)
+            {
+                throw;
+            }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine(ex);
@@ -170,6 +174,10 @@ public partial class JSObject : JSValue
                 }
 
                 return -1;
+            }
+            catch (JSException)
+            {
+                throw;
             }
             catch (Exception ex)
             {

@@ -807,6 +807,48 @@ public class BuiltInsTests
         Assert.Equal("1|1", result.ToString());
     }
 
+    [Fact]
+    public void TypedArray_Includes_Propagates_FromIndex_ValueOf_Exception()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = new JSContext();
+        var result = ctx.Eval(@"
+            var thrown = new Error('boom');
+            try {
+                new Float64Array([1]).includes(1, {
+                    valueOf() {
+                        throw thrown;
+                    }
+                });
+                false;
+            } catch (e) {
+                e === thrown;
+            }
+        ");
+        Assert.True(result.BooleanValue);
+    }
+
+    [Fact]
+    public void TypedArray_From_Propagates_Source_Length_Exception()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = new JSContext();
+        var result = ctx.Eval(@"
+            var thrown = new Error('boom');
+            try {
+                Float64Array.from({
+                    get length() {
+                        throw thrown;
+                    }
+                });
+                false;
+            } catch (e) {
+                e === thrown;
+            }
+        ");
+        Assert.True(result.BooleanValue);
+    }
+
     // ── M2: ArrayBuffer transfer tests ───────────────────────────────
 
     [Fact]

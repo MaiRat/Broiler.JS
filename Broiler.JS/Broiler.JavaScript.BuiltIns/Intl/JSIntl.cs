@@ -97,7 +97,7 @@ public static class JSIntl
         {
             constructor.prototype.FastAddProperty(FormatKey,
                 new JSFunction(static (in Arguments _) =>
-                    new JSFunction(static (in Arguments inner) => inner[0] ?? JSUndefined.Value, "format", "function format() { [native code] }", createPrototype: false, length: 1),
+                    new JSFunction(static (in Arguments inner) => JSValue.CreateString((inner[0] ?? JSUndefined.Value).ToString()), "format", "function format() { [native code] }", createPrototype: false, length: 1),
                     "get format",
                     "function get format() { [native code] }",
                     createPrototype: false,

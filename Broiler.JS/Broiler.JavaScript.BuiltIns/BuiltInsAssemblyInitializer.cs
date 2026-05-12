@@ -628,14 +628,24 @@ internal static class BuiltInsAssemblyInitializer
         EnsureAccessorProperty(typedArrayCtor, JSSymbol.species, "[Symbol.species]", static (in Arguments a) => a.This);
         EnsureAccessorProperty(typedArrayCtor.prototype, JSSymbol.toStringTag, "[Symbol.toStringTag]", static (in Arguments a) =>
         {
-            if (a.This is not JSTypedArray)
-                return JSUndefined.Value;
-
-            var constructor = a.This[KeyStrings.constructor];
-            var name = constructor[KeyStrings.name];
-            return name.IsUndefined ? JSUndefined.Value : name;
+            return GetTypedArrayTag(a.This);
         });
     }
+
+    private static JSValue GetTypedArrayTag(JSValue value) => value switch
+    {
+        JSInt8Array => JSValue.CreateString("Int8Array"),
+        JSUInt8Array => JSValue.CreateString("Uint8Array"),
+        JSUint8ClampedArray => JSValue.CreateString("Uint8ClampedArray"),
+        JSInt16Array => JSValue.CreateString("Int16Array"),
+        JSUInt16Array => JSValue.CreateString("Uint16Array"),
+        JSInt32Array => JSValue.CreateString("Int32Array"),
+        JSUInt32Array => JSValue.CreateString("Uint32Array"),
+        JSFloat16Array => JSValue.CreateString("Float16Array"),
+        JSFloat32Array => JSValue.CreateString("Float32Array"),
+        JSFloat64Array => JSValue.CreateString("Float64Array"),
+        _ => JSUndefined.Value
+    };
 
     private static void PatchAsyncIteratorPrototype(JSContext context)
     {

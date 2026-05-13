@@ -126,7 +126,13 @@ public partial class JSObject
 
     [JSPrototypeMethod]
     [JSExport("valueOf")]
-    public static JSValue ValueOf(in Arguments a) => a.This;
+    public static JSValue ValueOf(in Arguments a)
+    {
+        if (a.This.IsNullOrUndefined)
+            throw NewTypeError(Cannot_convert_undefined_or_null_to_object);
+
+        return a.This is JSObject ? a.This : CreatePrimitiveObject(a.This);
+    }
 
     [JSPrototypeMethod][JSExport("isPrototypeOf")]
     internal static JSValue IsPrototypeOf(in Arguments a)

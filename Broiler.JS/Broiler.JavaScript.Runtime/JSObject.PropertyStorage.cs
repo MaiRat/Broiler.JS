@@ -649,6 +649,15 @@ public partial class JSObject
         return new ElementEnumerator(this);
     }
 
+    public override IElementEnumerator GetIterableEnumerator()
+    {
+        var iterator = this[JSValue.SymbolIterator];
+        if (iterator.IsUndefined)
+            throw NewTypeError(NotIterable(this));
+
+        return new JSIterator(iterator.InvokeFunction(new Arguments(this)));
+    }
+
     public override IElementEnumerator GetAsyncElementEnumerator()
     {
         if (JSValue.SymbolAsyncIterator != null
@@ -659,6 +668,18 @@ public partial class JSObject
         }
 
         return GetElementEnumerator();
+    }
+
+    public override IElementEnumerator GetAsyncIterableEnumerator()
+    {
+        if (JSValue.SymbolAsyncIterator != null)
+        {
+            var asyncIterator = this[JSValue.SymbolAsyncIterator];
+            if (!asyncIterator.IsUndefined)
+                return new JSIterator(asyncIterator.InvokeFunction(new Arguments(this)));
+        }
+
+        return GetIterableEnumerator();
     }
 
     private readonly struct ElementEnumerator(JSObject @object) : IElementEnumerator

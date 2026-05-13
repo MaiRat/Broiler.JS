@@ -239,6 +239,9 @@ public partial class ClrProxy : JSObject
         throw JSEngine.NewTypeError($"{this} is not an iterable");
     }
 
+    public override IElementEnumerator GetIterableEnumerator() => GetElementEnumerator();
+    public override IElementEnumerator GetAsyncIterableEnumerator() => GetIterableEnumerator();
+
     public static ClrProxy From(int value) => new(value);
     public static ClrProxy From(string value) => new(value);
     public static ClrProxy From(bool value) => new(value);

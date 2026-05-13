@@ -3426,6 +3426,72 @@ public class BuiltInsTests
         Assert.Equal("true|true", ctx.Eval("var result = iterThrow.next(); String(result.done) + '|' + String(result.value === undefined);").ToString());
     }
 
+    [Fact]
+    public void Iterable_And_Object_TypeError_Regressions_Match_Test262_Expectations()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = new JSContext();
+
+        var result = ctx.Eval(@"(function () {
+            function thrownCtor(fn) {
+                try {
+                    fn();
+                    return 'no-throw';
+                } catch (e) {
+                    return e.constructor.name;
+                }
+            }
+
+            function* delegated() {
+                yield* true;
+            }
+
+            return [
+                thrownCtor(function () { Object.prototype.valueOf.call(null); }),
+                Object.getPrototypeOf(Object.create(null)) === null ? 'null' : 'non-null',
+                thrownCtor(function () { delegated().next(); }),
+                thrownCtor(function () { for (var value of true) { return value; } }),
+                thrownCtor(function () { [...true]; })
+            ].join('|');
+        })();");
+
+        Assert.Equal("TypeError|null|TypeError|TypeError|TypeError", result.ToString());
+    }
+
+    [Fact]
+    public void Map_Constructor_Uses_Iterable_Protocol_And_Rejects_Invalid_Entries()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = new JSContext();
+
+        var result = ctx.Eval(@"(function () {
+            function thrownCtor(fn) {
+                try {
+                    fn();
+                    return 'no-throw';
+                } catch (e) {
+                    return e.constructor.name;
+                }
+            }
+
+            return [
+                thrownCtor(function () { new Map(true); }),
+                thrownCtor(function () { new Map({ [Symbol.iterator]: function* () { yield 1; } }); }),
+                (function () {
+                    var original = Object.getOwnPropertyDescriptor(Map.prototype, 'set');
+                    try {
+                        Object.defineProperty(Map.prototype, 'set', { value: 1, configurable: true });
+                        return thrownCtor(function () { new Map([['a', 1]]); });
+                    } finally {
+                        Object.defineProperty(Map.prototype, 'set', original);
+                    }
+                })()
+            ].join('|');
+        })();");
+
+        Assert.Equal("TypeError|TypeError|TypeError", result.ToString());
+    }
+
     private static void EnsureBuiltInsLoaded()
     {
         // Load CLR assembly so JSEngine.ClrInterop is properly configured

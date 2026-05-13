@@ -263,7 +263,7 @@ public partial class JSArray : JSObject
             return;
         }
 
-        var en = iterator.GetElementEnumerator();
+        var en = iterator.GetIterableEnumerator();
         while (en.MoveNext(out var hasValue, out var item, out var index))
         {
             if (hasValue)

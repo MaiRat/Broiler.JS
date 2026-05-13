@@ -84,7 +84,7 @@ public class ClrGeneratorV2(JSValue generator, JSGeneratorDelegateV2 @delegate, 
         {
             if (v.IsValueDelegate)
             {
-                delegatedEnumerator = v.Value.GetElementEnumerator();
+                delegatedEnumerator = v.Value.GetIterableEnumerator();
                 Next(next, out value, out done);
                 return;
             }
@@ -99,7 +99,7 @@ public class ClrGeneratorV2(JSValue generator, JSGeneratorDelegateV2 @delegate, 
                     v = GetNext(Root.Finally, value);
                     if (v.IsValueDelegate)
                     {
-                        delegatedEnumerator = v.Value.GetElementEnumerator();
+                        delegatedEnumerator = v.Value.GetIterableEnumerator();
                         Next(next, out value, out done);
                         return;
                     }

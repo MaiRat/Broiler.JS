@@ -966,6 +966,8 @@ public abstract partial class JSValue : IDynamicMetaObjectProvider, IPropertyAcc
 
     public virtual IElementEnumerator GetElementEnumerator() => ElementEnumerator.Empty;
     public virtual IElementEnumerator GetAsyncElementEnumerator() => GetElementEnumerator();
+    public virtual IElementEnumerator GetIterableEnumerator() => throw NewTypeError($"{this} is not iterable");
+    public virtual IElementEnumerator GetAsyncIterableEnumerator() => GetIterableEnumerator();
 
     private readonly struct ElementEnumerator : IElementEnumerator
     {

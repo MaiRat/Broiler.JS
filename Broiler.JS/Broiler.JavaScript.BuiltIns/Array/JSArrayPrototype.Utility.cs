@@ -77,8 +77,9 @@ public partial class JSArray
             ? Math.Max(length + relativeEnd, 0)
             : Math.Min(relativeEnd, length);
         var count = Math.Max(actualEnd - actualStart, 0);
+        var resultLength = (uint)Math.Min(count, uint.MaxValue);
 
-        var result = CreateArraySpecies(@this, (uint)Math.Min(count, uint.MaxValue));
+        var result = CreateArraySpecies(@this, resultLength);
         uint resultIndex = 0;
 
         for (long sourceIndex = actualStart; sourceIndex < actualEnd; sourceIndex++)

@@ -17,7 +17,7 @@ public partial class JSArray : JSObject
 {
     internal uint _length;
 
-    private bool HasNonWritableLengthProperty()
+    private bool IsLengthReadOnly()
     {
         ref var ownProperties = ref GetOwnProperties(false);
         if (ownProperties.IsEmpty)
@@ -103,7 +103,7 @@ public partial class JSArray : JSObject
         get => _length;
         set
         {
-            if (HasNonWritableLengthProperty())
+            if (IsLengthReadOnly())
                 throw JSEngine.NewTypeError("Cannot modify property length");
 
             if (IsSealedOrFrozen())
@@ -280,7 +280,7 @@ public partial class JSArray : JSObject
 
     public override bool SetValue(uint name, JSValue value, JSValue receiver, bool throwError = true)
     {
-        if (_length <= name && HasNonWritableLengthProperty())
+        if (_length <= name && IsLengthReadOnly())
         {
             if (throwError)
                 throw JSEngine.NewTypeError("Cannot modify property length");

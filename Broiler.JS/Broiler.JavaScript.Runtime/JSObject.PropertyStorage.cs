@@ -299,8 +299,9 @@ public partial class JSObject
             return false;
         }
 
+        var attributes = !p.IsEmpty ? p.Attributes : JSPropertyAttributes.EnumerableConfigurableValue;
         ref var elements = ref CreateElements();
-        elements.Put(name, value, !p.IsEmpty ? p.Attributes : JSPropertyAttributes.EnumerableConfigurableValue);
+        elements.Put(name, value, attributes);
         PropertyChanged?.Invoke(this, (uint.MaxValue, name, null));
         return true;
     }

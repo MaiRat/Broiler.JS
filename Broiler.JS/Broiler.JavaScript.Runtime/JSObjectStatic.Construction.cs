@@ -128,7 +128,15 @@ public partial class JSObject
     }
 
     [JSExport("freeze")]
-    internal static JSValue Freeze(in Arguments a) => throw new NotImplementedException();
+    internal static JSValue Freeze(in Arguments a)
+    {
+        var first = a.Get1();
+        if (first is not JSObject @object)
+            return first;
+
+        @object.status |= ObjectStatus.Frozen | ObjectStatus.NonExtensible;
+        return @object;
+    }
 
     [JSExport("fromEntries")]
     internal static JSValue FromEntries(in Arguments a)

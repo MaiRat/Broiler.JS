@@ -20,6 +20,29 @@ public sealed class FilteredExceptionReport
 }
 
 /// <summary>
+/// Structured report emitted when the most common problem option is active.
+/// </summary>
+public sealed class MostCommonProblemReport
+{
+    public required string OutputFormat { get; init; }
+    public MostCommonProblemMatch? Problem { get; init; }
+}
+
+/// <summary>
+/// The most frequently occurring problem after grouping by type, context, and message.
+/// </summary>
+public sealed class MostCommonProblemMatch
+{
+    public required string Type { get; init; }
+    public required string Context { get; init; }
+    public required string Message { get; init; }
+    public required int Count { get; init; }
+    public required double OccurrenceRate { get; init; }
+    public required LoggedException Example { get; init; }
+    public required IReadOnlyList<LoggedException> Occurrences { get; init; }
+}
+
+/// <summary>
 /// Structured summary for a parsed file or directory.
 /// </summary>
 public sealed class LogReportSummary

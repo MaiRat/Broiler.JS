@@ -233,7 +233,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           pattern: test262-full-script-host-shard-*
-          path: ${{ env.RESULTS_DIR }}/merged
+          path: ${{ github.workspace }}/.artifacts/test262/full-script-host/merged
           merge-multiple: true
 
       - name: Merge shard logs into one artifact
@@ -248,8 +248,9 @@ jobs:
         id: logparser
         shell: bash
         env:
-          LOGPARSER_LOGS_DIR: ${{ env.RESULTS_DIR }}/merged
-          LOGPARSER_OUTPUT_DIR: ${{ env.RESULTS_DIR }}/logparser
+          ISSUE_TOKEN: ${{ secrets.ISSUE_TOKEN }}
+          LOGPARSER_LOGS_DIR: ${{ github.workspace }}/.artifacts/test262/full-script-host/merged
+          LOGPARSER_OUTPUT_DIR: ${{ github.workspace }}/.artifacts/test262/full-script-host/logparser
         run: |
           set -euo pipefail
           mkdir -p "$LOGPARSER_OUTPUT_DIR"
@@ -273,21 +274,33 @@ jobs:
           import os
           from pathlib import Path
 
+          MAX_ISSUE_TITLE_LENGTH = 256
+
           issue_json = json.loads(Path(os.environ["ISSUE_JSON_PATH"]).read_text(encoding="utf-8"))
           problem = issue_json.get("problem")
           should_create_issue = problem is not None
+          issue_token_available = bool(os.environ.get("ISSUE_TOKEN", "").strip())
 
           with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as handle:
               handle.write(f"create_issue={'true' if should_create_issue else 'false'}\n")
+              handle.write(f"issue_token_available={'true' if issue_token_available else 'false'}\n")
 
               if should_create_issue:
+                  problem_type = (problem.get("type") or "unknown type").strip()
                   context = (problem.get("context") or "unknown context").strip()
                   message = (problem.get("message") or "").strip()
-                  title = f"test262 full script-host common failure: {problem['type']} @ {context}"
+                  title = f"test262 full script-host common failure: {problem_type} @ {context}"
                   if message:
                       title = f"{title} - {message}"
 
-                  normalized_title = " ".join(title.split())[:256]
+                  # Keep titles within a conservative 256-character cap by trimming the
+                  # normalized title text on a word boundary when possible.
+                  normalized_title = " ".join(title.split())
+                  if len(normalized_title) > MAX_ISSUE_TITLE_LENGTH:
+                      normalized_title = normalized_title[:MAX_ISSUE_TITLE_LENGTH].rstrip()
+                      last_space = normalized_title.rfind(" ")
+                      if last_space >= 0:
+                          normalized_title = normalized_title[:last_space]
                   handle.write(f"issue_title={normalized_title}\n")
           PY
 
@@ -301,7 +314,7 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Report missing ISSUE_TOKEN secret
-        if: steps.logparser.outputs.create_issue == 'true' && secrets.ISSUE_TOKEN == ''
+        if: steps.logparser.outputs.create_issue == 'true' && steps.logparser.outputs.issue_token_available != 'true'
         shell: bash
         run: |
           {
@@ -310,11 +323,12 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Create GitHub issue for common problem
-        if: steps.logparser.outputs.create_issue == 'true' && secrets.ISSUE_TOKEN != ''
+        if: steps.logparser.outputs.create_issue == 'true' && steps.logparser.outputs.issue_token_available == 'true'
         uses: actions/github-script@v7
         env:
-          ISSUE_BODY_PATH: ${{ env.RESULTS_DIR }}/logparser/issue.md
+          ISSUE_BODY_PATH: ${{ github.workspace }}/.artifacts/test262/full-script-host/logparser/issue.md
           ISSUE_TITLE: ${{ steps.logparser.outputs.issue_title }}
+          TEST262_REF: ${{ inputs.suite_ref || 'ccaac100ff49d81e9ff47a75ff4c60e0bd3f262e' }}
         with:
           github-token: ${{ secrets.ISSUE_TOKEN }}
           script: |

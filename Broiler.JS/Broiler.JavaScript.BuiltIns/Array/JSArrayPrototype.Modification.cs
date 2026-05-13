@@ -90,87 +90,70 @@ public partial class JSArray
     [JSExport("push", Length = 1)]
     public static JSValue Push(in Arguments a)
     {
-        var t = a.This as JSObject;
+        var @this = ToArrayLikeObject(a.This);
+        long length = GetArrayLikeLengthLong(@this);
 
-        if (t == null)
-            return JSNumber.Zero;
+        if (length + a.Length > MaxArrayLikeLength)
+            throw JSEngine.NewTypeError("Invalid array length");
 
-        if (t.IsSealedOrFrozen())
-            throw JSEngine.NewTypeError($"Cannot modify property length");
-
-        int ai, al;
-
-        if (t is JSArray ta)
+        if (@this is JSArray array && length <= uint.MaxValue)
         {
-            var i = ta._length;
-            var l = (long)i;
-            var max = (long)uint.MaxValue;
-
-            al = a.Length;
-
-            ref var taElements = ref ta.GetElements();
-
-            for (ai = 0; ai < al; ai++)
+            var mustSetLengthThroughProperty = false;
+            for (var index = 0; index < a.Length; index++, length++)
             {
-                var item = a.GetAt(ai);
-                if (l < max)
-                {
-                    taElements.Put(i++, item);
-                    ta._length = i;
-                }
-                else
-                {
-                    ta[l.ToString()] = item;
-                }
-
-                l++;
+                var arrayIndex = (uint)length;
+                array.SetValue(arrayIndex, a.GetAt(index), array, true);
+                if (array.GetOwnPropertyDescriptor(JSValue.CreateNumber(arrayIndex)).IsUndefined)
+                    mustSetLengthThroughProperty = true;
             }
 
-            if (l > max)
-                throw JSEngine.NewTypeError($"Invalid array length");
+            if (mustSetLengthThroughProperty)
+                array[KeyStrings.length] = new JSNumber(length);
+            else
+                array.Length = (int)length;
 
-            ta._length = i;
-
-            return new JSNumber(ta._length);
+            return new JSNumber(length);
         }
 
-        var oldLength = t[KeyStrings.length];
-        uint ln = oldLength.IsUndefined ? 0 : (uint)oldLength.DoubleValue;
+        for (var index = 0; index < a.Length; index++, length++)
+        {
+            var item = a.GetAt(index);
+            if (length <= uint.MaxValue)
+            {
+                @this[(uint)length] = item;
+            }
+            else
+            {
+                @this[KeyStrings.GetOrCreate(length.ToString())] = item;
+            }
+        }
 
-        al = a.Length;
-
-        for (ai = 0; ai < al; ai++)
-            t[ln++] = a.GetAt(ai);
-
-        var n = new JSNumber(ln);
-        t[KeyStrings.length] = n;
-
-        return n;
+        var newLength = new JSNumber(length);
+        @this[KeyStrings.length] = newLength;
+        return newLength;
     }
 
     [JSPrototypeMethod]
     [JSExport("pop")]
     public static JSValue Pop(in Arguments a)
     {
-        var @this = a.This;
+        var @this = ToArrayLikeObject(a.This);
+        var length = GetArrayLikeLength(@this);
 
-        if (@this == null)
-            return JSUndefined.Value;
-
-        var length = @this.Length;
-
-        if (length <= 0)
-            return JSUndefined.Value;
-
-        var index = length - 1;
-
-        if (@this.TryRemove((uint)index, out JSProperty r))
+        if (length == 0)
         {
-            @this.Length = index;
-            return (JSValue)r.value;
+            @this[KeyStrings.length] = JSNumber.Zero;
+            return JSUndefined.Value;
         }
 
-        return JSUndefined.Value;
+        var index = length - 1;
+        var element = @this[index];
+
+        if (!@this.Delete(index).BooleanValue)
+            throw JSEngine.NewTypeError($"Cannot delete property {index}");
+
+        @this[KeyStrings.length] = new JSNumber(index);
+        return element;
     }
 
     [JSPrototypeMethod]

@@ -1,4 +1,5 @@
-﻿using Broiler.JavaScript.BuiltIns.Boolean;
+﻿using System;
+using Broiler.JavaScript.BuiltIns.Boolean;
 using Broiler.JavaScript.ExpressionCompiler;
 using Broiler.JavaScript.BuiltIns.Generator;
 using Broiler.JavaScript.BuiltIns.Number;
@@ -11,6 +12,8 @@ namespace Broiler.JavaScript.BuiltIns.Array;
 
 public partial class JSArray
 {
+    private const double MaxArrayLikeLength = 9007199254740991d;
+
     private static JSObject ToArrayLikeObject(JSValue value)
     {
         if (value is JSObject @object)
@@ -22,24 +25,87 @@ public partial class JSArray
         return (JSObject)JSObject.CreatePrimitiveObject(value);
     }
 
-    private static uint GetArrayLikeLength(JSObject @object)
+    private static JSValue ToNumberPrimitive(JSValue value)
     {
-        var lengthValue = @object[KeyStrings.length];
-        if (lengthValue.IsUndefined)
+        if (value is not JSObject @object)
+            return value;
+
+        var toPrimitive = @object[(IJSSymbol)JSSymbol.toPrimitive];
+        if (!toPrimitive.IsUndefined)
+        {
+            var primitive = toPrimitive.InvokeFunction(new Arguments(@object, JSConstants.Number));
+            if (primitive.IsObject)
+                throw JSEngine.NewTypeError("Cannot convert object to primitive value");
+
+            return primitive;
+        }
+
+        if (@object[KeyStrings.valueOf] is IJSFunction valueOf)
+        {
+            var primitive = valueOf.InvokeFunction(new Arguments(@object));
+            if (!primitive.IsObject)
+                return primitive;
+        }
+
+        if (@object[KeyStrings.toString] is IJSFunction toString)
+        {
+            var primitive = toString.InvokeFunction(new Arguments(@object));
+            if (!primitive.IsObject)
+                return primitive;
+        }
+
+        throw JSEngine.NewTypeError("Cannot convert object to primitive value");
+    }
+
+    private static double ToNumber(JSValue value) => ToNumberPrimitive(value).DoubleValue;
+
+    private static double ToLength(JSValue value)
+    {
+        if (value == null || value.IsUndefined)
             return 0;
 
-        var length = lengthValue.DoubleValue;
+        var length = ToNumber(value);
         if (double.IsNaN(length) || length <= 0)
             return 0;
 
+        if (double.IsPositiveInfinity(length) || length >= MaxArrayLikeLength)
+            return MaxArrayLikeLength;
+
+        return Math.Floor(length);
+    }
+
+    private static long ToIntegerOrInfinity(JSValue value, long defaultValue = 0)
+    {
+        if (value == null || value.IsUndefined)
+            return defaultValue;
+
+        var number = ToNumber(value);
+        if (double.IsNaN(number) || number == 0)
+            return 0;
+
+        if (double.IsPositiveInfinity(number))
+            return long.MaxValue;
+
+        if (double.IsNegativeInfinity(number))
+            return long.MinValue;
+
+        return (long)number;
+    }
+
+    private static uint GetArrayLikeLength(JSObject @object)
+    {
+        var length = ToLength(@object[KeyStrings.length]);
         return length >= uint.MaxValue
             ? uint.MaxValue
             : (uint)length;
     }
 
+    private static long GetArrayLikeLengthLong(JSObject @object) => (long)ToLength(@object[KeyStrings.length]);
+
+
     private static JSObject CreateArraySpecies(JSObject source, uint length)
     {
-        if (source is not JSArray)
+        if (!IsArrayValue(source))
             return new JSArray(length);
 
         var constructor = source[KeyStrings.constructor];
@@ -389,33 +455,22 @@ public partial class JSArray
     [JSExport("map", Length = 1)]
     public static JSValue Map(in Arguments a)
     {
-        if (a.This is not JSObject @this)
-            throw JSEngine.NewTypeError($"{a.This} is not an object or an array");
-
-        var callback = a.Get1();
-
+        var @this = ToArrayLikeObject(a.This);
+        var length = GetArrayLikeLength(@this);
+        var (callback, thisArg) = a.Get2();
         if (callback is not JSFunction fn)
             throw JSEngine.NewTypeError($"{callback} is not a function in Array.prototype.find");
 
-        ref var te = ref @this.GetElements();
-        var r = new JSArray();
-        ref var relements = ref r.GetElements();
-        var length = (uint)@this.Length;
+        var r = CreateArraySpecies(@this, length);
 
-        for (uint i = 0; i < length; i++)
+        for (uint index = 0; index < length; index++)
         {
-            ref var e = ref te.Get(i);
-
-            if (e.IsEmpty)
+            if (!@this.TryGetElement(index, out var item))
                 continue;
 
-            var item = @this.GetValue(e);
-            var itemArgs = new Arguments(@this, item, new JSNumber(i), @this);
-
-            relements.Put(i, fn.f(itemArgs));
+            var itemArgs = new Arguments(thisArg, item, new JSNumber(index), @this);
+            CreateDataPropertyOrThrow(r, index, fn.f(itemArgs));
         }
-
-        r._length = length;
 
         return r;
     }

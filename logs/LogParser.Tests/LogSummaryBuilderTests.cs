@@ -352,6 +352,15 @@ public class LogSummaryBuilderTests
         Assert.Equal(expectedMessage, options.MessageFilter);
     }
 
+    [Theory]
+    [MemberData(nameof(GetMostCommonProblemFlagArgs))]
+    public void ParseOptions_ReadsMostCommonProblemFlag(string[] args)
+    {
+        var options = Program.ParseOptions(args);
+
+        Assert.True(options.MostCommonProblem);
+    }
+
     [Fact]
     public void ParseOptions_DefaultsToTextWhenOutputIsNotSpecified()
     {
@@ -362,6 +371,16 @@ public class LogSummaryBuilderTests
         Assert.Null(options.TypeFilter);
         Assert.Null(options.ContextFilter);
         Assert.Null(options.MessageFilter);
+        Assert.False(options.MostCommonProblem);
+    }
+
+    [Fact]
+    public void ParseOptions_RejectsCombiningMostCommonProblemWithFilters()
+    {
+        var exception = Assert.Throws<ArgumentException>(() =>
+            Program.ParseOptions(["--most-common-problem", "--type", "System.Exception", "sample.json"]));
+
+        Assert.Contains("--most-common-problem", exception.Message, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -432,6 +451,179 @@ public class LogSummaryBuilderTests
     }
 
     [Fact]
+    public void FindMostCommonProblem_SelectsMostCommonTypeContextAndMessage()
+    {
+        using var fixture = TempLogFile.Create("""
+        {
+          "suiteRef": "fixture-most-common-problem",
+          "broilerDll": "fixture/BroilerJS.dll",
+          "executed": 5,
+          "passed": 0,
+          "failed": 5,
+          "skipped": 0,
+          "results": [
+            {
+              "path": "test/annexB/alpha.js",
+              "status": "failed",
+              "stderr": "Unhandled exception. Broiler.JavaScript.Runtime.JSException: Common failure\nat Throw in /repo/JSException.cs:line 114\n"
+            },
+            {
+              "path": "test/annexB/beta.js",
+              "status": "failed",
+              "stderr": "Unhandled exception. Broiler.JavaScript.Runtime.JSException: Common failure\nat Throw in /repo/JSException.cs:line 114\n"
+            },
+            {
+              "path": "test/annexB/gamma.js",
+              "status": "failed",
+              "stderr": "Unhandled exception. Broiler.JavaScript.Runtime.JSException: Less common failure\nat Throw in /repo/JSException.cs:line 120\n"
+            },
+            {
+              "path": "test/annexB/delta.js",
+              "status": "failed",
+              "stderr": "Unhandled exception. Broiler.JavaScript.Runtime.JSException: Different context failure\nat Handle in /repo/JSException.cs:line 140\n"
+            },
+            {
+              "path": "test/annexB/epsilon.js",
+              "status": "failed",
+              "stderr": "Unhandled exception. System.InvalidOperationException: Other failure\nat Throw in /repo/Program.cs:line 10\n"
+            }
+          ]
+        }
+        """);
+
+        var summary = LogSummaryBuilder.ParseAndSummarize(fixture.Path);
+        var problem = LogSummaryBuilder.FindMostCommonProblem(summary.LogRun.Results);
+
+        Assert.NotNull(problem);
+        Assert.Equal("Broiler.JavaScript.Runtime.JSException", problem.Type);
+        Assert.Equal("Throw", problem.Context);
+        Assert.Equal("Common failure", problem.Message);
+        Assert.Equal(2, problem.Count);
+        Assert.Equal(0.4, problem.OccurrenceRate);
+        Assert.Equal("test/annexB/alpha.js", problem.Example.Path);
+        Assert.Equal(114, problem.Example.LineNumber);
+        Assert.Equal(
+            [
+                "test/annexB/alpha.js",
+                "test/annexB/beta.js"
+            ],
+            problem.Occurrences.Select(occurrence => occurrence.Path).ToArray());
+    }
+
+    [Fact]
+    public void FormatMostCommonProblem_IncludesStructuredProblemDetails()
+    {
+        using var fixture = TempLogFile.Create("""
+        {
+          "suiteRef": "fixture-most-common-problem",
+          "broilerDll": "fixture/BroilerJS.dll",
+          "executed": 5,
+          "passed": 0,
+          "failed": 5,
+          "skipped": 0,
+          "results": [
+            {
+              "path": "test/annexB/alpha.js",
+              "status": "failed",
+              "stderr": "Unhandled exception. Broiler.JavaScript.Runtime.JSException: Common failure\nat Throw in /repo/JSException.cs:line 114\n"
+            },
+            {
+              "path": "test/annexB/beta.js",
+              "status": "failed",
+              "stderr": "Unhandled exception. Broiler.JavaScript.Runtime.JSException: Common failure\nat Throw in /repo/JSException.cs:line 114\n"
+            },
+            {
+              "path": "test/annexB/gamma.js",
+              "status": "failed",
+              "stderr": "Unhandled exception. Broiler.JavaScript.Runtime.JSException: Less common failure\nat Throw in /repo/JSException.cs:line 120\n"
+            },
+            {
+              "path": "test/annexB/delta.js",
+              "status": "failed",
+              "stderr": "Unhandled exception. Broiler.JavaScript.Runtime.JSException: Different context failure\nat Handle in /repo/JSException.cs:line 140\n"
+            },
+            {
+              "path": "test/annexB/epsilon.js",
+              "status": "failed",
+              "stderr": "Unhandled exception. System.InvalidOperationException: Other failure\nat Throw in /repo/Program.cs:line 10\n"
+            }
+          ]
+        }
+        """);
+
+        var formatted = LogReportFormatter.FormatMostCommonProblem(
+        [
+            LogSummaryBuilder.ParseAndSummarize(fixture.Path)
+        ]);
+
+        Assert.Contains("Most common problem:", formatted, StringComparison.Ordinal);
+        Assert.Contains("type: Broiler.JavaScript.Runtime.JSException", formatted, StringComparison.Ordinal);
+        Assert.Contains("context: Throw", formatted, StringComparison.Ordinal);
+        Assert.Contains("message: Common failure", formatted, StringComparison.Ordinal);
+        Assert.Contains("count: 2", formatted, StringComparison.Ordinal);
+        Assert.Contains("occurrenceRate:", formatted, StringComparison.Ordinal);
+        Assert.Contains("path: test/annexB/alpha.js", formatted, StringComparison.Ordinal);
+        Assert.Contains("lineNumber: 114", formatted, StringComparison.Ordinal);
+        Assert.Contains("logLine: Unhandled exception. Broiler.JavaScript.Runtime.JSException: Common failure", formatted, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void FormatMostCommonProblemJson_SerializesStructuredProblemReport()
+    {
+        using var fixture = TempLogFile.Create("""
+        {
+          "suiteRef": "fixture-most-common-problem",
+          "broilerDll": "fixture/BroilerJS.dll",
+          "executed": 5,
+          "passed": 0,
+          "failed": 5,
+          "skipped": 0,
+          "results": [
+            {
+              "path": "test/annexB/alpha.js",
+              "status": "failed",
+              "stderr": "Unhandled exception. Broiler.JavaScript.Runtime.JSException: Common failure\nat Throw in /repo/JSException.cs:line 114\n"
+            },
+            {
+              "path": "test/annexB/beta.js",
+              "status": "failed",
+              "stderr": "Unhandled exception. Broiler.JavaScript.Runtime.JSException: Common failure\nat Throw in /repo/JSException.cs:line 114\n"
+            },
+            {
+              "path": "test/annexB/gamma.js",
+              "status": "failed",
+              "stderr": "Unhandled exception. Broiler.JavaScript.Runtime.JSException: Less common failure\nat Throw in /repo/JSException.cs:line 120\n"
+            },
+            {
+              "path": "test/annexB/delta.js",
+              "status": "failed",
+              "stderr": "Unhandled exception. Broiler.JavaScript.Runtime.JSException: Different context failure\nat Handle in /repo/JSException.cs:line 140\n"
+            },
+            {
+              "path": "test/annexB/epsilon.js",
+              "status": "failed",
+              "stderr": "Unhandled exception. System.InvalidOperationException: Other failure\nat Throw in /repo/Program.cs:line 10\n"
+            }
+          ]
+        }
+        """);
+
+        var json = LogReportFormatter.FormatMostCommonProblemJson(
+        [
+            LogSummaryBuilder.ParseAndSummarize(fixture.Path)
+        ]);
+
+        Assert.Contains("\"outputFormat\": \"json\"", json, StringComparison.Ordinal);
+        Assert.Contains("\"problem\"", json, StringComparison.Ordinal);
+        Assert.Contains("\"type\": \"Broiler.JavaScript.Runtime.JSException\"", json, StringComparison.Ordinal);
+        Assert.Contains("\"context\": \"Throw\"", json, StringComparison.Ordinal);
+        Assert.Contains("\"message\": \"Common failure\"", json, StringComparison.Ordinal);
+        Assert.Contains("\"count\": 2", json, StringComparison.Ordinal);
+        Assert.Contains("\"lineNumber\": 114", json, StringComparison.Ordinal);
+        Assert.Contains("\"occurrences\"", json, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void ParseAndSummarize_IgnoresExceptionTypesContainingNonSpaceWhitespace()
     {
         var path = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid():N}.json");
@@ -478,6 +670,12 @@ public class LogSummaryBuilderTests
     private static string GetFixturePath()
     {
         return Path.Combine(AppContext.BaseDirectory, "TestData", "sample-shard.json");
+    }
+
+    public static IEnumerable<object[]> GetMostCommonProblemFlagArgs()
+    {
+        yield return new object[] { new[] { "--most-common-problem", "sample.json" } };
+        yield return new object[] { new[] { "--most-common", "--output", "json", "sample.json" } };
     }
 
     private static string GetTestDataDirectoryPath()

@@ -35,6 +35,7 @@ internal static class Program
         var typeFilter = default(string);
         var contextFilter = default(string);
         var messageFilter = default(string);
+        var mostCommonProblem = false;
         var pendingOption = string.Empty;
 
         foreach (var arg in args)
@@ -116,6 +117,13 @@ internal static class Program
                 continue;
             }
 
+            if (string.Equals(arg, "--most-common-problem", StringComparison.Ordinal)
+                || string.Equals(arg, "--most-common", StringComparison.Ordinal))
+            {
+                mostCommonProblem = true;
+                continue;
+            }
+
             if (arg.StartsWith("-o=", StringComparison.Ordinal))
             {
                 outputFormat = NormalizeOutputFormat(arg["-o=".Length..]);
@@ -130,7 +138,15 @@ internal static class Program
             throw new ArgumentException($"Missing value for {pendingOption}.");
         }
 
-        return new ProgramOptions(inputs, outputFormat, typeFilter, contextFilter, messageFilter);
+        if (mostCommonProblem
+            && (!string.IsNullOrEmpty(typeFilter)
+                || !string.IsNullOrEmpty(contextFilter)
+                || !string.IsNullOrEmpty(messageFilter)))
+        {
+            throw new ArgumentException("--most-common-problem cannot be combined with --type, --context, or --message.");
+        }
+
+        return new ProgramOptions(inputs, outputFormat, typeFilter, contextFilter, messageFilter, mostCommonProblem);
     }
 
     internal static IReadOnlyList<SummaryInput> ResolveSummaryInputs(IEnumerable<string> inputs)
@@ -157,6 +173,8 @@ internal static class Program
     {
         return options.OutputFormat switch
         {
+            "json" when options.MostCommonProblem => LogReportFormatter.FormatMostCommonProblemJson(summaries),
+            "text" when options.MostCommonProblem => LogReportFormatter.FormatMostCommonProblem(summaries),
             "json" when HasActiveFilters(options) => LogReportFormatter.FormatFilteredExceptionsJson(summaries, options.TypeFilter, options.ContextFilter, options.MessageFilter),
             "text" when HasActiveFilters(options) => LogReportFormatter.FormatFilteredExceptions(summaries, options.TypeFilter, options.ContextFilter, options.MessageFilter),
             "text" => LogReportFormatter.Format(summaries),
@@ -235,6 +253,7 @@ internal static class Program
         string OutputFormat,
         string? TypeFilter,
         string? ContextFilter,
-        string? MessageFilter);
+        string? MessageFilter,
+        bool MostCommonProblem);
     internal readonly record struct SummaryInput(string Path, bool IsDirectory);
 }

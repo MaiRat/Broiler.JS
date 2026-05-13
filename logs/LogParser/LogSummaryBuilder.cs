@@ -214,6 +214,57 @@ public static class LogSummaryBuilder
         };
     }
 
+    public static MostCommonProblemMatch? FindMostCommonProblem(IEnumerable<LogEntry> entries)
+    {
+        var allEntries = entries.ToArray();
+        var exceptionSummary = SummarizeExceptions(allEntries);
+        var mostCommonType = exceptionSummary.TypeGroups.FirstOrDefault();
+        if (mostCommonType is null)
+        {
+            return null;
+        }
+
+        var mostCommonContext = exceptionSummary.ContextGroups
+            .Where(group => string.Equals(group.Type, mostCommonType.Type, StringComparison.OrdinalIgnoreCase))
+            .OrderByDescending(group => group.Count)
+            .ThenBy(group => group.Context, StringComparer.OrdinalIgnoreCase)
+            .First();
+
+        var matchingOccurrences = allEntries
+            .Where(entry => entry.Exception is not null
+                && string.Equals(entry.Exception.Type, mostCommonType.Type, StringComparison.OrdinalIgnoreCase)
+                && string.Equals(entry.Exception.Context ?? UnknownContext, mostCommonContext.Context, StringComparison.OrdinalIgnoreCase))
+            .Select(entry => new LoggedException
+            {
+                Path = entry.Path,
+                Type = entry.Exception!.Type,
+                Message = entry.Exception.Message,
+                Context = entry.Exception.Context,
+                LineNumber = entry.Exception.LineNumber,
+                LogLine = entry.Exception.LogLine
+            })
+            .GroupBy(exception => exception.Message, StringComparer.OrdinalIgnoreCase)
+            .OrderByDescending(group => group.Count())
+            .ThenBy(group => group.Key, StringComparer.OrdinalIgnoreCase)
+            .Select(group => group
+                .OrderBy(exception => exception.Path, StringComparer.OrdinalIgnoreCase)
+                .ThenBy(exception => exception.LineNumber ?? int.MaxValue)
+                .ThenBy(exception => exception.LogLine, StringComparer.OrdinalIgnoreCase)
+                .ToArray())
+            .First();
+
+        return new MostCommonProblemMatch
+        {
+            Type = mostCommonType.Type,
+            Context = mostCommonContext.Context,
+            Message = matchingOccurrences[0].Message,
+            Count = matchingOccurrences.Length,
+            OccurrenceRate = allEntries.Length == 0 ? 0 : matchingOccurrences.Length / (double)allEntries.Length,
+            Example = matchingOccurrences[0],
+            Occurrences = matchingOccurrences
+        };
+    }
+
     private static LogGroupSummary SummarizeGroup(IGrouping<string, LogEntry> group, int notableEntryLimit)
     {
         var entries = group.ToArray();

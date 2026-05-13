@@ -37,6 +37,51 @@ public static class LogReportFormatter
         return JsonSerializer.Serialize(CreateReport(fileSummaries, outputFormat: "json"), JsonOptions);
     }
 
+    public static string FormatMostCommonProblem(IEnumerable<LogFileSummary> fileSummaries)
+    {
+        var report = CreateMostCommonProblemReport(fileSummaries, outputFormat: "text");
+        var builder = new StringBuilder();
+
+        builder.AppendLine("Most common problem:");
+        if (report.Problem is null)
+        {
+            builder.AppendLine("  (no parsed exceptions)");
+            return builder.ToString().TrimEnd();
+        }
+
+        builder.AppendLine($"  type: {report.Problem.Type}");
+        builder.AppendLine($"  context: {report.Problem.Context}");
+        builder.AppendLine($"  message: {report.Problem.Message}");
+        builder.AppendLine($"  count: {report.Problem.Count}");
+        builder.AppendLine($"  occurrenceRate: {report.Problem.OccurrenceRate:P1}");
+        builder.AppendLine("  example:");
+        builder.AppendLine($"    path: {report.Problem.Example.Path}");
+        builder.AppendLine($"    type: {report.Problem.Example.Type}");
+        builder.AppendLine($"    context: {report.Problem.Example.Context ?? "(unknown context)"}");
+        builder.AppendLine($"    message: {report.Problem.Example.Message}");
+        builder.AppendLine($"    lineNumber: {FormatLineNumber(report.Problem.Example.LineNumber)}");
+        builder.AppendLine($"    logLine: {report.Problem.Example.LogLine}");
+        builder.AppendLine("  occurrences:");
+
+        foreach (var occurrence in report.Problem.Occurrences)
+        {
+            builder.AppendLine("    -");
+            builder.AppendLine($"      path: {occurrence.Path}");
+            builder.AppendLine($"      type: {occurrence.Type}");
+            builder.AppendLine($"      context: {occurrence.Context ?? "(unknown context)"}");
+            builder.AppendLine($"      message: {occurrence.Message}");
+            builder.AppendLine($"      lineNumber: {FormatLineNumber(occurrence.LineNumber)}");
+            builder.AppendLine($"      logLine: {occurrence.LogLine}");
+        }
+
+        return builder.ToString().TrimEnd();
+    }
+
+    public static string FormatMostCommonProblemJson(IEnumerable<LogFileSummary> fileSummaries)
+    {
+        return JsonSerializer.Serialize(CreateMostCommonProblemReport(fileSummaries, outputFormat: "json"), JsonOptions);
+    }
+
     public static string FormatFilteredExceptions(
         IEnumerable<LogFileSummary> fileSummaries,
         string? typeFilter,
@@ -169,6 +214,18 @@ public static class LogReportFormatter
                 })
                 .Where(match => match.Exceptions.Count > 0)
                 .ToArray()
+        };
+    }
+
+    internal static MostCommonProblemReport CreateMostCommonProblemReport(
+        IEnumerable<LogFileSummary> fileSummaries,
+        string outputFormat)
+    {
+        var summaries = fileSummaries.ToArray();
+        return new MostCommonProblemReport
+        {
+            OutputFormat = outputFormat,
+            Problem = LogSummaryBuilder.FindMostCommonProblem(summaries.SelectMany(summary => summary.LogRun.Results))
         };
     }
 

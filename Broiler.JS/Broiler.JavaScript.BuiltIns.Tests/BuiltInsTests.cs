@@ -2731,6 +2731,132 @@ public class BuiltInsTests
     }
 
     [Fact]
+    public void Array_Prototype_Length_Coercion_And_Modification_Regressions_Match_Test262()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = new JSContext();
+
+        var result = ctx.Eval(@"(function () {
+            function thrownCtor(fn) {
+                try {
+                    return fn();
+                } catch (e) {
+                    return e.constructor.name;
+                }
+            }
+
+            function nonPrimitiveNumberLike() {
+                return {
+                    valueOf: function() { return {}; },
+                    toString: function() { return {}; }
+                };
+            }
+
+            var revoked = Proxy.revocable([], {});
+            revoked.revoke();
+
+            function SpeciesCtor(mode) {
+                if (mode === 'nonExtensible') {
+                    this.length = 0;
+                    Object.preventExtensions(this);
+                    return;
+                }
+
+                Object.defineProperty(this, '0', {
+                    set: function(_value) {},
+                    configurable: false
+                });
+            }
+
+            var speciesSource = [1];
+            speciesSource.constructor = {};
+            speciesSource.constructor[Symbol.species] = function() {
+                return new SpeciesCtor('nonExtensible');
+            };
+
+            var lockedSpeciesSource = [1];
+            lockedSpeciesSource.constructor = {};
+            lockedSpeciesSource.constructor[Symbol.species] = function() {
+                return new SpeciesCtor('lockedProperty');
+            };
+
+            return [
+                thrownCtor(function() { Array.prototype.every.call({ length: nonPrimitiveNumberLike() }, function() { return true; }); }),
+                thrownCtor(function() { Array.prototype.filter.call({ length: nonPrimitiveNumberLike() }, function() { return true; }); }),
+                thrownCtor(function() { Array.prototype.forEach.call({ length: nonPrimitiveNumberLike() }, function() {}); }),
+                thrownCtor(function() { Array.prototype.indexOf.call({ length: nonPrimitiveNumberLike() }, 1); }),
+                thrownCtor(function() { [0, true].indexOf(true, nonPrimitiveNumberLike()); }),
+                thrownCtor(function() { Array.prototype.lastIndexOf.call({ length: nonPrimitiveNumberLike() }, 1); }),
+                thrownCtor(function() { [0, true].lastIndexOf(true, nonPrimitiveNumberLike()); }),
+                thrownCtor(function() { Array.prototype.map.call({ length: nonPrimitiveNumberLike() }, function() { return 1; }); }),
+                thrownCtor(function() { Array.prototype.map.call(revoked.proxy, function() { return 1; }); }),
+                thrownCtor(function() { speciesSource.map(function() { return 1; }); }),
+                thrownCtor(function() { lockedSpeciesSource.map(function() { return 1; }); }),
+                (function() {
+                    var array = [];
+                    var setterCalls = 0;
+                    Object.defineProperty(Array.prototype, '0', {
+                        configurable: true,
+                        set: function(_value) {
+                            Object.defineProperty(array, 'length', { writable: false });
+                            setterCalls++;
+                        }
+                    });
+
+                    try {
+                        return [
+                            thrownCtor(function() { array.push(1); }),
+                            [Object.prototype.hasOwnProperty.call(array, '0'), setterCalls].join(',')
+                        ].join('|');
+                    } finally {
+                        delete Array.prototype[0];
+                    }
+                })(),
+                (function() {
+                    var array = new Array(1);
+                    var getterCalls = 0;
+                    Object.defineProperty(Array.prototype, '0', {
+                        configurable: true,
+                        get: function() {
+                            Object.defineProperty(array, 'length', { writable: false });
+                            getterCalls++;
+                        }
+                    });
+
+                    try {
+                        return [
+                            thrownCtor(function() { array.pop(); }),
+                            getterCalls
+                        ].join('|');
+                    } finally {
+                        delete Array.prototype[0];
+                    }
+                })(),
+                thrownCtor(function() { Object.freeze([]).pop(); }),
+                thrownCtor(function() {
+                    var array = [];
+                    Object.defineProperty(array, 'length', { writable: false });
+                    return array.pop();
+                }),
+                thrownCtor(function() {
+                    var arrayLike = { length: Number.MAX_SAFE_INTEGER - 3 };
+                    Object.defineProperty(arrayLike, Number.MAX_SAFE_INTEGER - 1, {
+                        value: 33,
+                        writable: false,
+                        enumerable: true,
+                        configurable: true
+                    });
+                    Array.prototype.push.call(arrayLike, 1, 2, 3);
+                })
+            ].join('|');
+        })();");
+
+        Assert.Equal(
+            "TypeError|TypeError|TypeError|TypeError|TypeError|TypeError|TypeError|TypeError|TypeError|TypeError|TypeError|TypeError|false,1|TypeError|1|TypeError|TypeError|TypeError",
+            result.ToString());
+    }
+
+    [Fact]
     public void RegExp_Prototype_Compile_TypeError_Scenarios_Match_Test262_Expectations()
     {
         EnsureBuiltInsLoaded();

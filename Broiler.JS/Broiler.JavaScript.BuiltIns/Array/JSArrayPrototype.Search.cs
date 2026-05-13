@@ -71,13 +71,13 @@ public partial class JSArray
         var @this = ToArrayLikeObject(a.This);
         var first = a.Get1();
         var length = GetArrayLikeLength(@this);
-        long fromIndex = a[1]?.IntValue ?? 0;
+        long fromIndex = ToIntegerOrInfinity(a[1]);
 
         if (fromIndex < 0)
-            fromIndex += length;
+            fromIndex = fromIndex < -(long)length ? 0 : fromIndex + length;
 
-        if (fromIndex < 0)
-            fromIndex = 0;
+        if (fromIndex >= length)
+            return JSNumber.MinusOne;
 
         for (uint index = (uint)fromIndex; index < length; index++)
             if (@this.TryGetElement(index, out var item) && first.StrictEquals(item))
@@ -93,10 +93,10 @@ public partial class JSArray
         var @this = ToArrayLikeObject(a.This);
         var first = a.Get1();
         var n = GetArrayLikeLength(@this);
-        var fromIndex = a[1]?.IntValue ?? int.MaxValue;
+        var fromIndex = a.TryGetAt(1, out var value) ? ToIntegerOrInfinity(value) : long.MaxValue;
 
         if (fromIndex < 0)
-            fromIndex += (int)n;
+            fromIndex += n;
 
         if (n == 0)
             return JSNumber.MinusOne;

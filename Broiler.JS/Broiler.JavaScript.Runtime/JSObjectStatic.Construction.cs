@@ -134,6 +134,26 @@ public partial class JSObject
         if (first is not JSObject @object)
             return first;
 
+        static JSProperty FreezeProperty(uint key, in JSProperty property)
+        {
+            var attributes = property.Attributes & (~JSPropertyAttributes.Configurable);
+            if (property.IsValue)
+                attributes |= JSPropertyAttributes.Readonly;
+
+            return new JSProperty(key, property.get, property.set, property.value, attributes);
+        }
+
+        ref var ownProperties = ref @object.GetOwnProperties();
+        ownProperties.Update((uint key, ref JSProperty property) => property = FreezeProperty(key, property));
+
+        ref var elements = ref @object.GetElements();
+        foreach (var (key, property) in elements.AllValues())
+            elements.Put(key) = FreezeProperty(key, property);
+
+        ref var symbols = ref @object.GetSymbols();
+        foreach (var entry in symbols.All)
+            symbols.Put(entry.Key) = FreezeProperty(entry.Key, entry.Value);
+
         @object.status |= ObjectStatus.Frozen | ObjectStatus.NonExtensible;
         return @object;
     }

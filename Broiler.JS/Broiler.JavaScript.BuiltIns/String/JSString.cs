@@ -288,6 +288,7 @@ public partial class JSString : JSPrimitive
     }
 
     public override IElementEnumerator GetElementEnumerator() => new ElementEnumerator(value);
+    public override IElementEnumerator GetIterableEnumerator() => GetElementEnumerator();
 
     private struct ElementEnumerator(in StringSpan value) : IElementEnumerator
     {

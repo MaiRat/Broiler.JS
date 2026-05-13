@@ -9,13 +9,15 @@ public partial class JSObject
     internal static JSValue StaticCreate(in Arguments a)
     {
         var p = a.Get1();
-        if (p is not JSObject proto)
+        if (p.IsNull)
         {
-            if (!p.IsNull)
-                throw NewTypeError("Object prototype may only be an Object or null");
-
-            proto = GetCurrentObjectPrototype();
+            var result = new JSObject();
+            result.BasePrototypeObject = null;
+            return result;
         }
+
+        if (p is not JSObject proto)
+            throw NewTypeError("Object prototype may only be an Object or null");
 
         return new JSObject(proto);
     }

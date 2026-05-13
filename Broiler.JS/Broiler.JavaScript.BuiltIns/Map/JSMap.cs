@@ -20,12 +20,21 @@ public partial class JSMap : JSObject
 
     public JSMap(in Arguments a) : base(JSEngine.NewTargetPrototype)
     {
-        if (a[0] is not JSArray array)
+        var iterable = a[0];
+        if (iterable.IsNullOrUndefined)
             return;
 
-        var en = array.GetElementEnumerator();
+        if (this[KeyStrings.set] is not IJSFunction adder)
+            throw JSEngine.NewTypeError("Map.prototype.set is not callable");
+
+        var en = iterable.GetIterableEnumerator();
         while (en.MoveNext(out var item))
-            Set(item[0], item[1]);
+        {
+            if (item is not JSObject entry)
+                throw JSEngine.NewTypeError(JSObject.NotEntry(item));
+
+            adder.InvokeFunction(new Arguments(this, entry[0], entry[1]));
+        }
     }
 
     [JSExport("groupBy")]

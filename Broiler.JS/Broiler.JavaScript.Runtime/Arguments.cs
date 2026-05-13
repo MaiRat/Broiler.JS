@@ -230,7 +230,7 @@ public readonly partial struct Arguments
             }
 
             var spreadTarget = GetSpreadTarget(item);
-            var enumerator = spreadTarget.GetElementEnumerator();
+            var enumerator = spreadTarget.GetIterableEnumerator();
             while (enumerator.MoveNext(out var value))
                 args.Add(value);
         }

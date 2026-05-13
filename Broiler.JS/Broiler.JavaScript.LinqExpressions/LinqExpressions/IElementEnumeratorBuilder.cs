@@ -11,7 +11,7 @@ public class IElementEnumeratorBuilder
     public static Expression Get(Expression target)
     {
         if (typeof(JSValue).IsAssignableFrom(target.Type))
-            return target.CallExpression<JSValue, IElementEnumerator>(() => (x) => x.GetElementEnumerator());
+            return target.CallExpression<JSValue, IElementEnumerator>(() => (x) => x.GetIterableEnumerator());
 
         if (ArgumentsBuilder.refType == target.Type || target.Type == typeof(Arguments))
             return ArgumentsBuilder.GetElementEnumerator(target);
@@ -22,7 +22,7 @@ public class IElementEnumeratorBuilder
     public static Expression GetAsync(Expression target)
     {
         if (typeof(JSValue).IsAssignableFrom(target.Type))
-            return target.CallExpression<JSValue, IElementEnumerator>(() => (x) => x.GetAsyncElementEnumerator());
+            return target.CallExpression<JSValue, IElementEnumerator>(() => (x) => x.GetAsyncIterableEnumerator());
 
         return Get(target);
     }

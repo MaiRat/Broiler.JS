@@ -572,7 +572,7 @@ public partial class JSMath : JSObject
         bool hasPositiveInfinity = false;
         bool hasNegativeInfinity = false;
 
-        var en = iterable.GetElementEnumerator();
+        var en = iterable.GetIterableEnumerator();
         while (en.MoveNext(out var hasValue, out var item, out var _))
         {
             if (!hasValue)

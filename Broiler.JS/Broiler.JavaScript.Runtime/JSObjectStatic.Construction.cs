@@ -23,20 +23,82 @@ public partial class JSObject
     [JSExport("assign")]
     internal static JSValue Assign(in Arguments a)
     {
-        var first = a.Get1();
-        if (first.IsNullOrUndefined)
-            throw NewTypeError(Cannot_convert_undefined_or_null_to_object);
+        static JSObject ToObject(JSValue value)
+        {
+            if (value is JSObject @object)
+                return @object;
 
-        if (first is not JSObject firstObject)
-            return first;
+            if (value.IsNullOrUndefined)
+                throw NewTypeError(Cannot_convert_undefined_or_null_to_object);
+
+            return CreatePrimitiveObject(value) as JSObject ?? throw NewTypeError(Parameter_is_not_an_object);
+        }
+
+        static void SetSymbolValue(JSObject target, uint key, JSValue value)
+        {
+            ref var symbols = ref target.GetSymbols();
+            ref var existing = ref symbols.GetRefOrDefault(key, ref JSProperty.Empty);
+
+            if (!existing.IsEmpty)
+            {
+                if (existing.IsProperty)
+                {
+                    if (existing.set is IJSFunction setter)
+                    {
+                        setter.Delegate(new Arguments(target, value));
+                        return;
+                    }
+
+                    throw NewTypeError($"Cannot modify property {key} of {target} which has only a getter");
+                }
+
+                if (existing.IsReadOnly)
+                    throw NewTypeError($"Cannot modify property {key} of {target}");
+            }
+
+            if (target.IsFrozen())
+                throw NewTypeError($"Cannot modify property {key} of {target}");
+
+            if (existing.IsEmpty && !target.IsExtensible())
+                throw NewTypeError($"Cannot add property {key} to {target}");
+
+            symbols.Put(key) = new JSProperty(
+                key,
+                value,
+                !existing.IsEmpty ? existing.Attributes : JSPropertyAttributes.EnumerableConfigurableValue);
+            target.PropertyChanged?.Invoke(target, (uint.MaxValue, uint.MaxValue, null));
+        }
+
+        var target = ToObject(a.Get1());
+        if (target == null)
+            throw NewTypeError(Cannot_convert_undefined_or_null_to_object);
 
         for (var i = 1; i < a.Length; i++)
         {
             var ai = a.GetAt(i);
-            firstObject.FastAddRange(ai);
+            if (ai.IsNullOrUndefined)
+                continue;
+
+            var source = ToObject(ai);
+            var elements = source.GetElementEnumerator();
+            while (elements.MoveNext(out var hasValue, out var value, out var index))
+            {
+                if (hasValue)
+                    target[index] = value;
+            }
+
+            var properties = new PropertyEnumerator(source, true, false);
+            while (properties.MoveNext(out var key, out var value))
+                target[key] = value;
+
+            foreach (var (key, property) in source.GetSymbols().AllValues())
+            {
+                if (!property.IsEmpty && property.IsEnumerable)
+                    SetSymbolValue(target, key, source.GetValue(property));
+            }
         }
 
-        return first;
+        return target;
     }
 
     [JSExport("defineProperties")]

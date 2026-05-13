@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using Broiler.JavaScript.ExpressionCompiler;
 using Broiler.JavaScript.Ast.Misc;
+using Broiler.JavaScript.BuiltIns.Proxy;
 using Broiler.JavaScript.Engine;
 using Broiler.JavaScript.Runtime;
 using Broiler.JavaScript.Engine.Core;
@@ -201,8 +202,25 @@ public partial class JSFunction : JSObject, IPropertyAccessor, IJSFunction
 
         var ec = JSEngine.Current as IJSExecutionContext;
         var previousNewTarget = ec?.CurrentNewTarget;
-        var newTarget = previousNewTarget as IJSFunction ?? this;
-        var instancePrototype = newTarget.Prototype as JSObject ?? prototype;
+        var instancePrototype = prototype;
+
+        if (previousNewTarget is IJSFunction newTargetFunction)
+        {
+            instancePrototype = newTargetFunction.Prototype as JSObject ?? prototype;
+        }
+        else if (previousNewTarget != null)
+        {
+            var newTargetPrototype = previousNewTarget[KeyStrings.prototype];
+            if (newTargetPrototype is JSObject newTargetPrototypeObject)
+            {
+                instancePrototype = newTargetPrototypeObject;
+            }
+            else
+            {
+                (previousNewTarget as JSProxy)?.RequireTarget();
+            }
+        }
+
         JSValue obj = new JSObject { BasePrototypeObject = instancePrototype };
         var a1 = a.OverrideThis(obj);
         if (ec != null)

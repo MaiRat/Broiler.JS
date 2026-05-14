@@ -190,7 +190,7 @@ partial class JSNumber
             var v = a.Get1().DoubleValue;
 
             if (double.IsNaN(v) || v > 20 || v < 0)
-                throw JSEngine.NewRangeError("toExponential() digits argument must be between 0 and 20");
+                throw JSEngine.NewRangeError("toExponential() digits argument is out of range");
 
             var m = (int)v;
             if (m == 0)

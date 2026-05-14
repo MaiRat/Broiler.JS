@@ -47,7 +47,18 @@ public partial class JSObject
     [JSPrototypeMethod][JSExport("toString")]
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "JavaScript Method Signature is Standard")]
     public static JSValue ToString(in Arguments a)
-        => JSValue.CreateString(a.This?.TypeOf() == JSConstants.Function ? "[object Function]" : "[object Object]");
+    {
+        if (a.This.IsNull)
+            return JSValue.CreateString("[object Null]");
+
+        if (a.This.IsUndefined)
+            return JSValue.CreateString("[object Undefined]");
+
+        if (a.This.IsArray)
+            return JSValue.CreateString("[object Array]");
+
+        return JSValue.CreateString(a.This?.TypeOf() == JSConstants.Function ? "[object Function]" : "[object Object]");
+    }
 
     [JSPrototypeMethod][JSExport("toLocaleString")]
     public static JSValue ToLocaleString(in Arguments a)
@@ -64,10 +75,10 @@ public partial class JSObject
         get => (prototypeChain as IJSPrototype)?.Object ?? JSValue.NullValue;
         set
         {
-            if (value is JSObject o)
-            {
-                BasePrototypeObject = o;
-            }
+            if (!value.IsObject && !value.IsNull)
+                return;
+
+            SetPrototypeOf(value);
         }
     }
 

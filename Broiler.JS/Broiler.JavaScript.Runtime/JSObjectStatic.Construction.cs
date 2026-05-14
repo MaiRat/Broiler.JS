@@ -365,20 +365,18 @@ public partial class JSObject
             throw NewTypeError(NotIterable("undefined"));
 
         var r = new JSObject();
-        if (v.IsArray && v is JSObject va)
+        var en = v.GetIterableEnumerator();
+        while (en.MoveNext(out var item))
         {
-            ref var vaElements = ref va.GetElements();
-            for (uint i = 0; i < (uint)v.Length; i++)
+            if (item is not JSObject entry)
             {
-                var vi = vaElements[i];
-                var iaValue = vi.value as JSValue;
-                if (iaValue == null || !iaValue.IsArray)
-                    throw NewTypeError(NotEntry(vi));
+                if (en is IReturnableEnumerator returnable)
+                    returnable.Return(JSUndefined.Value);
 
-                var first = iaValue[0];
-                var second = iaValue[1];
-                r.FastAddValue(first, second, JSPropertyAttributes.EnumerableConfigurableValue);
+                throw NewTypeError(NotEntry(item));
             }
+
+            r.FastAddValue(entry[0], entry[1], JSPropertyAttributes.EnumerableConfigurableValue);
         }
 
         return r;

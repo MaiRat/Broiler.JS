@@ -16,7 +16,18 @@ public class JSVariable
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get => _value;
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        set { if (!IsReadOnly) _value = value; }
+        set
+        {
+            if (!IsReadOnly)
+            {
+                _value = value;
+                return;
+            }
+
+            if (IsStrictMode?.Invoke() == true)
+                throw JSException.NewTypeErrorFactory?.Invoke("Cannot assign to read only variable")
+                    ?? new InvalidOperationException("JSException.NewTypeErrorFactory delegate is not initialized. Ensure the Core assembly module initializer has run.");
+        }
     }
     internal bool IsReadOnly;
 
@@ -29,6 +40,7 @@ public class JSVariable
     /// Wired by Core's module initializer to point to JSEngine.Current.
     /// </summary>
     internal static Func<object> GetCurrentContext;
+    internal static Func<bool> IsStrictMode;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public JSVariable(JSValue v, string name)

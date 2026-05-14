@@ -11,6 +11,20 @@ namespace Broiler.JavaScript.BuiltIns.Promise;
 
 public partial class JSPromise
 {
+    private static bool IsDefaultPromiseConstructor(JSValue constructor)
+        => ReferenceEquals(constructor, (JSEngine.Current as JSObject)?[KeyStrings.Promise]);
+
+    private static JSValue CreatePromiseFromConstructor(JSValue constructor, Action<JSValue, JSValue> executor)
+    {
+        var executorFunction = new JSFunction((in Arguments executorArgs) =>
+        {
+            executor(executorArgs.Get1(), executorArgs.GetAt(1));
+            return JSUndefined.Value;
+        }, "executor", "function executor() { [native] }", length: 2, createPrototype: false);
+
+        return constructor.CreateInstance(new Arguments(JSUndefined.Value, executorFunction));
+    }
+
     public static Task Await(JSValue value)
     {
         if (value.IsNullOrUndefined)
@@ -80,16 +94,29 @@ public partial class JSPromise
     }
 
     [JSExport("resolve")]
-    public static JSValue Resolve(in Arguments a) => new JSPromise(a.Get1(), PromiseState.Resolved);
+    public static JSValue Resolve(in Arguments a)
+    {
+        var value = a.Get1();
+        if (IsDefaultPromiseConstructor(a.This))
+            return new JSPromise(value, PromiseState.Resolved);
+
+        return CreatePromiseFromConstructor(a.This, (resolve, _) =>
+        {
+            resolve.InvokeFunction(new Arguments(JSUndefined.Value, value));
+        });
+    }
 
     [JSExport("reject")]
     public static JSValue Reject(in Arguments a)
     {
         var reason = a.Get1();
-        if (reason.IsNullOrUndefined)
-            throw JSEngine.NewTypeError($"Failure reason must be provided for rejected promise");
+        if (IsDefaultPromiseConstructor(a.This))
+            return new JSPromise(reason, PromiseState.Rejected);
 
-        return new JSPromise(reason, PromiseState.Rejected);
+        return CreatePromiseFromConstructor(a.This, (_, reject) =>
+        {
+            reject.InvokeFunction(new Arguments(JSUndefined.Value, reason));
+        });
     }
 
 
@@ -100,7 +127,7 @@ public partial class JSPromise
         var result = JSValue.CreateArray();
         uint i = 0;
 
-        return new JSPromise((resolve, reject) =>
+        return CreatePromiseFromConstructor(a.This, (resolve, reject) =>
         {
             var sc = (JSEngine.Current as JSContext)?.synchronizationContext ?? System.Threading.SynchronizationContext.Current
                 ?? throw JSEngine.NewTypeError($"Cannot use promise without Synchronization Context");
@@ -127,14 +154,14 @@ public partial class JSPromise
                         total--;
 
                         if (total <= 0)
-                            resolve(result);
+                            resolve.InvokeFunction(new Arguments(JSUndefined.Value, result));
                     }, r1);
                     return JSUndefined.Value;
                 }, "", "function () { [native] }", length: 1, createPrototype: false);
                 var rejectElement = new JSFunction((in Arguments args) =>
                 {
                     var v = args.Get1();
-                    sc.Post((o) => reject(o as JSValue), v);
+                    sc.Post((o) => reject.InvokeFunction(new Arguments(JSUndefined.Value, o as JSValue)), v);
                     return JSUndefined.Value;
                 }, "", "function () { [native] }", length: 1, createPrototype: false);
 
@@ -155,7 +182,7 @@ public partial class JSPromise
             }
 
             if (empty)
-                sc.Post((o) => resolve(JSValue.CreateArray()), null);
+                sc.Post((o) => resolve.InvokeFunction(new Arguments(JSUndefined.Value, JSValue.CreateArray())), null);
         });
     }
 
@@ -167,7 +194,7 @@ public partial class JSPromise
         var result = JSValue.CreateArray();
         uint index = 0;
 
-        return new JSPromise((resolve, reject) =>
+        return CreatePromiseFromConstructor(a.This, (resolve, reject) =>
         {
             var sc = (JSEngine.Current as JSContext)?.synchronizationContext ?? System.Threading.SynchronizationContext.Current
                 ?? throw JSEngine.NewTypeError("Cannot use promise without Synchronization Context");
@@ -178,7 +205,7 @@ public partial class JSPromise
             void FinishIfDone()
             {
                 if (remaining == 0)
-                    sc.Post(_ => resolve(result), null);
+                    sc.Post(_ => resolve.InvokeFunction(new Arguments(JSUndefined.Value, result)), null);
             }
 
             while (en.MoveNext(out var hasValue, out var item, out var _))
@@ -220,7 +247,7 @@ public partial class JSPromise
             }
 
             if (empty)
-                sc.Post(_ => resolve(result), null);
+                sc.Post(_ => resolve.InvokeFunction(new Arguments(JSUndefined.Value, result)), null);
         });
     }
 
@@ -229,7 +256,10 @@ public partial class JSPromise
     {
         var input = a.Get1();
         if (input is not JSObject obj)
-            return new JSPromise(new JSObject(), JSPromise.PromiseState.Resolved);
+            return CreatePromiseFromConstructor(a.This, (resolve, _) =>
+            {
+                resolve.InvokeFunction(new Arguments(JSUndefined.Value, new JSObject()));
+            });
 
         var result = new JSObject();
         var en = obj.GetOwnProperties(false).GetEnumerator();
@@ -251,7 +281,10 @@ public partial class JSPromise
             result[key] = entry;
         }
 
-        return new JSPromise(result, JSPromise.PromiseState.Resolved);
+        return CreatePromiseFromConstructor(a.This, (resolve, _) =>
+        {
+            resolve.InvokeFunction(new Arguments(JSUndefined.Value, result));
+        });
     }
 
     [JSExport("any", Length = 1)]
@@ -262,7 +295,7 @@ public partial class JSPromise
         var errors = JSValue.CreateArray();
         uint errorIndex = 0;
 
-        return new JSPromise((resolve, reject) =>
+        return CreatePromiseFromConstructor(a.This, (resolve, reject) =>
         {
             var sc = (JSEngine.Current as JSContext)?.synchronizationContext ?? System.Threading.SynchronizationContext.Current
                 ?? throw JSEngine.NewTypeError("Cannot use promise without Synchronization Context");
@@ -281,7 +314,7 @@ public partial class JSPromise
                 promise.Then((in Arguments args) =>
                 {
                     var value = args.Get1();
-                    sc.Post(_ => resolve(value), null);
+                    sc.Post(_ => resolve.InvokeFunction(new Arguments(JSUndefined.Value, value)), null);
                     return JSUndefined.Value;
                 }, (in Arguments args) =>
                 {
@@ -292,14 +325,14 @@ public partial class JSPromise
                         errors[currentIndex] = reason;
                         remaining--;
                         if (remaining == 0)
-                            reject(errors);
+                            reject.InvokeFunction(new Arguments(JSUndefined.Value, errors));
                     }, null);
                     return JSUndefined.Value;
                 });
             }
 
             if (empty)
-                sc.Post(_ => reject(errors), null);
+                sc.Post(_ => reject.InvokeFunction(new Arguments(JSUndefined.Value, errors)), null);
         });
     }
 }

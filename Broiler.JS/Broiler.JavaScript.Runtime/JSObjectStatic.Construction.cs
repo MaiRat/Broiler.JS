@@ -289,7 +289,7 @@ public partial class JSObject
 
         var result = targetObject.DefineProperty(key, pd);
         if (result.IsBoolean && !result.BooleanValue)
-            throw NewTypeError("Cannot define property");
+            throw NewTypeError($"Cannot define property {key}");
 
         return targetObject;
     }

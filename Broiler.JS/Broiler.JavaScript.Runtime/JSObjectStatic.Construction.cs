@@ -123,9 +123,9 @@ public partial class JSObject
         if (pds.IsNullOrUndefined)
             throw NewTypeError(Cannot_convert_undefined_or_null_to_object);
 
-        var pdObject = pds as JSObject
-            ?? CreatePrimitiveObject(pds) as JSObject
-            ?? throw new InvalidOperationException("CreatePrimitiveObject returned a non-object value.");
+        var primitiveObject = pds as JSObject ?? CreatePrimitiveObject(pds);
+        if (primitiveObject is not JSObject pdObject)
+            throw new InvalidOperationException($"CreatePrimitiveObject returned a non-JSObject value: {primitiveObject?.GetType().Name ?? "null"}");
 
         if (!target.IsExtensible())
             throw NewTypeError("Object is not extensible");

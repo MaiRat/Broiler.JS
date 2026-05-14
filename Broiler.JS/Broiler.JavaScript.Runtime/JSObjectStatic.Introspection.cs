@@ -3,6 +3,9 @@ namespace Broiler.JavaScript.Runtime;
 
 public partial class JSObject
 {
+    private static bool ShouldIncludeOwnPropertyKey(JSValue value, bool includeSymbols) =>
+        includeSymbols ? value is IJSSymbol : value is not IJSSymbol;
+
     [JSExport("entries")]
     internal static JSValue StaticEntries(in Arguments a)
     {
@@ -182,7 +185,7 @@ public partial class JSObject
         var r = JSValue.CreateArray();
         while (en.MoveNext(out var hasValue, out var value, out var index))
         {
-            if (hasValue && value is not IJSSymbol)
+            if (hasValue && ShouldIncludeOwnPropertyKey(value, includeSymbols: false))
                 r.AddArrayItem(value);
         }
         return r;
@@ -202,7 +205,7 @@ public partial class JSObject
         var en = jobj.GetAllKeys(false, false);
         while (en.MoveNext(out var hasValue, out var value, out var _))
         {
-            if (hasValue && value is IJSSymbol)
+            if (hasValue && ShouldIncludeOwnPropertyKey(value, includeSymbols: true))
                 r.AddArrayItem(value);
         }
 

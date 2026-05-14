@@ -476,9 +476,6 @@ public abstract partial class JSValue : IDynamicMetaObjectProvider, IPropertyAcc
 
     public virtual void SetPrototypeOf(JSValue target)
     {
-        if (ReferenceEquals(this, target))
-            throw NewTypeError("Cyclic __proto__ value");
-
         if (target == NullValue)
         {
             if (this is JSObject { } nullTargetObject && !nullTargetObject.IsExtensible() && prototypeChain?.Object != null)

@@ -54,8 +54,8 @@ public partial class JSObject
         if (a.This.IsUndefined)
             return JSValue.CreateString("[object Undefined]");
 
-        if (a.This.IsObject)
-            _ = a.This.GetPrototypeOf();
+        if (a.This.IsArray)
+            return JSValue.CreateString("[object Array]");
 
         return JSValue.CreateString(a.This?.TypeOf() == JSConstants.Function ? "[object Function]" : "[object Object]");
     }

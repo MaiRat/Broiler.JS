@@ -476,14 +476,39 @@ public abstract partial class JSValue : IDynamicMetaObjectProvider, IPropertyAcc
 
     public virtual void SetPrototypeOf(JSValue target)
     {
+        if (ReferenceEquals(this, target))
+            throw NewTypeError("Cyclic __proto__ value");
+
         if (target == NullValue)
         {
+            if (this is JSObject { } nullTargetObject && !nullTargetObject.IsExtensible() && prototypeChain?.Object != null)
+                throw NewTypeError("Object is not extensible");
+
             BasePrototypeObject = null;
             return;
         }
 
         if (!target.IsObject)
             throw NewTypeError($"Prototype must be an object or null");
+
+        if (this is JSObject { } @object)
+        {
+            var current = prototypeChain?.Object;
+            if (ReferenceEquals(current, target))
+                return;
+
+            if (!@object.IsExtensible())
+                throw NewTypeError("Object is not extensible");
+        }
+
+        for (var prototype = target; prototype is JSObject prototypeObject; prototype = prototypeObject.GetPrototypeOf())
+        {
+            if (ReferenceEquals(prototype, this))
+                throw NewTypeError("Cyclic __proto__ value");
+
+            if (prototypeObject.GetType() != typeof(JSObject))
+                break;
+        }
 
         BasePrototypeObject = target;
     }

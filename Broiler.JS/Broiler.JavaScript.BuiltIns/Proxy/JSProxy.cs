@@ -126,24 +126,35 @@ public partial class JSProxy : JSObject
 
     private static void ValidateOwnKeysInvariant(JSObject target, HashSet<string> seenKeys)
     {
-        foreach (var (key, property) in target.GetElements().AllValues())
+        void ValidateOwnKey(string identity, in JSProperty property)
         {
-            if (!property.IsConfigurable && !seenKeys.Contains(CreateKeyIdentity(key)))
-                throw JSEngine.NewTypeError("Proxy ownKeys trap must include all non-configurable target keys");
+            if (!property.IsConfigurable)
+            {
+                if (!seenKeys.Remove(identity))
+                    throw JSEngine.NewTypeError("Proxy ownKeys trap must include all non-configurable target keys");
+
+                return;
+            }
+
+            if (target.IsExtensible())
+                return;
+
+            if (!seenKeys.Remove(identity))
+                throw JSEngine.NewTypeError("Proxy ownKeys trap must include all keys of a non-extensible target");
         }
+
+        foreach (var (key, property) in target.GetElements().AllValues())
+            ValidateOwnKey(CreateKeyIdentity(key), property);
 
         var properties = target.GetOwnProperties(false).GetEnumerator(false);
         while (properties.MoveNext(out KeyString key, out JSProperty property))
-        {
-            if (!property.IsConfigurable && !seenKeys.Contains(CreateKeyIdentity(key)))
-                throw JSEngine.NewTypeError("Proxy ownKeys trap must include all non-configurable target keys");
-        }
+            ValidateOwnKey(CreateKeyIdentity(key), property);
 
         foreach (var (key, property) in target.GetSymbols().AllValues())
-        {
-            if (!property.IsConfigurable && !seenKeys.Contains(CreateSymbolKeyIdentity(key)))
-                throw JSEngine.NewTypeError("Proxy ownKeys trap must include all non-configurable target keys");
-        }
+            ValidateOwnKey(CreateSymbolKeyIdentity(key), property);
+
+        if (!target.IsExtensible() && seenKeys.Count > 0)
+            throw JSEngine.NewTypeError("Proxy ownKeys trap cannot report extra keys for a non-extensible target");
     }
 
     public override JSValue InvokeFunction(in Arguments a)
@@ -305,7 +316,16 @@ public partial class JSProxy : JSObject
         var target = RequireTarget();
         var fx = handler[KeyStrings.getPrototypeOf];
         if (fx is JSFunction fxFunction)
-            return fxFunction.InvokeFunction(new Arguments(target));
+        {
+            var result = fxFunction.InvokeFunction(new Arguments(target));
+            if (!result.IsObject && !result.IsNull)
+                throw JSEngine.NewTypeError("Proxy getPrototypeOf trap must return an object or null");
+
+            if (!target.IsExtensible() && !ReferenceEquals(target.GetPrototypeOf(), result))
+                throw JSEngine.NewTypeError("Proxy getPrototypeOf trap returned an inconsistent prototype");
+
+            return result;
+        }
 
         return target.GetPrototypeOf();
     }
@@ -357,7 +377,13 @@ public partial class JSProxy : JSObject
         var fx = handler[KeyStrings.setPrototypeOf];
         if (fx is JSFunction fxFunction)
         {
-            fxFunction.InvokeFunction(new Arguments(target, proto));
+            var result = fxFunction.InvokeFunction(new Arguments(target, proto));
+            if (!result.BooleanValue)
+                throw JSEngine.NewTypeError("Proxy setPrototypeOf trap returned false");
+
+            if (!target.IsExtensible() && !ReferenceEquals(target.GetPrototypeOf(), proto))
+                throw JSEngine.NewTypeError("Proxy setPrototypeOf trap returned true for an invalid prototype change");
+
             return;
         }
 

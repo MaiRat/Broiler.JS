@@ -3955,6 +3955,114 @@ public class BuiltInsTests
     }
 
     [Fact]
+    public void Object_Internal_Method_TypeError_Regressions_Match_Test262_Expectations()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = new JSContext();
+
+        var result = ctx.Eval(@"(function () {
+            function thrownCtor(fn) {
+                try {
+                    fn();
+                    return 'no-throw';
+                } catch (e) {
+                    return e.constructor.name;
+                }
+            }
+
+            return [
+                (function () {
+                    var returned = false;
+                    var iterable = {
+                        [Symbol.iterator]: function () {
+                            var advanced = false;
+                            return {
+                                next: function () {
+                                    if (advanced) {
+                                        throw new Error('should only advance once');
+                                    }
+
+                                    advanced = true;
+                                    return {
+                                        done: false,
+                                        value: null
+                                    };
+                                },
+                                return: function () {
+                                    returned = true;
+                                    return {};
+                                }
+                            };
+                        }
+                    };
+
+                    return thrownCtor(function () {
+                        Object.fromEntries(iterable);
+                    }) + '|' + returned;
+                })(),
+                (function () {
+                    var proto = {};
+                    var subject = Object.create(proto);
+                    Object.preventExtensions(subject);
+                    subject.__proto__ = proto;
+
+                    return thrownCtor(function () {
+                        subject.__proto__ = {};
+                    }) + '|' + (Object.getPrototypeOf(subject) === proto);
+                })(),
+                (function () {
+                    var root = {};
+                    var intermediary = Object.create(root);
+                    var leaf = Object.create(intermediary);
+
+                    return thrownCtor(function () {
+                        root.__proto__ = leaf;
+                    }) + '|' + (Object.getPrototypeOf(root) === Object.prototype);
+                })(),
+                thrownCtor(function () {
+                    var obj = {};
+                    Object.preventExtensions(obj);
+                    Object.setPrototypeOf(obj, null);
+                }),
+                thrownCtor(function () { Object.getPrototypeOf(); }),
+                thrownCtor(function () {
+                    var handle = Proxy.revocable([], {});
+                    handle.revoke();
+                    Object.prototype.toString.call(handle.proxy);
+                }),
+                thrownCtor(function () {
+                    var target = {};
+                    var symbol = Symbol();
+                    target[symbol] = 2;
+                    var proxy = new Proxy(target, {
+                        ownKeys: function() {
+                            return [];
+                        }
+                    });
+
+                    Object.preventExtensions(target);
+                    Object.getOwnPropertyNames(proxy);
+                }),
+                thrownCtor(function () {
+                    var target = {};
+                    var proxy = new Proxy(target, {
+                        ownKeys: function() {
+                            return ['prop'];
+                        }
+                    });
+
+                    Object.preventExtensions(target);
+                    Object.getOwnPropertySymbols(proxy);
+                })
+            ].join('|');
+        })();");
+
+        Assert.Equal(
+            "TypeError|true|TypeError|true|TypeError|true|TypeError|TypeError|TypeError|TypeError|TypeError",
+            result.ToString());
+    }
+
+    [Fact]
     public void Map_Constructor_Uses_Iterable_Protocol_And_Rejects_Invalid_Entries()
     {
         EnsureBuiltInsLoaded();

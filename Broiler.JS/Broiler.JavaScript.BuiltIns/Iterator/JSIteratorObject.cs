@@ -23,6 +23,7 @@ namespace Broiler.JavaScript.BuiltIns.Iterator;
 public partial class JSIteratorObject : JSObject
 {
     internal readonly IElementEnumerator _enumerator;
+    private bool _executing;
 
     // ---------------------------------------------------------------
     // Constructors
@@ -38,8 +39,18 @@ public partial class JSIteratorObject : JSObject
     [JSExport("next")]
     internal JSValue Next(in Arguments a)
     {
-        if (_enumerator != null && _enumerator.MoveNext(out var value))
-            return IteratorResult(value, false);
+        ThrowIfExecuting();
+
+        try
+        {
+            _executing = true;
+            if (_enumerator != null && _enumerator.MoveNext(out var value))
+                return IteratorResult(value, false);
+        }
+        finally
+        {
+            _executing = false;
+        }
 
         return IteratorResult(JSUndefined.Value, true);
     }
@@ -48,7 +59,26 @@ public partial class JSIteratorObject : JSObject
     internal JSValue Return(in Arguments a)
     {
         var value = a.Length > 0 ? a.Get1() : JSUndefined.Value;
+        ThrowIfExecuting();
+
+        try
+        {
+            _executing = true;
+            if (_enumerator is IReturnableEnumerator returnable)
+                return returnable.Return(value);
+        }
+        finally
+        {
+            _executing = false;
+        }
+
         return IteratorResult(value, true);
+    }
+
+    private void ThrowIfExecuting()
+    {
+        if (_executing)
+            throw JSEngine.NewTypeError("Iterator is already executing");
     }
 
     // ---------------------------------------------------------------
@@ -577,7 +607,7 @@ public partial class JSIteratorObject : JSObject
         }
     }
 
-    internal sealed class ConcatEnumerator(JSValue[] iterables) : IElementEnumerator
+    internal sealed class ConcatEnumerator(JSValue[] iterables) : IElementEnumerator, IReturnableEnumerator
     {
         private int _current = 0;
         private IElementEnumerator _currentEnum = iterables.Length > 0 ? iterables[0].GetElementEnumerator() : null;
@@ -637,6 +667,14 @@ public partial class JSIteratorObject : JSObject
             }
 
             return @default;
+        }
+
+        public JSValue Return(JSValue value)
+        {
+            if (_currentEnum is IReturnableEnumerator returnable)
+                return returnable.Return(value);
+
+            return IteratorResult(value, true);
         }
     }
 }

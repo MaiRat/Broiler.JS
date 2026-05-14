@@ -350,7 +350,10 @@ public partial class JSObject
         foreach (var entry in symbols.All)
             symbols.Put(entry.Key) = FreezeProperty(entry.Key, entry.Value);
 
-        @object.status |= ObjectStatus.Frozen | ObjectStatus.NonExtensible;
+        if (!@object.PreventExtensions())
+            throw NewTypeError("Cannot freeze object");
+
+        @object.status |= ObjectStatus.Frozen;
         return @object;
     }
 
@@ -388,7 +391,9 @@ public partial class JSObject
         if (first is not JSObject @object)
             return first;
 
-        @object.status |= ObjectStatus.NonExtensible;
+        if (!@object.PreventExtensions())
+            throw NewTypeError("Cannot prevent extensions");
+
         return @object;
     }
 
@@ -399,7 +404,10 @@ public partial class JSObject
         if (first is not JSObject @object)
             return first;
 
-        @object.status |= ObjectStatus.Sealed | ObjectStatus.NonExtensible;
+        if (!@object.PreventExtensions())
+            throw NewTypeError("Cannot seal object");
+
+        @object.status |= ObjectStatus.Sealed;
         @object.GetOwnProperties().Update((uint x, ref JSProperty v) => v = new JSProperty(x, v.get, v.set, v.value, v.Attributes & (~JSPropertyAttributes.Configurable)));
         ref var elements = ref @object.GetElements();
         foreach (var (key, property) in elements.AllValues())

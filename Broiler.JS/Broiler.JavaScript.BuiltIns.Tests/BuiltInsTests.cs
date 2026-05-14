@@ -69,9 +69,26 @@ public class BuiltInsTests
         EnsureBuiltInsLoaded();
         using var ctx = new JSContext();
 
-        var ex = Assert.Throws<JSException>(() => ctx.Eval("JSON.stringify(1n);"));
+        var result = ctx.Eval("""
+            (function () {
+              function thrownCtor(fn) {
+                try {
+                  fn();
+                  return 'no-throw';
+                } catch (e) {
+                  return e.constructor.name;
+                }
+              }
 
-        Assert.Equal("TypeError", ex.Error[KeyStrings.constructor][KeyStrings.name].ToString());
+              return [
+                thrownCtor(function () { JSON.stringify(0n); }),
+                thrownCtor(function () { JSON.stringify(Object(0n)); }),
+                thrownCtor(function () { JSON.stringify({ x: 0n }); })
+              ].join('|');
+            })();
+            """);
+
+        Assert.Equal("TypeError|TypeError|TypeError", result.ToString());
     }
 
     [Fact]
@@ -1961,6 +1978,66 @@ public class BuiltInsTests
     }
 
     [Fact]
+    public void Object_Integrity_And_DefineProperty_TypeError_Regressions_Match_Test262()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = new JSContext();
+        var result = ctx.Eval("""
+            (function () {
+              function thrownCtor(fn) {
+                try {
+                  fn();
+                  return 'no-throw';
+                } catch (e) {
+                  return e.constructor.name;
+                }
+              }
+
+              var toStringAccessed = false;
+              var valueOfAccessed = false;
+              var ownProp = {
+                toString: function() {
+                  toStringAccessed = true;
+                  return {};
+                },
+                valueOf: function() {
+                  valueOfAccessed = true;
+                  return {};
+                }
+              };
+
+              var arr = [0, 1, 2];
+              Object.defineProperty(arr, '1', { configurable: false });
+
+              var trapFalse = new Proxy({}, {
+                preventExtensions: function() {
+                  return false;
+                }
+              });
+
+              return [
+                thrownCtor(function () { Object.preventExtensions(trapFalse); }),
+                thrownCtor(function () { Object.seal(new Proxy({}, { preventExtensions: function() { return false; } })); }),
+                thrownCtor(function () { Object.freeze(new Proxy({}, { preventExtensions: function() { return false; } })); }),
+                thrownCtor(function () { Object.defineProperty({}, ownProp, {}); }) + ':' + toStringAccessed + ':' + valueOfAccessed,
+                thrownCtor(function () { Object.defineProperty(arr, 'length', { value: 1 }); }) + ':' + arr.length,
+                (function () {
+                  var target = [1, 2, 3];
+                  Object.defineProperty(target, 'length', { writable: false });
+                  return thrownCtor(function () { Object.defineProperty(target, 3, { value: 'abc' }); });
+                })(),
+                (function () {
+                  var target = [1];
+                  return thrownCtor(function () { Object.defineProperty(target, 'length', { configurable: true }); });
+                })()
+              ].join('|');
+            })();
+            """);
+
+        Assert.Equal("TypeError|TypeError|TypeError|TypeError:true:true|TypeError:2|TypeError|TypeError", result.ToString());
+    }
+
+    [Fact]
     public void Array_IsArray_And_Name_Properties_Are_Actually_Configurable()
     {
         EnsureBuiltInsLoaded();
@@ -3747,6 +3824,102 @@ public class BuiltInsTests
         var throwEx = Assert.Throws<JSException>(() => ctx.Eval("iterThrow.next();"));
         Assert.Equal("TypeError", throwEx.Error[KeyStrings.constructor][KeyStrings.name].ToString());
         Assert.Equal("true|true", ctx.Eval("var result = iterThrow.next(); String(result.done) + '|' + String(result.value === undefined);").ToString());
+
+        var concatReturnResult = ctx.Eval("""
+            (function () {
+              let enterCount = 0;
+              let iterator;
+
+              let iterable = {
+                [Symbol.iterator]() {
+                  return {
+                    next() {
+                      return { done: false };
+                    },
+                    return() {
+                      enterCount++;
+                      iterator.return();
+                      return { done: false };
+                    }
+                  };
+                }
+              };
+
+              iterator = Iterator.concat(iterable);
+              iterator.next();
+
+              try {
+                iterator.return();
+                return 'no-throw';
+              } catch (e) {
+                return e.constructor.name + '|' + enterCount;
+              }
+            })();
+            """);
+
+        Assert.Equal("TypeError|1", concatReturnResult.ToString());
+    }
+
+    [Fact]
+    public void Math_SumPrecise_Rejects_NonNumbers_Without_Coercion_And_Closes_Iterators()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = CreateContext();
+        var result = ctx.Eval("""
+            (function () {
+              function thrownCtor(fn) {
+                try {
+                  fn();
+                  return 'no-throw';
+                } catch (e) {
+                  return e.constructor.name;
+                }
+              }
+
+              var coercions = 0;
+              var objectWithValueOf = {
+                valueOf: function() {
+                  ++coercions;
+                  throw new Error('valueOf should not be called');
+                },
+                toString: function() {
+                  ++coercions;
+                  throw new Error('toString should not be called');
+                }
+              };
+
+              var nextCalls = 0;
+              var returnCalls = 0;
+              var iterator = {
+                next: function () {
+                  ++nextCalls;
+                  return { done: false, value: objectWithValueOf };
+                },
+                return: function () {
+                  ++returnCalls;
+                  return {};
+                }
+              };
+
+              return [
+                thrownCtor(function () { Math.sumPrecise([{}]); }),
+                thrownCtor(function () { Math.sumPrecise([0n]); }),
+                thrownCtor(function () { Math.sumPrecise([objectWithValueOf]); }),
+                coercions,
+                thrownCtor(function () {
+                  Math.sumPrecise({
+                    [Symbol.iterator]: function () {
+                      return iterator;
+                    }
+                  });
+                }),
+                nextCalls,
+                returnCalls
+              ].join('|');
+            })();
+            """);
+
+        Assert.Equal("TypeError|TypeError|TypeError|0|TypeError|1|1", result.ToString());
     }
 
     [Fact]

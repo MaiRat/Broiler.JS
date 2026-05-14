@@ -222,8 +222,7 @@ public partial class JSReflect : JSObject
         if (target is not JSObject @object)
             throw JSEngine.NewTypeError($"Not an object");
 
-        @object.status |= ObjectStatus.NonExtensible;
-        return JSBoolean.True;
+        return @object.PreventExtensions() ? JSBoolean.True : JSBoolean.False;
     }
 
     [JSExport(Length = 2)]

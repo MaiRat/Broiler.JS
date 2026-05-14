@@ -10,7 +10,7 @@ public partial class JSObject
     public bool IsSealedOrFrozen() => (status & ObjectStatus.SealedOrFrozen) > 0;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool IsExtensible() => !((status & ObjectStatus.NonExtensible) > 0);
+    public virtual bool IsExtensible() => !((status & ObjectStatus.NonExtensible) > 0);
 
 
     public bool IsSealedOrFrozenOrNonExtensible() => (status & ObjectStatus.SealedFrozenNonExtensible) > 0;
@@ -18,17 +18,31 @@ public partial class JSObject
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool IsFrozen() => (status & ObjectStatus.Frozen) > 0;
 
+    public virtual bool PreventExtensions()
+    {
+        status |= ObjectStatus.NonExtensible;
+        return true;
+    }
+
     internal override PropertyKey ToKey(bool create = true)
     {
-        if (!create)
+        var toString = GetMethod(KeyStrings.toString);
+        if (toString != null)
         {
-            if (KeyStrings.TryGet(ToString(), out var k))
-                return k;
-
-            return KeyStrings.undefined;
+            var primitive = toString(new Arguments(this));
+            if (!primitive.IsObject)
+                return primitive.ToKey(create);
         }
 
-        return KeyStrings.GetOrCreate(ToString());
+        var valueOf = GetMethod(KeyStrings.valueOf);
+        if (valueOf != null)
+        {
+            var primitive = valueOf(new Arguments(this));
+            if (!primitive.IsObject)
+                return primitive.ToKey(create);
+        }
+
+        throw NewTypeError("Cannot convert object to primitive value");
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

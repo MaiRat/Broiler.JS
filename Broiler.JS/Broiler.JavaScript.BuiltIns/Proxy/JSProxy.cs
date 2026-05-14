@@ -16,6 +16,8 @@ namespace Broiler.JavaScript.BuiltIns.Proxy;
 public partial class JSProxy : JSObject
 {
     private static readonly KeyString ConstructTrapKey = KeyStrings.GetOrCreate("construct");
+    private static readonly KeyString IsExtensibleTrapKey = KeyStrings.GetOrCreate("isExtensible");
+    private static readonly KeyString PreventExtensionsTrapKey = KeyStrings.GetOrCreate("preventExtensions");
     readonly JSObject target;
     private readonly JSObject handler;
     private readonly bool callable;
@@ -306,6 +308,47 @@ public partial class JSProxy : JSObject
             return fxFunction.InvokeFunction(new Arguments(target));
 
         return target.GetPrototypeOf();
+    }
+
+    public override bool IsExtensible()
+    {
+        var target = RequireTarget();
+        var fx = handler[IsExtensibleTrapKey];
+        if (fx is JSFunction fxFunction)
+        {
+            var result = fxFunction.InvokeFunction(new Arguments(target));
+            var isExtensible = result.BooleanValue;
+            if (isExtensible != target.IsExtensible())
+                throw JSEngine.NewTypeError("Proxy isExtensible trap returned an inconsistent result");
+
+            return isExtensible;
+        }
+
+        return target.IsExtensible();
+    }
+
+    public override bool PreventExtensions()
+    {
+        var target = RequireTarget();
+        var fx = handler[PreventExtensionsTrapKey];
+        if (fx is JSFunction fxFunction)
+        {
+            var result = fxFunction.InvokeFunction(new Arguments(target));
+            if (!result.BooleanValue)
+                return false;
+
+            if (target.IsExtensible())
+                throw JSEngine.NewTypeError("Proxy preventExtensions trap returned true but target is still extensible");
+
+            status |= ObjectStatus.NonExtensible;
+            return true;
+        }
+
+        if (!target.PreventExtensions())
+            return false;
+
+        status |= ObjectStatus.NonExtensible;
+        return true;
     }
 
     public override void SetPrototypeOf(JSValue proto)

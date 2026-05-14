@@ -128,14 +128,18 @@ public partial class JSObject
         if (!target.IsExtensible())
             throw NewTypeError("Object is not extensible");
 
-        var ownElements = pdObject.GetElementEnumerator();
+        var ownElements = pds is JSObject
+            ? pdObject.GetElementEnumerator()
+            : pds.GetElementEnumerator();
         while (ownElements.MoveNext(out var hasValue, out var item, out var index))
         {
             if (!hasValue)
                 continue;
 
-            if (item is JSObject itemObject)
-                target.DefineProperty(index, itemObject);
+            if (item is not JSObject itemObject)
+                throw NewTypeError("Property Description must be an object");
+
+            target.DefineProperty(index, itemObject);
         }
 
         var properties = pdObject.GetOwnProperties(false).GetEnumerator();

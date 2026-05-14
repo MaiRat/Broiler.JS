@@ -578,7 +578,15 @@ public partial class JSMath : JSObject
             if (!hasValue)
                 continue;
 
-            var d = item.DoubleValue;
+            if (item is not JSNumber number)
+            {
+                if (en is IReturnableEnumerator returnable)
+                    returnable.Return(JSUndefined.Value);
+
+                throw JSEngine.NewTypeError("Math.sumPrecise only accepts Number values");
+            }
+
+            var d = number.value;
 
             if (double.IsNaN(d))
                 return JSNumber.NaN;

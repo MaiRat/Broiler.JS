@@ -2,7 +2,7 @@
 
 namespace Broiler.JavaScript.Runtime;
 
-public struct JSIterator(JSValue iterator) : IElementEnumerator
+public struct JSIterator(JSValue iterator) : IElementEnumerator, IReturnableEnumerator
 {
     private uint index = 0;
 
@@ -68,5 +68,23 @@ public struct JSIterator(JSValue iterator) : IElementEnumerator
             return @default;
 
         return value[KeyStrings.value];
+    }
+
+    public readonly JSValue Return(JSValue value)
+    {
+        var fx = iterator.GetMethod(KeyStrings.@return);
+        if (fx == null)
+        {
+            var iteratorResult = JSObject.NewWithProperties();
+            iteratorResult.FastAddValue(KeyStrings.value, value, Broiler.JavaScript.Storage.JSPropertyAttributes.EnumerableConfigurableValue);
+            iteratorResult.FastAddValue(KeyStrings.done, JSValue.BooleanTrue, Broiler.JavaScript.Storage.JSPropertyAttributes.EnumerableConfigurableValue);
+            return iteratorResult;
+        }
+
+        var result = fx(new Arguments(iterator, value));
+        if (!result.IsObject)
+            throw JSValue.NewTypeError("Iterator return result is not an object");
+
+        return result;
     }
 }

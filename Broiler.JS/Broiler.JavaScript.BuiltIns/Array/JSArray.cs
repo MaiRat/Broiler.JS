@@ -298,6 +298,97 @@ public partial class JSArray : JSObject
         }
         return false;
     }
+
+    public override JSValue DefineProperty(JSValue key, JSObject propertyDescription)
+    {
+        var propertyKey = key.ToKey();
+        if (propertyKey.Type == KeyType.String && propertyKey.KeyString.Key == KeyStrings.length.Key)
+            return DefineLengthProperty(propertyDescription);
+
+        if (propertyKey.Type == KeyType.UInt)
+            return DefineIndexProperty(propertyKey.Index, propertyDescription);
+
+        return base.DefineProperty(key, propertyDescription);
+    }
+
+    private JSValue DefineIndexProperty(uint index, JSObject propertyDescription)
+    {
+        if (index >= _length && IsLengthReadOnly())
+            throw JSEngine.NewTypeError("Cannot modify property length");
+
+        var result = base.DefineProperty(index, propertyDescription);
+        if (_length <= index)
+            _length = index + 1;
+
+        return result;
+    }
+
+    private JSValue DefineLengthProperty(JSObject propertyDescription)
+    {
+        var hasValue = !propertyDescription.GetInternalProperty(KeyStrings.value, false).IsEmpty;
+        var hasWritable = !propertyDescription.GetInternalProperty(KeyStrings.writable, false).IsEmpty;
+        var hasConfigurable = !propertyDescription.GetInternalProperty(KeyStrings.configurable, false).IsEmpty;
+        var hasEnumerable = !propertyDescription.GetInternalProperty(KeyStrings.enumerable, false).IsEmpty;
+
+        if ((hasConfigurable && propertyDescription[KeyStrings.configurable].BooleanValue)
+            || (hasEnumerable && propertyDescription[KeyStrings.enumerable].BooleanValue))
+        {
+            throw JSEngine.NewTypeError("Cannot redefine array length");
+        }
+
+        if (!hasValue)
+        {
+            if (hasWritable)
+                SetLengthWritable(propertyDescription[KeyStrings.writable].BooleanValue);
+
+            return JSUndefined.Value;
+        }
+
+        var newLengthNumber = propertyDescription[KeyStrings.value].DoubleValue;
+        if (double.IsNaN(newLengthNumber) || newLengthNumber < 0 || newLengthNumber > uint.MaxValue || newLengthNumber != System.Math.Truncate(newLengthNumber))
+            throw JSEngine.NewRangeError("Invalid length");
+
+        var newLength = (uint)newLengthNumber;
+        var oldLength = _length;
+        var newWritable = !hasWritable || propertyDescription[KeyStrings.writable].BooleanValue;
+
+        if (newLength >= oldLength)
+        {
+            if (newLength != oldLength && IsLengthReadOnly())
+                throw JSEngine.NewTypeError("Cannot modify property length");
+
+            _length = newLength;
+            SetLengthWritable(newWritable);
+            return JSUndefined.Value;
+        }
+
+        if (IsLengthReadOnly())
+            throw JSEngine.NewTypeError("Cannot modify property length");
+
+        ref var elements = ref GetElements();
+        for (uint index = oldLength; index > newLength; index--)
+        {
+            var actualIndex = index - 1;
+            if (elements.TryGetValue(actualIndex, out var property) && !property.IsConfigurable)
+            {
+                _length = actualIndex + 1;
+                SetLengthWritable(newWritable);
+                throw JSEngine.NewTypeError("Cannot redefine array length");
+            }
+
+            elements.RemoveAt(actualIndex);
+        }
+
+        _length = newLength;
+        SetLengthWritable(newWritable);
+        return JSUndefined.Value;
+    }
+
+    private void SetLengthWritable(bool writable)
+    {
+        var attributes = writable ? JSPropertyAttributes.Value : JSPropertyAttributes.ReadonlyValue;
+        GetOwnProperties().Put(KeyStrings.length.Key) = new JSProperty(KeyStrings.length, JSValue.CreateNumber(_length), attributes);
+    }
 }
 
 

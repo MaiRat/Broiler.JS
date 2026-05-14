@@ -227,6 +227,8 @@ public partial class JSJSON : JSObject
         if (f.IsUndefined)
             return f;
 
+        f = ToJson(f);
+
         TextWriter sb = new StringWriter();
         Func<(JSValue target, JSValue key, JSValue value), JSValue> replacer = null;
         string indent = null;
@@ -285,6 +287,7 @@ public partial class JSJSON : JSObject
 
     public static string Stringify(JSValue value)
     {
+        value = ToJson(value);
         var sb = new StringWriter();
         Stringify(sb, value, null, null, []);
         return sb.ToString();
@@ -460,6 +463,10 @@ public partial class JSJSON : JSObject
     {
         if (value is not JSObject jobj)
             return value;
+
+        var primitive = jobj.ValueOf();
+        if (!primitive.IsObject)
+            value = primitive;
 
         var p = jobj.GetMethod(KeyStrings.toJSON);
         if (p == null)

@@ -208,6 +208,7 @@ partial class FastCompiler
             if (body is not AstBlock block)
                 return false;
 
+            // "use strict" is recognized only within the initial directive prologue.
             var statements = block.Statements.GetFastEnumerator();
             while (statements.MoveNext(out var statement))
             {

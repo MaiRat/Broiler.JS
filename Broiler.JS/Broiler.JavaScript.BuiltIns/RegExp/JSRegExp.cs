@@ -192,6 +192,8 @@ public partial class JSRegExp : JSObject, IJSRegExp
             return Exec(arg);
         }
 
+        SetObservableLastIndex(0);
+
         // Otherwise, find all matches.
         var matches = value.Matches(input.ToString());
         if (matches.Count == 0)
@@ -202,6 +204,7 @@ public partial class JSRegExp : JSObject, IJSRegExp
         for (int i = 0; i < matches.Count; i++)
             matchValues[(uint)i] = JSValue.CreateString(matches[i].Value);
 
+        SetObservableLastIndex(0);
         return matchValues;
     }
 

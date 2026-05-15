@@ -541,7 +541,7 @@ public partial class JSProxy : JSObject
         var fx = GetTrap(HasTrapKey);
         if (!fx.IsUndefined)
         {
-            var result = fx.InvokeFunction(new Arguments(target, target, propertyKey));
+            var result = fx.InvokeFunction(new Arguments(handler, target, propertyKey));
             if (result.BooleanValue)
                 return JSBoolean.True;
 

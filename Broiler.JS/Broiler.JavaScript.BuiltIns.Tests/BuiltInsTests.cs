@@ -725,12 +725,13 @@ public class BuiltInsTests
                 }
 
                 var intercepted = [];
-                var interceptedProxy = new Proxy({}, {
+                var interceptedHandler = {
                     has: function(target, key) {
-                        intercepted.push(key);
+                        intercepted.push(String(this === interceptedHandler) + ':' + key);
                         return key === 'virtual';
                     }
-                });
+                };
+                var interceptedProxy = new Proxy({}, interceptedHandler);
 
                 var nonCallableTrap = new Proxy({}, { has: 1 });
 
@@ -763,7 +764,7 @@ public class BuiltInsTests
             })();
         ");
 
-        Assert.Equal("ok:true|virtual|throw:TypeError|throw:TypeError|throw:TypeError", result.ToString());
+        Assert.Equal("ok:true|true:virtual|throw:TypeError|throw:TypeError|throw:TypeError", result.ToString());
     }
 
     // ── M2: JSProxy tests ────────────────────────────────────────────

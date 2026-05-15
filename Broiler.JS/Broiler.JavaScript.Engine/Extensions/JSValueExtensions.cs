@@ -242,18 +242,15 @@ public static partial class JSValueExtensions
 
     public static JSValue IsIn(this JSValue target, JSValue value)
     {
-        static bool HasProperty(JSObject @object, JSValue propertyKey)
-        {
-            if (!@object.GetOwnPropertyDescriptor(propertyKey).IsUndefined)
-                return true;
-
-            var prototype = @object.GetPrototypeOf();
-            return prototype is JSObject prototypeObject && HasProperty(prototypeObject, propertyKey);
-        }
-
         if (value is not JSObject tx)
             throw JSEngine.NewTypeError($"Cannot use 'in' operator to search for '{target}' in {value}");
 
-        return HasProperty(tx, target) ? JSValue.BooleanTrue : JSValue.BooleanFalse;
+        for (JSValue prototype = tx; prototype is JSObject @object; prototype = @object.GetPrototypeOf())
+        {
+            if (!@object.GetOwnPropertyDescriptor(target).IsUndefined)
+                return JSValue.BooleanTrue;
+        }
+
+        return JSValue.BooleanFalse;
     }
 }

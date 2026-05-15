@@ -23,10 +23,10 @@ public partial class JSReflect : JSObject
     public static JSValue Apply(in Arguments a)
     {
         var (target, thisArgument, arguments) = a.Get3();
-        if (!IsCallable(target))
+        if (!IsCallable(target) || target is not JSObject targetObject)
             throw JSEngine.NewTypeError("target is not a function");
 
-        return target.InvokeFunction(Arguments.ForApply(thisArgument, arguments));
+        return targetObject.InvokeFunction(Arguments.ForApply(thisArgument, arguments));
     }
 
     [JSExport(Length = 2)]
@@ -35,7 +35,7 @@ public partial class JSReflect : JSObject
         var (target, arguments, newTarget) = a.Get3();
         newTarget = newTarget.IsUndefined ? target : newTarget;
 
-        if (!IsCallable(target))
+        if (!IsCallable(target) || target is not JSObject targetObject)
             throw JSEngine.NewTypeError("target is not a constructor");
 
         if (!IsCallable(newTarget)
@@ -53,7 +53,7 @@ public partial class JSReflect : JSObject
 
         try
         {
-            return target.CreateInstance(Arguments.ForApply(new JSObject(), arguments));
+            return targetObject.CreateInstance(Arguments.ForApply(new JSObject(), arguments));
         }
         finally
         {

@@ -218,10 +218,7 @@ public partial class JSRegExp : JSObject, IJSRegExp
 
         // If the global flag is not set, returns a single match.
         if (!isGlobal)
-        {
-            var arg = new Arguments(this, input);
-            return Exec(arg);
-        }
+            return ExecuteMatch(input);
 
         SetObservableLastIndex(0);
 
@@ -236,6 +233,22 @@ public partial class JSRegExp : JSObject, IJSRegExp
             matchValues[(uint)i] = JSValue.CreateString(matches[i].Value);
 
         return matchValues;
+    }
+
+    private JSValue ExecuteMatch(JSValue input)
+    {
+        var exec = this[KeyStrings.GetOrCreate("exec")];
+        if (exec.IsUndefined)
+            return Exec(new Arguments(this, input));
+
+        if (!exec.IsFunction)
+            throw JSEngine.NewTypeError("RegExp exec property is not callable");
+
+        var result = exec.InvokeFunction(new Arguments(this, input));
+        if (!result.IsObject && !result.IsNull)
+            throw JSEngine.NewTypeError("RegExp exec result must be an object or null");
+
+        return result;
     }
 
     /// <summary>

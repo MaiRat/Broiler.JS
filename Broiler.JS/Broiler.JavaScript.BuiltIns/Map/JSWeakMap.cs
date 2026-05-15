@@ -27,12 +27,26 @@ public partial class JSWeakMap: JSObject
 
     public JSWeakMap(in Arguments a) : base(JSEngine.NewTargetPrototype)
     {
-        if (a[0] is not JSArray array)
+        var iterable = a.Get1();
+        if (iterable.IsNullOrUndefined)
             return;
 
-        var en = array.GetElementEnumerator();
-        while (en.MoveNext(out var value))
-            Set((JSObject)value[0], value[1]);
+        if (this[KeyStrings.set] is not IJSFunction adder)
+            throw JSEngine.NewTypeError("WeakMap instance 'set' property is not callable");
+
+        var en = iterable.GetIterableEnumerator();
+        while (en.MoveNext(out var item))
+        {
+            if (item is not JSObject entry)
+            {
+                if (en is IReturnableEnumerator returnable)
+                    returnable.Return(JSUndefined.Value);
+
+                throw JSEngine.NewTypeError(JSObject.NotEntry(item));
+            }
+
+            adder.InvokeFunction(new Arguments(this, entry[0], entry[1]));
+        }
     }
 
     [JSExport("set")]

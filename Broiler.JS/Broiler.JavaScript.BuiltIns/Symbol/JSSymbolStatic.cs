@@ -64,7 +64,7 @@ public partial class JSSymbol
     [JSExport("for")]
     public static JSValue For(in Arguments a)
     {
-        var name = a.Get1().ToString();
+        var name = a.Get1().StringValue;
         return globals.GetOrCreate(name, (x) => new JSSymbol(x.Value));
     }
 
@@ -74,8 +74,8 @@ public partial class JSSymbol
         if (a.Get1() is not JSSymbol symbol)
             throw JSEngine.NewTypeError("Symbol.keyFor requires a symbol");
 
-        var description = symbol.ToString();
-        if (globals.TryGetValue(description, out var existing) && ReferenceEquals(existing, symbol))
+        var description = symbol.Description;
+        if (description != null && globals.TryGetValue(description, out var existing) && ReferenceEquals(existing, symbol))
             return JSValue.CreateString(description);
 
         return JSUndefined.Value;

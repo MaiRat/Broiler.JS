@@ -552,10 +552,10 @@ internal static class BuiltInsAssemblyInitializer
         EnsureAccessorProperty(symbolCtor.prototype, KeyStrings.GetOrCreate("description"), "description", static (in Arguments a) =>
         {
             if (a.This is JSSymbol symbol)
-                return JSValue.CreateString(symbol.ToString());
+                return symbol.Description == null ? JSUndefined.Value : JSValue.CreateString(symbol.Description);
 
             if (a.This is JSObject symbolObject && symbolObject.ValueOf() is JSSymbol boxed)
-                return JSValue.CreateString(boxed.ToString());
+                return boxed.Description == null ? JSUndefined.Value : JSValue.CreateString(boxed.Description);
 
             throw JSEngine.NewTypeError("Symbol.prototype.description requires a symbol receiver");
         });

@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Globalization;
+using System.Runtime.CompilerServices;
 
 namespace Broiler.JavaScript.Parser;
 
@@ -80,20 +81,52 @@ public static class CharExtensions
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static bool IsIdentifierStart(this char ch)
     {
-        return ch switch
+        return ((int)ch).IsIdentifierStart();
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static bool IsIdentifierStart(this int codePoint)
+    {
+        if (codePoint is '$' or '_' or '@' or 0x2118 or 0x212E or 0x309B or 0x309C)
+            return true;
+
+        return char.GetUnicodeCategory(codePoint.FromCodePoint(), 0) switch
         {
-            '_' or '$' or '@' => true,
-            _ => char.IsLetter(ch),
+            UnicodeCategory.UppercaseLetter
+            or UnicodeCategory.LowercaseLetter
+            or UnicodeCategory.TitlecaseLetter
+            or UnicodeCategory.ModifierLetter
+            or UnicodeCategory.OtherLetter
+            or UnicodeCategory.LetterNumber => true,
+            _ => false,
         };
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static bool IsIdentifierPart(this char ch)
     {
-        return ch switch
+        return ((int)ch).IsIdentifierPart();
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static bool IsIdentifierPart(this int codePoint)
+    {
+        if (codePoint.IsIdentifierStart())
+            return true;
+
+        if (codePoint is 0x200C or 0x200D or 0x00B7 or 0x0387 or 0x19DA)
+            return true;
+
+        if (codePoint >= 0x1369 && codePoint <= 0x1371)
+            return true;
+
+        return char.GetUnicodeCategory(codePoint.FromCodePoint(), 0) switch
         {
-            '_' or '$' or '@' or '0' or '1' or '2' or '3' or '4' or '5' or '6' or '7' or '8' or '9' => true,
-            _ => char.IsLetter(ch),
+            UnicodeCategory.NonSpacingMark
+            or UnicodeCategory.SpacingCombiningMark
+            or UnicodeCategory.DecimalDigitNumber
+            or UnicodeCategory.ConnectorPunctuation => true,
+            _ => false,
         };
     }
 }

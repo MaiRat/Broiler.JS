@@ -220,7 +220,7 @@ public class FastScanner
         if (skipped)
             state = Push();
 
-        if (first.IsIdentifierStart())
+        if (first == '\\' || first.IsIdentifierStart())
             return ReadIdentifier(state);
 
         switch (first)
@@ -1102,40 +1102,92 @@ public class FastScanner
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private FastToken ReadIdentifier(State state)
     {
-        char first;
-        do
+        var sb = pool.AllocateStringBuilder();
+        var builder = sb.Builder;
+        var escaped = false;
+        var start = true;
+
+        try
         {
-            first = Consume();
-            // BROILER-PATCH: Handle \uXXXX unicode escapes in identifiers (ES3 §7.6)
-            if (first == '\\')
+            while (true)
             {
-                first = Consume();
-                if (first != 'u')
-                    throw Unexpected();
-
-                // Read 4 hex digits and decode the code point
-                int cp = 0;
-                for (int hx = 0; hx < 4; hx++)
+                var current = Peek();
+                if (current == '\\')
                 {
-                    first = Consume();
-
-                    if (!first.IsDigitPart(true, false))
-                        throw Unexpected();
-
-                    cp = cp * 16 + first.HexValue();
+                    Consume();
+                    builder.Append(ReadIdentifierEscape(start));
+                    escaped = true;
+                    start = false;
+                    continue;
                 }
 
-                char decoded = (char)cp;
-                if (!decoded.IsIdentifierPart())
+                if (!(start ? current.IsIdentifierStart() : current.IsIdentifierPart()))
+                    break;
+
+                builder.Append(current);
+                Consume();
+                start = false;
+            }
+
+            return state.CommitIdentifier(keywords, escaped ? builder.ToString() : null);
+        }
+        finally
+        {
+            sb.Clear();
+        }
+    }
+
+    private string ReadIdentifierEscape(bool start)
+    {
+        if (Peek() != 'u')
+            throw Unexpected();
+
+        Consume();
+
+        int codePoint;
+        var current = Peek();
+        if (current == '{')
+        {
+            Consume();
+            current = Peek();
+
+            if (current == '}')
+                throw Unexpected();
+
+            codePoint = 0;
+            while (current != char.MaxValue && current != '}')
+            {
+                if (!current.IsDigitPart(true, false))
                     throw Unexpected();
 
-                // Valid identifier character — continue scanning
-                continue;
+                codePoint = codePoint * 16 + current.HexValue();
+                Consume();
+                current = Peek();
             }
-        } while (first.IsIdentifierPart());
 
-        var token = state.CommitIdentifier(keywords);
-        return token;
+            if (current != '}')
+                throw Unexpected();
+
+            Consume();
+        }
+        else
+        {
+            codePoint = 0;
+            for (var i = 0; i < 4; i++)
+            {
+                current = Peek();
+                if (!current.IsDigitPart(true, false))
+                    throw Unexpected();
+
+                codePoint = codePoint * 16 + current.HexValue();
+                Consume();
+            }
+        }
+
+        if (!(start ? codePoint.IsIdentifierStart() : codePoint.IsIdentifierPart()))
+            throw Unexpected();
+
+        return codePoint.FromCodePoint();
     }
 
     private FastToken ReadNumber(State state, char first)
@@ -1276,14 +1328,17 @@ public class FastScanner
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal FastToken CommitIdentifier(FastKeywordMap keywords)
+        internal FastToken CommitIdentifier(FastKeywordMap keywords, string? cooked = null)
         {
             var cp = scanner.position;
             var start = scanner.Text.Offset + position;
             var location = scanner.Location;
 
-            var span = new StringSpan(scanner.Text.Source, start, cp - start);
-            bool isKw = keywords.IsKeyword(span, out var k);
+            var span = cooked != null
+                ? new StringSpan(cooked)
+                : new StringSpan(scanner.Text.Source, start, cp - start);
+            var k = FastKeywords.none;
+            bool isKw = cooked == null && keywords.IsKeyword(span, out k);
             var tokenType = TokenTypes.Identifier;
             var keyword = k;
             var contextualKeyword = FastKeywords.none;
@@ -1331,7 +1386,7 @@ public class FastScanner
                 }
             }
 
-            var token = new FastToken(tokenType, scanner.Text.Source, null, null, start, cp - start, this.start, location, isKeyword: isKw, keyword: keyword, contextualKeyword: contextualKeyword);
+            var token = new FastToken(tokenType, scanner.Text.Source, cooked, null, start, cp - start, this.start, location, isKeyword: isKw, keyword: keyword, contextualKeyword: contextualKeyword);
             scanner = null;
             return token;
         }

@@ -29,7 +29,7 @@ partial class FastParser
                 if (property.Kind == AstPropertyKind.Get || property.Kind == AstPropertyKind.Set)
                     throw stream.Unexpected();
 
-                property = new AstClassProperty(current, property.End, AstPropertyKind.Method, isAsync, isStatic, property.Key, property.Computed, property.Init);
+                property = new AstClassProperty(current, property.End, AstPropertyKind.Method, isAsync, isStatic, property.Key, property.Computed, property.Init, property.UsesColon, property.UsesAssign);
                 return true;
             }
 
@@ -49,7 +49,7 @@ partial class FastParser
             {
                 if (ObjectProperty(out property, isClass: isClass, isAsync: isAsync))
                 {
-                    property = new AstClassProperty(current, property.End, isSet ? AstPropertyKind.Set : AstPropertyKind.Get, false, isStatic, property.Key, property.Computed, property.Init);
+                    property = new AstClassProperty(current, property.End, isSet ? AstPropertyKind.Set : AstPropertyKind.Get, false, isStatic, property.Key, property.Computed, property.Init, property.UsesColon, property.UsesAssign);
                     return true;
                 }
             }
@@ -64,7 +64,7 @@ partial class FastParser
                 if (!Expression(out var value))
                     throw stream.Unexpected();
 
-                property = new AstClassProperty(current, PreviousToken, AstPropertyKind.Data, false, false, key, computed, value);
+                property = new AstClassProperty(current, PreviousToken, AstPropertyKind.Data, false, false, key, computed, value, usesAssign: true);
                 stream.CheckAndConsume(TokenTypes.SemiColon);
 
                 return true;
@@ -78,7 +78,7 @@ partial class FastParser
                 if (!Expression(out var value))
                     throw stream.Unexpected();
 
-                property = new AstClassProperty(current, PreviousToken, AstPropertyKind.Data, false, false, key, computed, value);
+                property = new AstClassProperty(current, PreviousToken, AstPropertyKind.Data, false, false, key, computed, value, usesColon: true);
                 return true;
             }
             else if (stream.CheckAndConsume(TokenTypes.BracketStart))

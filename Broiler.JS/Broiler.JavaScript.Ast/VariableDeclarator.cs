@@ -29,6 +29,7 @@ public static class ExpressionPatternExtensions
                 return ArrayToPattern(ae!);
 
             case FastNodeType.Identifier:
+            case FastNodeType.MemberExpression:
             case FastNodeType.ArrayPattern:
             case FastNodeType.ObjectPattern:
                 return exp;
@@ -74,7 +75,26 @@ public static class ExpressionPatternExtensions
                         var p = (px as AstClassProperty)!;
                         if (p.Kind == AstPropertyKind.Data)
                         {
-                            property = new ObjectProperty(p.Key, p.Key, p.Init, false, p.Computed);
+                            if (p.UsesColon)
+                            {
+                                var target = p.Init.ToPattern();
+                                if (target.Type == FastNodeType.BinaryExpression && target is AstBinaryExpression targetAssignment)
+                                {
+                                    property = new ObjectProperty(p.Key, targetAssignment.Left, targetAssignment.Right, false, p.Computed);
+                                }
+                                else
+                                {
+                                    property = new ObjectProperty(p.Key, target, null, false, p.Computed);
+                                }
+                            }
+                            else if (p.UsesAssign)
+                            {
+                                property = new ObjectProperty(p.Key, p.Key, p.Init, false, p.Computed);
+                            }
+                            else
+                            {
+                                property = new ObjectProperty(p.Key, p.Key, null, false, p.Computed);
+                            }
                             break;
                         }
                         var init = p.Init.ToPattern();

@@ -1,4 +1,5 @@
 using System.Runtime.CompilerServices;
+using System.Text;
 using Broiler.JavaScript.BuiltIns.Array;
 using Broiler.JavaScript.BuiltIns.Array.Typed;
 using Broiler.JavaScript.BuiltIns.Date;
@@ -592,10 +593,10 @@ internal static class BuiltInsAssemblyInitializer
         if (context[KeyStrings.RegExp] is not JSFunction regExpCtor)
             return;
 
-        static void ValidateSpeciesConstructor(JSValue constructor)
+        static JSValue GetSpeciesConstructor(JSValue constructor)
         {
             if (constructor.IsUndefined)
-                return;
+                return JSUndefined.Value;
 
             if (constructor is not JSObject constructorObject)
                 throw JSEngine.NewTypeError("RegExp constructor must be an object");
@@ -603,6 +604,41 @@ internal static class BuiltInsAssemblyInitializer
             var species = constructorObject[(IJSSymbol)JSSymbol.species];
             if (!species.IsNullOrUndefined && species is not IJSFunction)
                 throw JSEngine.NewTypeError("RegExp species constructor is not a constructor");
+
+            return species;
+        }
+
+        static JSValue GetObservableFlags(JSValue regExpValue)
+        {
+            var sb = new StringBuilder(8);
+            if (regExpValue[KeyStrings.GetOrCreate("hasIndices")].BooleanValue)
+                sb.Append('d');
+            if (regExpValue[KeyStrings.GetOrCreate("global")].BooleanValue)
+                sb.Append('g');
+            if (regExpValue[KeyStrings.GetOrCreate("ignoreCase")].BooleanValue)
+                sb.Append('i');
+            if (regExpValue[KeyStrings.GetOrCreate("multiline")].BooleanValue)
+                sb.Append('m');
+            if (regExpValue[KeyStrings.GetOrCreate("dotAll")].BooleanValue)
+                sb.Append('s');
+            if (regExpValue[KeyStrings.GetOrCreate("unicode")].BooleanValue)
+                sb.Append('u');
+            if (regExpValue[KeyStrings.GetOrCreate("unicodeSets")].BooleanValue)
+                sb.Append('v');
+            if (regExpValue[KeyStrings.GetOrCreate("sticky")].BooleanValue)
+                sb.Append('y');
+
+            return JSValue.CreateString(sb.ToString());
+        }
+
+        static void InvokeSpeciesConstructor(JSRegExp regExp, JSValue flags)
+        {
+            var constructor = regExp[KeyStrings.constructor];
+            var species = GetSpeciesConstructor(constructor);
+            if (species.IsNullOrUndefined)
+                return;
+
+            species.CreateInstance(new Arguments(species, regExp, flags));
         }
 
         ref var symbols = ref regExpCtor.prototype.GetSymbols();
@@ -611,6 +647,7 @@ internal static class BuiltInsAssemblyInitializer
             if (a.This is not JSRegExp regExp)
                 throw JSEngine.NewTypeError("RegExp.prototype[Symbol.match] called on incompatible receiver");
 
+            _ = GetObservableFlags(regExp);
             return regExp.Match(a.Get1());
         }, "[Symbol.match]", 1), JSPropertyAttributes.ConfigurableValue);
         symbols.Put(JSSymbol.matchAll.Key) = JSProperty.Property(CreateNativeFunction((in Arguments a) =>
@@ -618,11 +655,8 @@ internal static class BuiltInsAssemblyInitializer
             if (a.This is not JSRegExp regExp)
                 throw JSEngine.NewTypeError("RegExp.prototype[Symbol.matchAll] called on incompatible receiver");
 
-            var flags = regExp[KeyStrings.GetOrCreate("flags")];
-            if (!flags.IsUndefined)
-                _ = flags.ToString();
-
-            ValidateSpeciesConstructor(regExp[KeyStrings.constructor]);
+            var flags = GetObservableFlags(regExp);
+            InvokeSpeciesConstructor(regExp, flags);
 
             return regExp.Match(a.Get1());
         }, "[Symbol.matchAll]", 1), JSPropertyAttributes.ConfigurableValue);
@@ -639,7 +673,8 @@ internal static class BuiltInsAssemblyInitializer
             if (a.This is not JSRegExp regExp)
                 throw JSEngine.NewTypeError("RegExp.prototype[Symbol.split] called on incompatible receiver");
 
-            ValidateSpeciesConstructor(regExp[KeyStrings.constructor]);
+            var flags = GetObservableFlags(regExp);
+            InvokeSpeciesConstructor(regExp, flags);
 
             var limit = a.TryGetAt(1, out var second) ? second.UIntValue : uint.MaxValue;
             return regExp.Split(a.Get1().StringValue, limit);

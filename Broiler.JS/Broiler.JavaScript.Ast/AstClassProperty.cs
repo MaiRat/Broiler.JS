@@ -5,7 +5,7 @@ namespace Broiler.JavaScript.Ast;
 
 
 public class AstClassProperty(FastToken begin, FastToken last, AstPropertyKind propertyKind, bool isPrivate, bool isStatic, AstExpression propertyName, bool computed,
-    AstExpression init) : AstNode(begin, FastNodeType.ClassProperty, last)
+    AstExpression init, bool usesColon = false, bool usesAssign = false) : AstNode(begin, FastNodeType.ClassProperty, last)
 {
     public readonly bool IsStatic = isStatic;
     public readonly bool IsPrivate = isPrivate;
@@ -13,8 +13,11 @@ public class AstClassProperty(FastToken begin, FastToken last, AstPropertyKind p
     public readonly AstExpression Key = propertyName;
     public readonly AstExpression Init = init;
     public readonly bool Computed = computed;
+    public readonly bool UsesColon = usesColon;
+    public readonly bool UsesAssign = usesAssign;
 
-    public AstClassProperty Reduce(AstExpression key, AstExpression init) => new(Start, End, Kind, IsPrivate, IsStatic, key, Computed, init);
+    public AstClassProperty Reduce(AstExpression key, AstExpression init)
+        => new(Start, End, Kind, IsPrivate, IsStatic, key, Computed, init, UsesColon, UsesAssign);
 
     public override string ToString()
     {

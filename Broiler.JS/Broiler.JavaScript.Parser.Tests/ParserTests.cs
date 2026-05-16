@@ -137,6 +137,45 @@ public class ParserTests
         Assert.Throws<FastParseException>(() => parser.ParseProgram());
     }
 
+    [Theory]
+    [InlineData("var obj = {}; obj.\\u0063onst = 42;", "const")]
+    [InlineData("var groups = {}; groups.\\u03C0;", "π")]
+    [InlineData("var groups = {}; groups._\\u200C;", "_\u200C")]
+    public void ParseProgram_MemberExpression_Allows_UnicodeEscapedIdentifierNames(string source, string expectedName)
+    {
+        var stream = new FastTokenStream(new StringSpan(source));
+        var parser = new FastParser(stream);
+        var program = parser.ParseProgram();
+
+        var statement = Assert.IsType<AstExpressionStatement>(program.Statements.ToArray().Last());
+        var expression = statement.Expression is AstBinaryExpression binary
+            ? binary.Left
+            : statement.Expression;
+        var member = Assert.IsType<AstMemberExpression>(expression);
+        var property = Assert.IsType<AstIdentifier>(member.Property);
+
+        Assert.Equal(expectedName, property.Name.Value);
+    }
+
+    [Theory]
+    [InlineData("class C { static #\\u{6F}() {} }", "#o")]
+    [InlineData("class C { static #\\u2118() {} }", "#℘")]
+    [InlineData("class C { static #ZW_\\u200C_NJ() {} }", "#ZW_\u200C_NJ")]
+    public void ParseProgram_ClassBody_Allows_UnicodeEscapedPrivateIdentifiers(string source, string expectedName)
+    {
+        var stream = new FastTokenStream(new StringSpan(source));
+        var parser = new FastParser(stream);
+        var program = parser.ParseProgram();
+
+        var statement = Assert.IsType<AstExpressionStatement>(Assert.Single(program.Statements.ToArray()));
+        var classExpression = Assert.IsType<AstClassExpression>(statement.Expression);
+        var property = Assert.IsType<AstClassProperty>(Assert.Single(classExpression.Members.ToArray()));
+        var key = Assert.IsType<AstIdentifier>(property.Key);
+
+        Assert.True(property.IsPrivate);
+        Assert.Equal(expectedName, key.Name.Value);
+    }
+
     private static void AssertAsyncMethod(AstNode node, string expectedName)
     {
         var property = Assert.IsType<AstClassProperty>(node);

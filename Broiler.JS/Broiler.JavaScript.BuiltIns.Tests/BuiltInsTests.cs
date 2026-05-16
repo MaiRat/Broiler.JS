@@ -5533,6 +5533,79 @@ public class BuiltInsTests
     }
 
     [Fact]
+    public void RegExp_Species_And_Destructuring_Assignment_Abrupt_Completions_Are_Preserved()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = CreateContext();
+
+        var result = ctx.Eval("""
+            (function () {
+                class Test262Error extends Error {}
+
+                function thrownCtor(fn) {
+                    try {
+                        fn();
+                        return 'no-throw';
+                    } catch (e) {
+                        return e.constructor.name;
+                    }
+                }
+
+                var unicodeResult = thrownCtor(function () {
+                    var re = /./;
+                    Object.defineProperty(re, 'unicode', {
+                        get: function () {
+                            throw new Test262Error();
+                        }
+                    });
+
+                    re[Symbol.match]('');
+                });
+
+                var matchAllSpecies = thrownCtor(function () {
+                    var regexp = /./;
+                    regexp.constructor = {
+                        [Symbol.species]: function () {
+                            throw new Test262Error();
+                        }
+                    };
+
+                    regexp[Symbol.matchAll]('');
+                });
+
+                var splitSpecies = thrownCtor(function () {
+                    var re = /x/;
+                    re.constructor = function () {};
+                    re.constructor[Symbol.species] = function () {
+                        throw new Test262Error();
+                    };
+
+                    re[Symbol.split]();
+                });
+
+                var destructuringAssignment = thrownCtor(function () {
+                    var target = {
+                        set y(val) {
+                            throw new Test262Error();
+                        }
+                    };
+
+                    0, { a: target.y } = { a: 23 };
+                });
+
+                return [
+                    unicodeResult,
+                    matchAllSpecies,
+                    splitSpecies,
+                    destructuringAssignment
+                ].join('|');
+            })();
+            """);
+
+        Assert.Equal("Test262Error|Test262Error|Test262Error|Test262Error", result.ToString());
+    }
+
+    [Fact]
     public void MatchAll_Set_Delete_RegExp_And_Proxy_TypeErrors_Match_Test262()
     {
         EnsureBuiltInsLoaded();

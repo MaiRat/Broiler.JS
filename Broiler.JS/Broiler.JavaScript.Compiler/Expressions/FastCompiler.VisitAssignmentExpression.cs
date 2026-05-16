@@ -105,6 +105,10 @@ partial class FastCompiler
                 }
                 return;
 
+            case FastNodeType.MemberExpression:
+                inits.Add(BinaryOperation.Assign(Visit(pattern), init, TokenTypes.Assign));
+                return;
+
             case FastNodeType.ObjectPattern:
                 var objectPattern = pattern as AstObjectPattern;
                 {
@@ -144,6 +148,7 @@ partial class FastCompiler
                         switch (property.Value.Type)
                         {
                             case FastNodeType.Identifier:
+                            case FastNodeType.MemberExpression:
                             case FastNodeType.ArrayPattern:
                             case FastNodeType.ObjectPattern:
                                 CreateAssignment(inits, property.Value, start, true, newScope);

@@ -4224,9 +4224,7 @@ test/built-ins/RegExp/prototype/Symbol.match/u-advance-after-empty.js
 test/built-ins/RegExp/prototype/Symbol.matchAll/isregexp-called-once.js
 test/built-ins/RegExp/prototype/Symbol.matchAll/isregexp-this-throws.js
 test/built-ins/RegExp/prototype/Symbol.matchAll/regexpcreate-this-throws.js
-test/built-ins/RegExp/prototype/Symbol.matchAll/species-constructor-is-not-object-throws.js
 test/built-ins/RegExp/prototype/Symbol.matchAll/species-constructor-is-undefined.js
-test/built-ins/RegExp/prototype/Symbol.matchAll/species-constructor-species-is-not-constructor.js
 test/built-ins/RegExp/prototype/Symbol.matchAll/species-constructor-species-is-null-or-undefined.js
 test/built-ins/RegExp/prototype/Symbol.matchAll/species-constructor-species-throws.js
 test/built-ins/RegExp/prototype/Symbol.matchAll/species-constructor.js
@@ -6523,9 +6521,6 @@ test/intl402/DateTimeFormat/timezone-invalid.js
 test/intl402/DateTimeFormat/timezone-legacy-non-iana.js
 test/intl402/DateTimeFormat/timezone-not-canonicalized.js
 test/intl402/DateTimeFormat/timezone-utc.js
-test/intl402/DisplayNames/locales-invalid-throws.js
-test/intl402/DisplayNames/locales-length-poison-throws.js
-test/intl402/DisplayNames/locales-length-tolength-throws.js
 test/intl402/DisplayNames/locales-symbol-length.js
 test/intl402/DisplayNames/options-fallback-abrupt-throws.js
 test/intl402/DisplayNames/options-fallback-invalid-throws.js
@@ -6961,7 +6956,6 @@ test/intl402/NumberFormat/constructor-options-throwing-getters-rounding-priority
 test/intl402/NumberFormat/constructor-options-throwing-getters-trailing-zero-display.js
 test/intl402/NumberFormat/constructor-options-throwing-getters.js
 test/intl402/NumberFormat/constructor-options-toobject.js
-test/intl402/NumberFormat/constructor-order.js
 test/intl402/NumberFormat/constructor-roundingIncrement-invalid.js
 test/intl402/NumberFormat/constructor-roundingIncrement.js
 test/intl402/NumberFormat/constructor-signDisplay-negative.js
@@ -6970,7 +6964,6 @@ test/intl402/NumberFormat/constructor-trailingZeroDisplay-invalid.js
 test/intl402/NumberFormat/constructor-trailingZeroDisplay.js
 test/intl402/NumberFormat/constructor-unit.js
 test/intl402/NumberFormat/constructor-unitDisplay.js
-test/intl402/NumberFormat/currency-code-invalid.js
 test/intl402/NumberFormat/currency-code-well-formed.js
 test/intl402/NumberFormat/currency-digits-nonstandard-notation.js
 test/intl402/NumberFormat/currency-digits.js
@@ -7021,7 +7014,6 @@ test/intl402/NumberFormat/prototype/format/format-rounding-priority-less-precisi
 test/intl402/NumberFormat/prototype/format/format-rounding-priority-more-precision.js
 test/intl402/NumberFormat/prototype/format/format-significant-digits-precision.js
 test/intl402/NumberFormat/prototype/format/format-significant-digits.js
-test/intl402/NumberFormat/prototype/format/no-instanceof.js
 test/intl402/NumberFormat/prototype/format/notation-compact-de-DE.js
 test/intl402/NumberFormat/prototype/format/notation-compact-en-US.js
 test/intl402/NumberFormat/prototype/format/notation-compact-ja-JP.js
@@ -7050,7 +7042,6 @@ test/intl402/NumberFormat/prototype/format/signDisplay-negative-ko-KR.js
 test/intl402/NumberFormat/prototype/format/signDisplay-negative-zh-TW.js
 test/intl402/NumberFormat/prototype/format/signDisplay-rounding.js
 test/intl402/NumberFormat/prototype/format/signDisplay-zh-TW.js
-test/intl402/NumberFormat/prototype/format/this-value-not-numberformat.js
 test/intl402/NumberFormat/prototype/format/unit-de-DE.js
 test/intl402/NumberFormat/prototype/format/unit-en-US.js
 test/intl402/NumberFormat/prototype/format/unit-ja-JP.js
@@ -7138,7 +7129,6 @@ test/intl402/NumberFormat/prototype/resolvedOptions/prop-desc.js
 test/intl402/NumberFormat/prototype/resolvedOptions/resolved-numbering-system-unicode-extensions-and-options.js
 test/intl402/NumberFormat/prototype/resolvedOptions/return-keys-order-default.js
 test/intl402/NumberFormat/prototype/resolvedOptions/roundingMode.js
-test/intl402/NumberFormat/prototype/this-value-numberformat-prototype.js
 test/intl402/NumberFormat/prototype/toStringTag/configurable.js
 test/intl402/NumberFormat/prototype/toStringTag/prop-desc.js
 test/intl402/NumberFormat/significant-digits-options-get-sequence.js
@@ -7198,8 +7188,6 @@ test/intl402/PluralRules/supportedLocalesOf/supportedLocalesOf.js
 test/intl402/PluralRules/undefined-newtarget-throws.js
 test/intl402/RelativeTimeFormat/constructor/constructor/locales-invalid.js
 test/intl402/RelativeTimeFormat/constructor/constructor/locales-valid.js
-test/intl402/RelativeTimeFormat/constructor/constructor/newtarget-undefined.js
-test/intl402/RelativeTimeFormat/constructor/constructor/options-invalid.js
 test/intl402/RelativeTimeFormat/constructor/constructor/options-localeMatcher-invalid.js
 test/intl402/RelativeTimeFormat/constructor/constructor/options-numberingSystem-invalid.js
 test/intl402/RelativeTimeFormat/constructor/constructor/options-numberingSystem-valid.js
@@ -7233,7 +7221,6 @@ test/intl402/RelativeTimeFormat/prototype/format/pl-pl-style-narrow.js
 test/intl402/RelativeTimeFormat/prototype/format/pl-pl-style-short.js
 test/intl402/RelativeTimeFormat/prototype/format/unit-invalid.js
 test/intl402/RelativeTimeFormat/prototype/format/value-non-finite.js
-test/intl402/RelativeTimeFormat/prototype/format/value-symbol.js
 test/intl402/RelativeTimeFormat/prototype/format/value-tonumber.js
 test/intl402/RelativeTimeFormat/prototype/formatToParts/branding.js
 test/intl402/RelativeTimeFormat/prototype/formatToParts/en-us-numeric-always.js

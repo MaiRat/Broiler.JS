@@ -226,18 +226,23 @@ public static partial class JSValueExtensions
         if (!value.IsFunction)
             throw JSEngine.NewTypeError("Right side of instanceof is not a function");
 
-        var p = (target.prototypeChain as IJSPrototype)?.Object as JSObject;
-        if (p == null)
+        if (!target.IsObject)
             return JSValue.BooleanFalse;
 
-        var c = p[KeyStrings.constructor];
-        if (c.IsUndefined)
-            return JSValue.BooleanFalse;
+        var prototype = value[KeyStrings.prototype];
+        if (!prototype.IsObject)
+            throw JSEngine.NewTypeError("Function has non-object prototype in instanceof check");
 
-        if (c.StrictEquals(value))
-            return JSValue.BooleanTrue;
+        var current = target.GetPrototypeOf();
+        while (current is JSObject currentObject)
+        {
+            if (ReferenceEquals(currentObject, prototype))
+                return JSValue.BooleanTrue;
 
-        return p.InstanceOf(value);
+            current = currentObject.GetPrototypeOf();
+        }
+
+        return JSValue.BooleanFalse;
     }
 
     public static JSValue IsIn(this JSValue propertyKey, JSValue value)

@@ -12,7 +12,7 @@ namespace Broiler.JavaScript.BuiltIns.Symbol;
 public partial class JSSymbol: JSValue, IJSSymbol
 {
     private static int SymbolID = 1;
-    private readonly string name;
+    private readonly string description;
     public readonly uint Key;
 
     uint IJSSymbol.Key => Key;
@@ -31,9 +31,13 @@ public partial class JSSymbol: JSValue, IJSSymbol
 
     public static implicit operator PropertyKey(JSSymbol key) => PropertyKey.FromSymbol(key);
 
-    public JSSymbol(string name) : base((JSEngine.Current as IJSExecutionContext)?.ObjectPrototype)
+    internal string Description => description;
+
+    internal string ToDescriptiveString() => description == null ? "Symbol()" : $"Symbol({description})";
+
+    public JSSymbol(string description) : base((JSEngine.Current as IJSExecutionContext)?.ObjectPrototype)
     {
-        this.name = name;
+        this.description = description;
         Key = (uint)Interlocked.Increment(ref SymbolID);
     }
 
@@ -54,14 +58,14 @@ public partial class JSSymbol: JSValue, IJSSymbol
     {
         var f = a.Get1();
         if (f.IsUndefined)
-            return new JSSymbol("");
+            return new JSSymbol((string)null);
 
-        return new JSSymbol(a.ToString());
+        return new JSSymbol(f.StringValue);
     }
 
-    public override JSValue CreateInstance(in Arguments a) => throw new NotSupportedException();
+    public override JSValue CreateInstance(in Arguments a) => throw JSEngine.NewTypeError("Symbol is not a constructor");
 
     public override bool StrictEquals(JSValue value) => ReferenceEquals(this, value);
 
-    public override string ToString() => name;
+    public override string ToString() => description ?? string.Empty;
 }

@@ -4950,6 +4950,51 @@ public class BuiltInsTests
     }
 
     [Fact]
+    public void String_Symbol_WeakMap_RegExp_And_Instanceof_Regressions_Match_Test262()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = new JSContext();
+
+        var result = ctx.Eval("""
+            (function () {
+                function outcome(fn) {
+                    try {
+                        return fn();
+                    } catch (e) {
+                        return e.constructor.name;
+                    }
+                }
+
+                return [
+                    String(Symbol('66')),
+                    outcome(function () { return new String(Symbol('66')); }),
+                    outcome(function () { return new Symbol('x'); }),
+                    outcome(function () { return new WeakMap({}); }),
+                    outcome(function () {
+                        var regex = /./;
+                        regex.exec = function () { return 86; };
+                        return regex[Symbol.match]('');
+                    }),
+                    outcome(function () {
+                        function Custom() {}
+                        var target = {};
+                        var proxy = new Proxy(target, {
+                            getPrototypeOf: function () {
+                                return Custom.prototype;
+                            }
+                        });
+
+                        Object.preventExtensions(target);
+                        return proxy instanceof Custom;
+                    })
+                ].join('|');
+            })();
+            """);
+
+        Assert.Equal("Symbol(66)|TypeError|TypeError|TypeError|TypeError|TypeError", result.ToString());
+    }
+
+    [Fact]
     public void MatchAll_Set_Delete_RegExp_And_Proxy_TypeErrors_Match_Test262()
     {
         EnsureBuiltInsLoaded();

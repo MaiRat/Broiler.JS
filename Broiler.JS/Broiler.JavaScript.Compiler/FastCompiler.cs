@@ -17,7 +17,7 @@ namespace Broiler.JavaScript.Compiler;
 public partial class FastCompiler : AstMapVisitor<YExpression>
 {
     private static readonly MethodInfo EnterStrictModeDisposableMethod = typeof(JSEngine)
-        .InternalMethod(nameof(JSEngine.EnterStrictModeDisposable), typeof(bool))
+        .InternalMethod("EnterStrictModeDisposable", typeof(bool))
         ?? throw new InvalidOperationException("JSEngine.EnterStrictModeDisposable(bool) not found");
     private static readonly MethodInfo DisposeMethod = typeof(IDisposable)
         .GetMethod(nameof(IDisposable.Dispose))

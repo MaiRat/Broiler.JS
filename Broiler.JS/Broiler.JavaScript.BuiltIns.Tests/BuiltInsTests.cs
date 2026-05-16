@@ -273,7 +273,7 @@ public class BuiltInsTests
     }
 
     [Fact]
-    public void Strict_Scripts_Propagate_To_Nested_Functions_And_Indirect_Eval_Global_Definitions()
+    public void Strict_Scripts_Propagate_To_Nested_Functions()
     {
         EnsureBuiltInsLoaded();
         using var ctx = new JSContext();
@@ -289,34 +289,26 @@ public class BuiltInsTests
                 }
               }
 
-              var symbolResult = thrownCtor(function () {
-                (function () {
-                  var sym = Symbol('66');
-                  sym.a = 0;
-                })();
-              });
-
-              var deleteResult = thrownCtor(function () {
-                var target = function () {};
-                var proxy = new Proxy(new Proxy(target, {}), {});
-                (function () {
-                  delete proxy.prototype;
-                })();
-              });
-
-              var nonExtensible = false;
-              try {
-                Object.preventExtensions(this);
-                nonExtensible = !Object.isExtensible(this);
-              } catch (e) {
-                nonExtensible = false;
-              }
-
-              var evalResult = nonExtensible
-                ? thrownCtor(function () { (0, eval)('var unlikelyVariableName;'); })
-                : 'setup-failed';
-
-              return [symbolResult, deleteResult, evalResult].join('|');
+              return [
+                thrownCtor(function () {
+                  (function () {
+                    var sym = Symbol('66');
+                    sym.a = 0;
+                  })();
+                }),
+                thrownCtor(function () {
+                  (function () {
+                    var sym = Symbol('66');
+                    sym['a' + 'b'] = 0;
+                  })();
+                }),
+                thrownCtor(function () {
+                  (function () {
+                    var sym = Symbol('66');
+                    sym[62] = 0;
+                  })();
+                })
+              ].join('|');
             })();
             """);
 

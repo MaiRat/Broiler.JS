@@ -6159,6 +6159,16 @@ public class BuiltInsTests
                     }
                 });
 
+                var genericMatch = {
+                    flags: 'g',
+                    global: true
+                };
+                Object.defineProperty(genericMatch, 'exec', {
+                    get: function () {
+                        throw new Test262Error();
+                    }
+                });
+
                 return [
                     typeof Reflect.getPrototypeOf,
                     thrownCtor(function () {
@@ -6187,14 +6197,32 @@ public class BuiltInsTests
                         });
                     }),
                     thrownCtor(function () {
+                        RegExp.prototype[Symbol.match].call(genericMatch, '');
+                    }),
+                    thrownCtor(function () {
                         RegExp.prototype[Symbol.replace].call(genericReplace, '', '');
+                    }),
+                    thrownCtor(function () {
+                        var re = /./;
+                        re.exec = function () {
+                            return {
+                                length: 2,
+                                1: {
+                                    toString: function () {
+                                        throw new Test262Error();
+                                    }
+                                }
+                            };
+                        };
+
+                        re[Symbol.replace]('a', 'b');
                     })
                 ].join('|');
             })();
             """);
 
         Assert.Equal(
-            "function|Test262Error|function|Test262Error|Test262Error|string:42|function|Test262Error|Test262Error",
+            "function|Test262Error|function|Test262Error|Test262Error|string:42|function|Test262Error|Test262Error|Test262Error|Test262Error",
             result.ToString());
     }
 

@@ -943,11 +943,37 @@ internal static class BuiltInsAssemblyInitializer
         ref var symbols = ref regExpCtor.prototype.GetSymbols();
         symbols.Put(JSSymbol.match.Key) = JSProperty.Property(CreateNativeFunction((in Arguments a) =>
         {
-            if (a.This is not JSRegExp regExp)
+            var rx = a.This;
+            if (rx is not JSObject)
                 throw JSEngine.NewTypeError("RegExp.prototype[Symbol.match] called on incompatible receiver");
 
-            _ = GetObservableFlags(regExp);
-            return regExp.Match(a.Get1());
+            var input = a.Get1();
+            var flags = GetObservableFlags(rx).ToString();
+            if (!flags.Contains('g'))
+            {
+                if (rx is JSRegExp regExp)
+                    return regExp.Match(input);
+
+                return RegExpExec(rx, input);
+            }
+
+            rx[KeyStrings.lastIndex] = JSValue.NumberZero;
+            var matches = JSValue.CreateArray();
+            uint matchCount = 0;
+            while (true)
+            {
+                var result = RegExpExec(rx, input);
+                if (result.IsNull)
+                    return matchCount == 0 ? JSValue.NullValue : matches;
+
+                var matchString = result[0].ToString();
+                matches[matchCount++] = JSValue.CreateString(matchString);
+                if (matchString.Length != 0)
+                    continue;
+
+                var nextIndex = (int)rx[KeyStrings.lastIndex].DoubleValue;
+                rx[KeyStrings.lastIndex] = JSValue.CreateNumber(nextIndex + 1);
+            }
         }, "[Symbol.match]", 1), JSPropertyAttributes.ConfigurableValue);
         symbols.Put(JSSymbol.matchAll.Key) = JSProperty.Property(CreateNativeFunction((in Arguments a) =>
         {
@@ -1022,7 +1048,10 @@ internal static class BuiltInsAssemblyInitializer
 
                 List<JSValue> captures = [];
                 for (var i = 1; i < capturesLength; i++)
-                    captures.Add(result[(uint)i]);
+                {
+                    var capture = result[(uint)i];
+                    captures.Add(capture.IsUndefined ? JSUndefined.Value : JSValue.CreateString(capture.ToString()));
+                }
 
                 string replacement;
                 if (functionalReplace)

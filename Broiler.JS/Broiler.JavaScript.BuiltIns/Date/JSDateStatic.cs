@@ -56,7 +56,7 @@ partial class JSDate
     /// </summary>
     /// <param name="a"></param>
     /// <returns></returns>
-    [JSExport("parse")]
+    [JSExport("parse", Length = 1)]
     internal static JSValue Parse(in Arguments a)
     {
         var text = a.Get1().ToString();

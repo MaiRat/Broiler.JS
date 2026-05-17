@@ -2365,6 +2365,44 @@ public class BuiltInsTests
     }
 
     [Fact]
+    public void Function_Length_Metadata_Matches_Test262_Regression_Samples()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = new JSContext();
+        var parts = ctx.Eval(@"(function () {
+            function snapshot(fn) {
+                var descriptor = Object.getOwnPropertyDescriptor(fn, 'length');
+                return [descriptor.value, fn.length, descriptor.writable, descriptor.enumerable, descriptor.configurable].join(',');
+            }
+
+            return [
+                snapshot(async function () {}.constructor),
+                snapshot(BigInt),
+                snapshot(DataView.prototype.getFloat16),
+                snapshot(DataView.prototype.getFloat32),
+                snapshot(DataView.prototype.getFloat64),
+                snapshot(DataView.prototype.getInt16),
+                snapshot(DataView.prototype.getInt32),
+                snapshot(DataView.prototype.getUint16),
+                snapshot(DataView.prototype.getUint32),
+                snapshot(Date.parse),
+                snapshot(FinalizationRegistry),
+                snapshot(FinalizationRegistry.prototype.unregister),
+                snapshot(Iterator.from),
+                snapshot(Iterator.prototype.drop),
+                snapshot(Iterator.prototype.every),
+                snapshot(Iterator.prototype.filter),
+                snapshot(Iterator.prototype.find),
+                snapshot(Iterator.prototype.flatMap),
+                snapshot(Iterator.prototype.forEach),
+                snapshot(Iterator.prototype.map)
+            ].join('|');
+        })();").ToString().Split('|');
+
+        Assert.All(parts, part => Assert.Equal("1,1,false,false,true", part));
+    }
+
+    [Fact]
     public void Array_Iteration_Methods_Preserve_Abrupt_Completions_From_Length_Property_And_Predicate()
     {
         EnsureBuiltInsLoaded();

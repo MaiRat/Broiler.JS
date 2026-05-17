@@ -53,7 +53,7 @@ public partial class JSBigInt : JSPrimitive
 
     public override long BigIntValue => throw CannotMix();
 
-    [JSExport(IsConstructor = true)]
+    [JSExport(IsConstructor = true, Length = 1)]
     public static JSValue Constructor(in Arguments a)
     {
         var f = a[0];

@@ -1843,6 +1843,25 @@ public class BuiltInsTests
         Assert.Equal("2|3|1", result.ToString());
     }
 
+    [Fact]
+    public void Direct_Eval_In_Function_Context_Rejects_Arguments_Declaration()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = new JSContext();
+
+        var result = ctx.Eval("""
+            try {
+              async function * f(p = eval("var arguments")) {}
+              f();
+              'no error';
+            } catch (e) {
+              e.name;
+            }
+            """);
+
+        Assert.Equal("SyntaxError", result.ToString());
+    }
+
     // ── M2: JSMap tests ──────────────────────────────────────────────
 
     [Fact]
@@ -3015,6 +3034,43 @@ public class BuiltInsTests
         var result = ctx.Eval("""
             try {
               Function('-->', '');
+              'no error';
+            } catch (e) {
+              e.name;
+            }
+            """);
+
+        Assert.Equal("SyntaxError", result.ToString());
+    }
+
+    [Fact]
+    public void NewFunction_Strict_Body_Rejects_Eval_Parameter()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = new JSContext();
+
+        var result = ctx.Eval("""
+            try {
+              Function('eval', '"use strict";');
+              'no error';
+            } catch (e) {
+              e.name;
+            }
+            """);
+
+        Assert.Equal("SyntaxError", result.ToString());
+    }
+
+    [Fact]
+    public void NewFunction_Strict_Body_Makes_Direct_Eval_Strict()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = new JSContext();
+
+        var result = ctx.Eval("""
+            try {
+              var funObj = new Function("a", "'use strict'; eval('public = 1;');");
+              funObj();
               'no error';
             } catch (e) {
               e.name;

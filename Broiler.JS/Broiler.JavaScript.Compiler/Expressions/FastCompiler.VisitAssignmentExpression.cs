@@ -126,20 +126,22 @@ partial class FastCompiler
                             case FastNodeType.Identifier:
                             case FastNodeType.Literal:
                                 var id = property.Key;
-                                var propertyInit = property.Init;
-                                if (propertyInit != null)
-                                {
-                                    var piTemp = scope.Top.GetTempVariable(typeof(JSValue));
-                                    inits.Add(YExpression.Assign(piTemp.Variable,
-                                        JSValueBuilder.Coalesce(
-                                        CreateMemberExpression(init, id, property.Computed),
-                                        Visit(propertyInit))));
-                                    start = piTemp.Variable;
-                                }
-                                else
-                                {
-                                    start = CreateMemberExpression(init, id, property.Computed);
-                                }
+                                 var propertyInit = property.Init;
+                                 if (propertyInit != null)
+                                 {
+                                     var piTemp = scope.Top.GetTempVariable(typeof(JSValue));
+                                     inits.Add(YExpression.Assign(
+                                         piTemp.Variable,
+                                         CreateMemberExpression(init, id, property.Computed)));
+                                     inits.Add(JSValueExtensionsBuilder.AssignCoalesce(
+                                         piTemp.Expression,
+                                         Visit(propertyInit)));
+                                     start = piTemp.Expression;
+                                 }
+                                 else
+                                 {
+                                     start = CreateMemberExpression(init, id, property.Computed);
+                                 }
                                 break;
                             default:
                                 throw new NotImplementedException();

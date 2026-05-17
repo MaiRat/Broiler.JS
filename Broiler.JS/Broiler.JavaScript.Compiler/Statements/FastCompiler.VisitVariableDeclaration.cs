@@ -48,7 +48,7 @@ partial class FastCompiler
                         if (d.Init != null)
                             list.Add(YExpression.Assign(temp.Variable, Visit(d.Init)));
 
-                        list.Add(CreateAssignment(objectPattern, temp.Expression, true, newScope));
+                        list.Add(CreateAssignment(objectPattern, temp.Expression, true, newScope, suppressAnonymousFunctionNameInference: true));
 
                         if (dispose)
                         {
@@ -65,7 +65,7 @@ partial class FastCompiler
                         if (d.Init != null)
                             list.Add(YExpression.Assign(temp.Variable, Visit(d.Init)));
 
-                        list.Add(CreateAssignment(arrayPattern, temp.Expression, true, newScope));
+                        list.Add(CreateAssignment(arrayPattern, temp.Expression, true, newScope, suppressAnonymousFunctionNameInference: true));
                         if (dispose)
                         {
                             list.Add(top.Disposable.CallExpression<IJSDisposableStack, JSValue, bool>(() => (j, v, b) => 

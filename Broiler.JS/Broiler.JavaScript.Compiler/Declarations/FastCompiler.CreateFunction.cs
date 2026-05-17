@@ -115,11 +115,11 @@ partial class FastCompiler
             {
                 if (v.Identifier.IsSpreadElement(out var spe))
                 {
-                    CreateAssignment(bodyInits, spe.Argument, ArgumentsBuilder.RestFrom(argumentElements, (uint)i), true, true);
+                    CreateAssignment(bodyInits, spe.Argument, ArgumentsBuilder.RestFrom(argumentElements, (uint)i), true, true, suppressAnonymousFunctionNameInference: true);
                     continue;
                 }
 
-                CreateAssignment(bodyInits, v.Identifier, JSVariableBuilder.FromArgumentOptional(argumentElements, i, VisitExpression(v.Init)), true, true);
+                CreateAssignment(bodyInits, v.Identifier, JSVariableBuilder.FromArgumentOptional(argumentElements, i, VisitExpression(v.Init)), true, true, suppressAnonymousFunctionNameInference: true);
             }
 
             YExpression lambdaBody = VisitStatement(functionDeclaration.Body);

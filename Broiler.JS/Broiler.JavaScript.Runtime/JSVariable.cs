@@ -11,6 +11,19 @@ public class JSVariable
 {
     // BROILER-PATCH: Support read-only variables for function expression names (ES3 §13)
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static JSValue PrepareAnonymousFunctionNameForDestructuring(JSValue value, string name, bool assignName)
+    {
+        if (value is not JSObject functionObject || !value.IsFunction)
+            return value;
+
+        if (functionObject[KeyStrings.name].ToString() != "native")
+            return value;
+
+        functionObject.FastAddValue(KeyStrings.name, JSValue.CreateString(assignName ? name : string.Empty), JSPropertyAttributes.ConfigurableReadonlyValue);
+        return value;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private JSValue InferAnonymousFunctionName(JSValue value)
     {
         if (Name.IsEmpty || value is not JSObject functionObject || !value.IsFunction)

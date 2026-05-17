@@ -106,4 +106,35 @@ public class CompilerTests
 
         Assert.Equal("cls|cls", result.ToString());
     }
+
+    [Fact]
+    public void Compile_DestructuringDefaults_DoNotInfer_Function_Names_Through_Cover_Grammar()
+    {
+        using var ctx = new JSContext();
+        var result = ctx.Eval("""
+            (function () {
+                var parameterName = (({ xCover = (0, function () {}) } = {}) => xCover.name)();
+                var arrayName = (([xCover = (0, function () {})] = []) => xCover.name)();
+                return (parameterName === '') + '|' + (arrayName === '');
+            })()
+            """);
+
+        Assert.Equal("true|true", result.ToString());
+    }
+
+    [Fact]
+    public void Compile_DestructuringAssignmentProperties_OnlyInfer_Direct_Anonymous_Function_Names()
+    {
+        using var ctx = new JSContext();
+        var result = ctx.Eval("""
+            (function () {
+                var xCover;
+                var cover;
+                ({ x: xCover = (0, function () {}), y: cover = (function () {}) } = {});
+                return (xCover.name === '') + '|' + cover.name;
+            })()
+            """);
+
+        Assert.Equal("true|cover", result.ToString());
+    }
 }

@@ -1,6 +1,7 @@
-﻿using Broiler.JavaScript.Ast.Expressions;
+using Broiler.JavaScript.Ast.Expressions;
 using Broiler.JavaScript.Ast.Misc;
 using Broiler.JavaScript.Ast.Patterns;
+using Broiler.JavaScript.Ast.Statements;
 using Broiler.JavaScript.ExpressionCompiler.Core;
 using Broiler.JavaScript.ExpressionCompiler.Expressions;
 using Broiler.JavaScript.LinqExpressions.LinqExpressions;
@@ -19,6 +20,9 @@ partial class FastCompiler
     private static readonly MethodInfo ReturnableEnumeratorReturnMethod = typeof(IReturnableEnumerator)
         .GetMethod(nameof(IReturnableEnumerator.Return), [typeof(JSValue)])
         ?? throw new InvalidOperationException("IReturnableEnumerator.Return(JSValue) not found");
+    private static readonly MethodInfo PrepareAnonymousFunctionNameForDestructuringMethod = typeof(JSVariable)
+        .GetMethod(nameof(JSVariable.PrepareAnonymousFunctionNameForDestructuring), [typeof(JSValue), typeof(string), typeof(bool)])
+        ?? throw new InvalidOperationException("JSVariable.PrepareAnonymousFunctionNameForDestructuring(JSValue, string, bool) not found");
 
     private YExpression VisitAssignmentExpression(AstExpression left, TokenTypes assignmentOperator, AstExpression right)
     {
@@ -26,7 +30,7 @@ partial class FastCompiler
         {
             case FastNodeType.ArrayPattern:
             case FastNodeType.ObjectPattern:
-                return CreateAssignment(left, Visit(right));
+                return CreateAssignment(left, Visit(right), suppressAnonymousFunctionNameInference: true);
 
             case FastNodeType.Identifier:
                 var id = left as AstIdentifier;
@@ -74,15 +78,15 @@ partial class FastCompiler
         return BinaryOperation.Assign(exp, Visit(right), assignmentOperator);
     }
 
-    private YExpression CreateAssignment(AstExpression pattern, YExpression init, bool createVariable = false, bool newScope = false)
+    private YExpression CreateAssignment(AstExpression pattern, YExpression init, bool createVariable = false, bool newScope = false, bool suppressAnonymousFunctionNameInference = false)
     {
         var inits = new Sequence<YExpression>();
-        CreateAssignment(inits, pattern, init, createVariable, newScope);
+        CreateAssignment(inits, pattern, init, createVariable, newScope, suppressAnonymousFunctionNameInference);
 
         return YExpression.Block(inits);
     }
 
-    private void CreateAssignment(Sequence<YExpression> inits, AstExpression pattern, YExpression init, bool createVariable = false, bool newScope = false)
+    private void CreateAssignment(Sequence<YExpression> inits, AstExpression pattern, YExpression init, bool createVariable = false, bool newScope = false, bool suppressAnonymousFunctionNameInference = false)
     {
         YExpression target;
 
@@ -99,6 +103,11 @@ partial class FastCompiler
                     else
                     {
                         target = VisitIdentifierReference(id);
+                    }
+
+                    if (suppressAnonymousFunctionNameInference)
+                    {
+                        init = YExpression.Call(null, PrepareAnonymousFunctionNameForDestructuringMethod, init, YExpression.Constant(id.Name.Value), YExpression.Constant(false));
                     }
 
                     inits.Add(YExpression.Assign(target, init));
@@ -127,18 +136,24 @@ partial class FastCompiler
                             case FastNodeType.Literal:
                                 var id = property.Key;
                                  var propertyInit = property.Init;
-                                 if (propertyInit != null)
-                                 {
-                                     var piTemp = scope.Top.GetTempVariable(typeof(JSValue));
-                                     inits.Add(YExpression.Assign(
-                                         piTemp.Variable,
-                                         CreateMemberExpression(init, id, property.Computed)));
-                                     inits.Add(JSValueExtensionsBuilder.AssignCoalesce(
-                                         piTemp.Expression,
-                                         Visit(propertyInit)));
-                                     start = piTemp.Expression;
-                                 }
-                                 else
+                                  if (propertyInit != null)
+                                  {
+                                      var defaultValue = Visit(propertyInit);
+                                      if (suppressAnonymousFunctionNameInference)
+                                      {
+                                          defaultValue = PrepareDestructuringInitializer(property.Value, propertyInit, defaultValue);
+                                      }
+
+                                      var piTemp = scope.Top.GetTempVariable(typeof(JSValue));
+                                      inits.Add(YExpression.Assign(
+                                          piTemp.Variable,
+                                          CreateMemberExpression(init, id, property.Computed)));
+                                      inits.Add(JSValueExtensionsBuilder.AssignCoalesce(
+                                          piTemp.Expression,
+                                          defaultValue));
+                                      start = piTemp.Expression;
+                                  }
+                                  else
                                  {
                                      start = CreateMemberExpression(init, id, property.Computed);
                                  }
@@ -153,16 +168,21 @@ partial class FastCompiler
                             case FastNodeType.MemberExpression:
                             case FastNodeType.ArrayPattern:
                             case FastNodeType.ObjectPattern:
-                                CreateAssignment(inits, property.Value, start, true, newScope);
+                                CreateAssignment(inits, property.Value, start, true, newScope, suppressAnonymousFunctionNameInference);
                                 break;
                             // TODO
                             case FastNodeType.BinaryExpression:
                                 var ap = property.Value as AstBinaryExpression;
+                                var defaultValue = Visit(ap.Right);
+                                if (suppressAnonymousFunctionNameInference)
+                                {
+                                    defaultValue = PrepareDestructuringInitializer(ap.Left, ap.Right, defaultValue);
+                                }
                                 CreateAssignment(inits, ap.Left,
                                     YExpression.Coalesce(
                                         JSValueExtensionsBuilder.NullIfUndefined(start),
-                                        Visit(ap.Right))
-                                );
+                                        defaultValue),
+                                    suppressAnonymousFunctionNameInference: suppressAnonymousFunctionNameInference);
                                 break;
                             default:
                                 throw new NotImplementedException();
@@ -208,9 +228,15 @@ partial class FastCompiler
                                 {
                                     using var te = scope.Top.GetTempVariable(typeof(JSValue));
                                     arrayInits.Add(IElementEnumeratorBuilder.MoveNext(destExp, te.Expression));
-                                    arrayInits.Add(JSValueExtensionsBuilder.AssignCoalesce(te.Expression, Visit(be.Right)));
+                                    var defaultValue = Visit(be.Right);
+                                    if (suppressAnonymousFunctionNameInference)
+                                    {
+                                        defaultValue = PrepareDestructuringInitializer(be.Left, be.Right, defaultValue);
+                                    }
 
-                                    CreateAssignment(arrayInits, be.Left, te.Expression, true, newScope);
+                                    arrayInits.Add(JSValueExtensionsBuilder.AssignCoalesce(te.Expression, defaultValue));
+
+                                    CreateAssignment(arrayInits, be.Left, te.Expression, true, newScope, suppressAnonymousFunctionNameInference);
 
                                     break;
                                 }
@@ -221,7 +247,13 @@ partial class FastCompiler
 
                                 assignee = VisitIdentifierReference(id);
                                 arrayInits.Add(IElementEnumeratorBuilder.AssignMoveNext(assignee, destExp));
-                                arrayInits.Add(JSValueExtensionsBuilder.AssignCoalesce(assignee, Visit(be.Right)));
+                                var identifierDefaultValue = Visit(be.Right);
+                                if (suppressAnonymousFunctionNameInference)
+                                {
+                                    identifierDefaultValue = PrepareDestructuringInitializer(be.Left, be.Right, identifierDefaultValue);
+                                }
+
+                                arrayInits.Add(JSValueExtensionsBuilder.AssignCoalesce(assignee, identifierDefaultValue));
                                 break;
 
                             case FastNodeType.SpreadElement:
@@ -244,7 +276,7 @@ partial class FastCompiler
                                 {
                                     var check = IElementEnumeratorBuilder.MoveNext(destExp, te.Expression);
                                     arrayInits.Add(check);
-                                    CreateAssignment(arrayInits, ape, te.Expression, true, newScope);
+                                    CreateAssignment(arrayInits, ape, te.Expression, true, newScope, suppressAnonymousFunctionNameInference);
                                 }
                                 break;
 
@@ -276,5 +308,26 @@ partial class FastCompiler
         }
 
         throw new NotImplementedException();
+    }
+
+    private static bool IsAnonymousFunctionDefinition(AstExpression expression) =>
+        expression switch
+        {
+            AstFunctionExpression { Id: null } => true,
+            AstClassExpression { Identifier: null } => true,
+            _ => false
+        };
+
+    private static YExpression PrepareDestructuringInitializer(AstExpression target, AstExpression initializer, YExpression value)
+    {
+        if (target is not AstIdentifier id)
+            return value;
+
+        return YExpression.Call(
+            null,
+            PrepareAnonymousFunctionNameForDestructuringMethod,
+            value,
+            YExpression.Constant(id.Name.Value),
+            YExpression.Constant(IsAnonymousFunctionDefinition(initializer)));
     }
 }

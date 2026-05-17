@@ -156,6 +156,7 @@ partial class FastCompiler
 
             var inheritedStrictMode = IsStrictMode || forceStrictMode || createClass;
             var isStrictFunction = inheritedStrictMode || HasUseStrictDirective(functionDeclaration.Body);
+            ValidateFunctionEarlyErrors(functionDeclaration, isStrictFunction);
             var previousStrictMode = IsStrictMode;
             IsStrictMode = isStrictFunction;
 

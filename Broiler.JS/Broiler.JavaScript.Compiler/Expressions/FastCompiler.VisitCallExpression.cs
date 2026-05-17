@@ -10,6 +10,10 @@ namespace Broiler.JavaScript.Compiler;
 
 partial class FastCompiler
 {
+    private static readonly System.Reflection.MethodInfo DirectEvalMethod = typeof(DirectEvalSupport)
+        .GetMethod(nameof(DirectEvalSupport.Execute), [typeof(Arguments), typeof(bool), typeof(bool)])
+        ?? throw new InvalidOperationException("DirectEvalSupport.Execute(Arguments, bool, bool) not found");
+
     protected override YExpression VisitCallExpression(AstCallExpression callExpression)
     {
         var ce = VisitCallExpression(callExpression.Callee, callExpression.Arguments, callExpression.Coalesce);
@@ -81,6 +85,14 @@ partial class FastCompiler
 
     protected YExpression VisitCallExpression(AstExpression callee, IFastEnumerable<AstExpression> arguments, bool coalesce = false)
     {
+        if (!coalesce
+            && callee is AstIdentifier identifier
+            && identifier.Name.Equals("eval"))
+        {
+            var paramArray = VisitArguments(null, arguments);
+            return YExpression.Call(null, DirectEvalMethod, paramArray, YExpression.Constant(IsStrictMode), YExpression.Constant(scope.Top.Function != null));
+        }
+
         if (callee.Type == FastNodeType.MemberExpression && callee is AstMemberExpression me)
         {
             YExpression name;

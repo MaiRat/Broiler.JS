@@ -46,4 +46,34 @@ public class CompilerTests
         Assert.Equal("Broiler.JavaScript.Clr.DefaultClrInterop", JSEngine.ClrInterop.GetType().FullName);
         Assert.NotNull(JSEngine.ClrModuleProvider);
     }
+
+    [Fact]
+    public void Compile_ObjectDestructuringDefault_OnlyFallsBackForUndefined()
+    {
+        using var ctx = new JSContext();
+        var result = ctx.Eval("""
+            (function () {
+                var initCount = 0;
+                var source = { a: null, b: undefined };
+                var { a = (++initCount, 'fallback-a'), b = (++initCount, 'fallback-b') } = source;
+                return String(a) + '|' + b + '|' + initCount;
+            })()
+            """);
+
+        Assert.Equal("null|fallback-b|1", result.ToString());
+    }
+
+    [Fact]
+    public void Compile_ObjectDestructuringParameterDefault_KeepsNullValues()
+    {
+        using var ctx = new JSContext();
+        var result = ctx.Eval("""
+            (function () {
+                var initCount = 0;
+                return (({ a = (++initCount, 'fallback') }) => String(a) + '|' + initCount)({ a: null });
+            })()
+            """);
+
+        Assert.Equal("null|0", result.ToString());
+    }
 }

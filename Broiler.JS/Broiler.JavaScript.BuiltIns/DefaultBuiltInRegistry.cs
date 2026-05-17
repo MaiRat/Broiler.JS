@@ -189,8 +189,8 @@ public sealed class DefaultBuiltInRegistry : IBuiltInRegistry
     /// Registers a function as a configurable-value property on a prototype object.
     /// Used by satellite assemblies to add prototype methods.
     /// </summary>
-    public static void AddProto(JSObject proto, string name, JSFunctionDelegate fn)
+    public static void AddProto(JSObject proto, string name, JSFunctionDelegate fn, int length = 0)
     {
-        proto.FastAddValue(KeyStrings.GetOrCreate(name), new JSFunction(fn, name, $"function {name}() {{ [native] }}", createPrototype: false), JSPropertyAttributes.ConfigurableValue);
+        proto.FastAddValue(KeyStrings.GetOrCreate(name), new JSFunction(fn, name, $"function {name}() {{ [native] }}", length, createPrototype: false), JSPropertyAttributes.ConfigurableValue);
     }
 }

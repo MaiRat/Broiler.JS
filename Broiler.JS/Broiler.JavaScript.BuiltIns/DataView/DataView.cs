@@ -152,7 +152,7 @@ public partial class DataView : JSObject
     /// big-endian format. If false or undefined, a big-endian value is read. </param>
     /// <returns> The 32-bit floating point number at the specified byte offset from the start
     /// of the DataView. </returns>
-    [JSExport(Length = 2)]
+    [JSExport(Length = 1)]
     public unsafe JSValue GetFloat32(in Arguments a)
     {
         int temp = GetInt32Int(in a);
@@ -163,7 +163,7 @@ public partial class DataView : JSObject
     /// Gets a 16-bit floating point number (half-precision) at the specified byte offset
     /// from the start of the DataView (ES2025 §2.8).
     /// </summary>
-    [JSExport(Length = 2)]
+    [JSExport(Length = 1)]
     public JSValue GetFloat16(in Arguments a)
     {
         int temp = GetInt16Int(in a);
@@ -181,7 +181,7 @@ public partial class DataView : JSObject
     /// big-endian format. If false or undefined, a big-endian value is read. </param>
     /// <returns> The 64-bit floating point number at the specified byte offset from the start
     /// of the DataView. </returns>
-    [JSExport(Length = 2)]
+    [JSExport(Length = 1)]
     public unsafe JSValue GetFloat64(in Arguments a)
     {
         long temp = GetInt64(in a);
@@ -223,7 +223,7 @@ public partial class DataView : JSObject
     /// big-endian format. If false or undefined, a big-endian value is read. </param>
     /// <returns> The signed 16-bit integer at the specified byte offset from the start of the
     /// DataView. </returns>
-    [JSExport(Length = 2)]
+    [JSExport(Length = 1)]
     public JSValue GetInt16(in Arguments a) => new JSNumber(GetInt16Int(in a));
 
 
@@ -237,7 +237,7 @@ public partial class DataView : JSObject
     /// big-endian format. If false or undefined, a big-endian value is read. </param>
     /// <returns> The signed 32-bit integer at the specified byte offset from the start
     /// of the DataView. </returns>
-    [JSExport(Length = 2)]
+    [JSExport(Length = 1)]
     public JSValue GetInt32(in Arguments a) => new JSNumber(GetInt32Int(in a));
 
 
@@ -275,7 +275,7 @@ public partial class DataView : JSObject
     /// big-endian format. If false or undefined, a big-endian value is read. </param>
     /// <returns> The unsigned 8-bit integer (byte) at the specified byte offset from the start
     /// of the DataView. </returns>
-    [JSExport(Length = 2)]
+    [JSExport(Length = 1)]
     public JSValue GetUint16(in Arguments a) => new JSNumber((ushort)GetInt16Int(in a));
 
 
@@ -289,7 +289,7 @@ public partial class DataView : JSObject
     /// big-endian format. If false or undefined, a big-endian value is read. </param>
     /// <returns> The unsigned 32-bit integer at the specified byte offset from the start
     /// of the DataView. </returns>
-    [JSExport(Length = 2)]
+    [JSExport(Length = 1)]
     public JSValue GetUint32(in Arguments a) => new JSNumber((uint)GetInt32Int(in a));
 
 

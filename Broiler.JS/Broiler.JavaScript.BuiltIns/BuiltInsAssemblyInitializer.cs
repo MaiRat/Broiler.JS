@@ -308,17 +308,17 @@ internal static class BuiltInsAssemblyInitializer
         // does not directly reference JSIteratorObject.
         DefaultBuiltInRegistry.IteratorPrototypeSetup = static proto =>
         {
-            DefaultBuiltInRegistry.AddProto(proto, "map", JSIteratorObject.StaticMap);
-            DefaultBuiltInRegistry.AddProto(proto, "filter", JSIteratorObject.StaticFilter);
-            DefaultBuiltInRegistry.AddProto(proto, "take", JSIteratorObject.StaticTake);
-            DefaultBuiltInRegistry.AddProto(proto, "drop", JSIteratorObject.StaticDrop);
-            DefaultBuiltInRegistry.AddProto(proto, "flatMap", JSIteratorObject.StaticFlatMap);
-            DefaultBuiltInRegistry.AddProto(proto, "reduce", JSIteratorObject.StaticReduce);
-            DefaultBuiltInRegistry.AddProto(proto, "toArray", JSIteratorObject.StaticToArray);
-            DefaultBuiltInRegistry.AddProto(proto, "forEach", JSIteratorObject.StaticForEach);
-            DefaultBuiltInRegistry.AddProto(proto, "some", JSIteratorObject.StaticSome);
-            DefaultBuiltInRegistry.AddProto(proto, "every", JSIteratorObject.StaticEvery);
-            DefaultBuiltInRegistry.AddProto(proto, "find", JSIteratorObject.StaticFind);
+            DefaultBuiltInRegistry.AddProto(proto, "map", JSIteratorObject.StaticMap, 1);
+            DefaultBuiltInRegistry.AddProto(proto, "filter", JSIteratorObject.StaticFilter, 1);
+            DefaultBuiltInRegistry.AddProto(proto, "take", JSIteratorObject.StaticTake, 1);
+            DefaultBuiltInRegistry.AddProto(proto, "drop", JSIteratorObject.StaticDrop, 1);
+            DefaultBuiltInRegistry.AddProto(proto, "flatMap", JSIteratorObject.StaticFlatMap, 1);
+            DefaultBuiltInRegistry.AddProto(proto, "reduce", JSIteratorObject.StaticReduce, 1);
+            DefaultBuiltInRegistry.AddProto(proto, "toArray", JSIteratorObject.StaticToArray, 0);
+            DefaultBuiltInRegistry.AddProto(proto, "forEach", JSIteratorObject.StaticForEach, 1);
+            DefaultBuiltInRegistry.AddProto(proto, "some", JSIteratorObject.StaticSome, 1);
+            DefaultBuiltInRegistry.AddProto(proto, "every", JSIteratorObject.StaticEvery, 1);
+            DefaultBuiltInRegistry.AddProto(proto, "find", JSIteratorObject.StaticFind, 1);
         };
 
         // Wire factory delegates for JSPromise so Core can create

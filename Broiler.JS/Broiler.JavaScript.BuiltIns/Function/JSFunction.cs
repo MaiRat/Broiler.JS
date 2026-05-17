@@ -333,7 +333,7 @@ public partial class JSFunction : JSObject, IPropertyAccessor, IJSFunction
         return r.IsObject ? r : @this;
     }
 
-    [JSExport(IsConstructor = true)]
+    [JSExport(IsConstructor = true, Length = 1)]
     internal new static JSValue Constructor(in Arguments args)
     {
         var len = args.Length;

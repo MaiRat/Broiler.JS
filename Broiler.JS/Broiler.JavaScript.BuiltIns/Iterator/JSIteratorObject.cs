@@ -95,7 +95,7 @@ public partial class JSIteratorObject : JSObject
     // ---------------------------------------------------------------
     // Static: Iterator.from  (§2.1.2)
     // ---------------------------------------------------------------
-    [JSExport("from")]
+    [JSExport("from", Length = 1)]
     internal static JSValue From(in Arguments a)
     {
         var obj = a.Get1();

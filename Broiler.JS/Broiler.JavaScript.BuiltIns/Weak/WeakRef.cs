@@ -15,6 +15,7 @@ public partial class JSFinalizationRegistry : JSObject
 
     private readonly JSFunction finalizer;
 
+    [JSExport(Length = 1)]
     public JSFinalizationRegistry(in Arguments a) : base(JSEngine.NewTargetPrototype)
     {
         if (a[0] is not JSFunction fx)
@@ -36,7 +37,7 @@ public partial class JSFinalizationRegistry : JSObject
         finalizer.InvokeFunction(new Arguments(this, holdings));
     }
 
-    [JSExport]
+    [JSExport(Length = 1)]
     public JSValue Unregister(in Arguments a)
     {
         if (!CanBeHeldWeakly(a[0]))
@@ -45,7 +46,7 @@ public partial class JSFinalizationRegistry : JSObject
         return Unregister(a[0]) ? JSValue.BooleanTrue : JSValue.BooleanFalse;
     }
 
-    [JSExport]
+    [JSExport(Length = 2)]
     public JSValue Register(in Arguments a)
     {
         var target = a[0];

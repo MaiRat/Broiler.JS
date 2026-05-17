@@ -76,4 +76,19 @@ public class CompilerTests
 
         Assert.Equal("null|0", result.ToString());
     }
+
+    [Fact]
+    public void Compile_DestructuringDefaults_Infer_Anonymous_Arrow_Function_Names()
+    {
+        using var ctx = new JSContext();
+        var result = ctx.Eval("""
+            (function () {
+                var arrayName = (([arrow = () => {}] = []) => arrow.name)();
+                var objectName = (({ arrow = () => {} } = {}) => arrow.name)();
+                return arrayName + '|' + objectName;
+            })()
+            """);
+
+        Assert.Equal("arrow|arrow", result.ToString());
+    }
 }

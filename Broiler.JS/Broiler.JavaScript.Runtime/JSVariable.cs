@@ -10,6 +10,19 @@ namespace Broiler.JavaScript.Runtime;
 public class JSVariable
 {
     // BROILER-PATCH: Support read-only variables for function expression names (ES3 §13)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private JSValue InferAnonymousFunctionName(JSValue value)
+    {
+        if (Name.IsEmpty || value is not JSObject functionObject || !value.IsFunction)
+            return value;
+
+        if (functionObject[KeyStrings.name].ToString() != "native")
+            return value;
+
+        functionObject.FastAddValue(KeyStrings.name, JSValue.CreateString(Name.Value), JSPropertyAttributes.ConfigurableReadonlyValue);
+        return value;
+    }
+
     private JSValue _value;
     public JSValue Value
     {
@@ -20,7 +33,7 @@ public class JSVariable
         {
             if (!IsReadOnly)
             {
-                _value = value;
+                _value = InferAnonymousFunctionName(value);
                 return;
             }
 
@@ -71,6 +84,7 @@ public class JSVariable
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         set
         {
+            value = InferAnonymousFunctionName(value);
             _value = value;
             if (key.Value == null)
                 key = KeyStrings.GetOrCreate(Name);

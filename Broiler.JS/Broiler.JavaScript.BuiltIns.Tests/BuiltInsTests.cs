@@ -2445,6 +2445,53 @@ public class BuiltInsTests
     }
 
     [Fact]
+    public void Generated_BuiltIn_Method_Length_Metadata_Matches_Map_And_Math_Samples()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = new JSContext();
+        var parts = ctx.Eval(@"(function () {
+            function snapshot(fn) {
+                var descriptor = Object.getOwnPropertyDescriptor(fn, 'length');
+                return [descriptor.value, fn.length, descriptor.writable, descriptor.enumerable, descriptor.configurable].join(',');
+            }
+
+            return [
+                snapshot(Map.prototype.clear),
+                snapshot(Map.prototype.delete),
+                snapshot(Map.prototype.forEach),
+                snapshot(Map.prototype.get),
+                snapshot(Map.prototype.has),
+                snapshot(Math.abs),
+                snapshot(Math.acos),
+                snapshot(Math.atan2),
+                snapshot(Math.f16round),
+                snapshot(Math.floor),
+                snapshot(Math.max),
+                snapshot(Math.min),
+                snapshot(Math.random)
+            ].join('|');
+        })();").ToString().Split('|');
+
+        Assert.Equal(
+            [
+                "0,0,false,false,true",
+                "1,1,false,false,true",
+                "1,1,false,false,true",
+                "1,1,false,false,true",
+                "1,1,false,false,true",
+                "1,1,false,false,true",
+                "1,1,false,false,true",
+                "2,2,false,false,true",
+                "1,1,false,false,true",
+                "1,1,false,false,true",
+                "2,2,false,false,true",
+                "2,2,false,false,true",
+                "0,0,false,false,true"
+            ],
+            parts);
+    }
+
+    [Fact]
     public void Array_Iteration_Methods_Preserve_Abrupt_Completions_From_Length_Property_And_Predicate()
     {
         EnsureBuiltInsLoaded();

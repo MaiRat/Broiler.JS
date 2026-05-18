@@ -422,7 +422,7 @@ public partial class JSMath : JSObject
         return new JSNumber(r);
     }
 
-    [JSExport]
+    [JSExport(Length = 2)]
     public static JSValue Max(in Arguments args)
     {
         int length = args.Length;
@@ -439,7 +439,7 @@ public partial class JSMath : JSObject
         return new JSNumber(result);
     }
 
-    [JSExport]
+    [JSExport(Length = 2)]
     public static JSValue Min(in Arguments args)
     {
         int length = args.Length;

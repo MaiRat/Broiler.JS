@@ -129,12 +129,15 @@ public class JSContext : JSObject, IJSExecutionContext, IDisposable
             {
                 if (entry.HadPreviousVariable)
                 {
+                    if (!ReferenceEquals(entry.PreviousVariable, entry.OverlayVariable))
+                        entry.PreviousVariable.Value = entry.OverlayVariable.Value;
+
                     context.globalVars.Put(entry.Name.Key) = entry.PreviousVariable;
 
                     if (!ReferenceEquals(entry.PreviousVariable, entry.OverlayVariable))
                     {
                         if (entry.HadOwnProperty)
-                            context[entry.Name] = entry.PreviousValue;
+                            context[entry.Name] = entry.PreviousVariable.Value;
                         else
                             context.Delete(entry.Name);
                     }
@@ -155,24 +158,26 @@ public class JSContext : JSObject, IJSExecutionContext, IDisposable
 
     public JSValue Register(JSVariable variable)
     {
+        KeyString name = variable.Name;
         var v = variable.Value;
-        var oldV = this[variable.Name];
-        var hasOwnProperty = !GetInternalProperty(variable.Name, false).IsEmpty;
+        var oldV = this[name];
+        var hasOwnProperty = !GetInternalProperty(name, false).IsEmpty;
+        var hadExistingVariable = globalVars.TryGetValue(name.Key, out var existingVariable);
 
         if (!hasOwnProperty)
         {
             if (!IsExtensible())
-                throw JSEngine.NewTypeError($"Cannot define global variable {variable.Name} on a non-extensible global object");
+                throw JSEngine.NewTypeError($"Cannot define global variable {name} on a non-extensible global object");
 
-            FastAddValue(variable.Name, v, JSPropertyAttributes.Value | JSPropertyAttributes.Enumerable);
+            FastAddValue(name, v, JSPropertyAttributes.Value | JSPropertyAttributes.Enumerable);
         }
         else if (oldV != v)
         {
-            this[variable.Name] = v;
+            this[name] = v;
         }
 
-        KeyString name = variable.Name;
-        globalVars.Put(name.Key) = variable;
+        if (!hadExistingVariable || ReferenceEquals(existingVariable, variable))
+            globalVars.Put(name.Key) = variable;
         return v;
     }
 

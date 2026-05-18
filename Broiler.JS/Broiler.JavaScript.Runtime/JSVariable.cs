@@ -115,7 +115,24 @@ public class JSVariable
     public JSValue GlobalValue
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => Value;
+        get
+        {
+            if (!_isInitialized)
+                throw (NewReferenceErrorFactory ?? throw new InvalidOperationException("JSVariable.NewReferenceErrorFactory delegate is not initialized. Ensure the Engine assembly module initializer has run."))
+                    (ReferenceErrorMessage);
+
+            if (key.Value == null)
+                key = KeyStrings.GetOrCreate(Name);
+
+            if (GetCurrentContext?.Invoke() is JSObject ctx)
+            {
+                var property = ctx.GetInternalProperty(key, false);
+                if (!property.IsEmpty)
+                    return _value = ctx[key];
+            }
+
+            return _value;
+        }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         set
         {

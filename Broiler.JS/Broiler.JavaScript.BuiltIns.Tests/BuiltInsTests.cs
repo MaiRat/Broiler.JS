@@ -1886,6 +1886,30 @@ public class BuiltInsTests
     }
 
     [Fact]
+    public void Eval_Block_Function_Declarations_Update_Existing_Var_Bindings()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = new JSContext();
+
+        var result = ctx.Eval("""
+            eval('{ function directGlobal() { return "direct declaration"; } }');
+            var direct = typeof directGlobal + "|" + directGlobal();
+            var functionLocal = (function () {
+              eval('{ function local() { return "local declaration"; } }');
+              return typeof local + "|" + local();
+              var local = 123;
+            }());
+            (0, eval)('{ function indirectGlobal() { return "indirect declaration"; } }');
+            var indirect = typeof indirectGlobal + "|" + indirectGlobal();
+            var directGlobal = 123;
+            var indirectGlobal = 123;
+            direct + "||" + functionLocal + "||" + indirect
+            """);
+
+        Assert.Equal("function|direct declaration||function|local declaration||function|indirect declaration", result.ToString());
+    }
+
+    [Fact]
     public void AnnexB_Block_Function_Declarations_Update_Function_Scope_Bindings()
     {
         using var ctx = CreateContext();

@@ -126,6 +126,51 @@ public class JSObjectBuilder
         return new YElementInit(_FastAddGetterKeyString, key, getter, Expression.Constant(attributes));
     }
 
+    public static Expression AddRange(Expression target, Expression value)
+        => Expression.Call(target, _FastAddRange, value);
+
+    public static Expression AddValue(Expression target, Expression key, Expression value, JSPropertyAttributes attributes = JSPropertyAttributes.EnumerableConfigurableValue)
+    {
+        if (key.Type.IsJSValueType())
+            return Expression.Call(target, _FastAddValueKeyValue, key, value, Expression.Constant(attributes));
+
+        if (key.Type == typeof(uint))
+            return Expression.Call(target, _FastAddValueUInt, key, value, Expression.Constant(attributes));
+
+        if (key.Type == typeof(int))
+            return Expression.Call(target, _FastAddValueUInt, Expression.Convert(key, typeof(uint)), value, Expression.Constant(attributes));
+
+        return Expression.Call(target, _FastAddValueKeyString, key, value, Expression.Constant(attributes));
+    }
+
+    public static Expression AddSetter(Expression target, Expression key, Expression setter, JSPropertyAttributes attributes = JSPropertyAttributes.EnumerableConfigurableProperty)
+    {
+        if (key.Type.IsJSValueType())
+            return Expression.Call(null, _FastAddSetterValue, target, key, setter, Expression.Constant(attributes));
+
+        if (key.Type == typeof(uint))
+            return Expression.Call(null, _FastAddSetterUInt, target, key, setter, Expression.Constant(attributes));
+
+        if (key.Type == typeof(int))
+            return Expression.Call(null, _FastAddSetterUInt, target, Expression.Convert(key, typeof(uint)), setter, Expression.Constant(attributes));
+
+        return Expression.Call(null, _FastAddSetterKeyString, target, key, setter, Expression.Constant(attributes));
+    }
+
+    public static Expression AddGetter(Expression target, Expression key, Expression getter, JSPropertyAttributes attributes = JSPropertyAttributes.EnumerableConfigurableProperty)
+    {
+        if (key.Type.IsJSValueType())
+            return Expression.Call(null, _FastAddGetterValue, target, key, getter, Expression.Constant(attributes));
+
+        if (key.Type == typeof(uint))
+            return Expression.Call(null, _FastAddGetterUInt, target, key, getter, Expression.Constant(attributes));
+
+        if (key.Type == typeof(int))
+            return Expression.Call(null, _FastAddGetterUInt, target, Expression.Convert(key, typeof(uint)), getter, Expression.Constant(attributes));
+
+        return Expression.Call(null, _FastAddGetterKeyString, target, key, getter, Expression.Constant(attributes));
+    }
+
     public static Expression New() => Expression.New(_New);
 
     public static Expression New(IFastEnumerable<YElementInit> elements) => Expression.ListInit(Expression.New(_New), elements);

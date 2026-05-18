@@ -5614,6 +5614,56 @@ public class BuiltInsTests
     }
 
     [Fact]
+    public void Object_Literal_Proto_Setter_Uses_Prototype_Without_Creating_Own_Property()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = CreateContext();
+        var result = ctx.Eval("""
+            (function () {
+              var proto = {
+                getValue: function () {
+                  return this.value;
+                }
+              };
+              var child = {
+                __proto__: proto,
+                value: 42
+              };
+              var ignored = {
+                __proto__: 1
+              };
+              var closable = {
+                __proto__: Iterator.prototype,
+                get next() {
+                  throw new Test262Error('next should not be read');
+                },
+                return() {
+                  return { done: true };
+                }
+              };
+
+              return [
+                String(Object.getPrototypeOf(child) === proto),
+                String(child.getValue()),
+                String(Object.prototype.hasOwnProperty.call(child, '__proto__')),
+                String(Object.getPrototypeOf(ignored) === Object.prototype),
+                String(Object.prototype.hasOwnProperty.call(ignored, '__proto__')),
+                (function () {
+                  try {
+                    closable.every();
+                    return 'no-throw';
+                  } catch (e) {
+                    return e.constructor.name;
+                  }
+                })()
+              ].join('|');
+            })();
+            """);
+
+        Assert.Equal("true|42|false|true|false|TypeError", result.ToString());
+    }
+
+    [Fact]
     public void Bound_HasInstance_Zero_Normalization_And_Proxy_IsPrototypeOf_Regressions()
     {
         EnsureBuiltInsLoaded();

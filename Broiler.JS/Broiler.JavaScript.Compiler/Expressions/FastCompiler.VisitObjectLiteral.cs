@@ -1,25 +1,171 @@
-﻿using System;
+using System;
 using Broiler.JavaScript.ExpressionCompiler.Expressions;
 using Broiler.JavaScript.ExpressionCompiler.Core;
 using Broiler.JavaScript.Ast.Misc;
+using Broiler.JavaScript.LinqExpressions.LinqExpressions;
 using Broiler.JavaScript.Runtime;
 
 namespace Broiler.JavaScript.Compiler;
 
 partial class FastCompiler
 {
+    private static bool IsObjectLiteralProtoSetter(AstClassProperty property)
+    {
+        if (property.Computed || !property.UsesColon || property.Kind != AstPropertyKind.Data)
+            return false;
+
+        return property.Key switch
+        {
+            AstIdentifier identifier => identifier.Name.Equals("__proto__"),
+            AstLiteral literal when literal.TokenType == TokenTypes.String => literal.StringValue == "__proto__",
+            _ => false
+        };
+    }
+
     protected override YExpression VisitObjectLiteral(AstObjectLiteral objectExpression)
     {
-        var elements = new Sequence<YElementInit>();
-        var en = objectExpression.Properties.GetFastEnumerator();
+        var properties = objectExpression.Properties;
+        bool hasProtoSetter = false;
+        var protoScan = properties.GetFastEnumerator();
+        while (protoScan.MoveNext(out var propertyNode))
+        {
+            if (propertyNode is AstClassProperty property && IsObjectLiteralProtoSetter(property))
+            {
+                hasProtoSetter = true;
+                break;
+            }
+        }
 
-        while (en.MoveNext(out var pn))
+        if (!hasProtoSetter)
+        {
+            var elements = new Sequence<YElementInit>();
+            var en = properties.GetFastEnumerator();
+
+            while (en.MoveNext(out var pn))
+            {
+                switch (pn.Type)
+                {
+                    case FastNodeType.SpreadElement:
+                        var spread = pn as AstSpreadElement;
+                        elements.Add(new YElementInit(JSObjectBuilder._FastAddRange, Visit(spread.Argument)));
+                        continue;
+
+                    case FastNodeType.ClassProperty:
+                        break;
+
+                    default:
+                        throw new FastParseException(pn.Start, $"Invalid token {pn.Start} in object literal");
+                }
+
+                AstClassProperty p = pn as AstClassProperty;
+
+                YExpression key = null;
+                YExpression value = null;
+                var pKey = p.Key;
+
+                value = VisitExpression(p.Init);
+
+                if (p.Computed)
+                {
+                    // there is a possibility of numeric index
+                    var keyExp = pKey.IsUIntLiteral(out var num) ? YExpression.Constant(num) : Visit(pKey);
+
+                    if (p.Kind == AstPropertyKind.Get)
+                    {
+                        elements.Add(JSObjectBuilder.AddGetter(keyExp, value));
+                        continue;
+                    }
+
+                    if (p.Kind == AstPropertyKind.Set)
+                    {
+                        elements.Add(JSObjectBuilder.AddSetter(keyExp, value));
+                        continue;
+                    }
+
+                    elements.Add(JSObjectBuilder.AddValue(keyExp, value));
+                    continue;
+                }
+
+                switch (pKey.Type)
+                {
+                    case FastNodeType.Identifier:
+                        var id = pKey as AstIdentifier;
+                        if (!p.Computed)
+                        {
+                            key = KeyOfName(id.Name);
+                        }
+                        else
+                        {
+                            key = scope.Top.GetVariable(id.Name).Expression;
+                        }
+                        break;
+
+                    case FastNodeType.Literal:
+                        var l = pKey as AstLiteral;
+                        if (l.TokenType == TokenTypes.String)
+                        {
+                            if (NumberParser.TryCoerceToUInt32(l.StringValue, out var ui))
+                            {
+                                key = YExpression.Constant(ui);
+
+                            }
+                            else
+                            {
+                                key = KeyOfName(l.StringValue);
+                            }
+                        }
+                        else if (l.TokenType == TokenTypes.Number)
+                        {
+                            key = YExpression.Constant((uint)l.NumericValue);
+                        }
+                        else
+                            throw new NotSupportedException();
+
+                        break;
+
+                    default:
+                        throw new NotSupportedException();
+                }
+
+                switch (p.Kind)
+                {
+                    case AstPropertyKind.Get:
+                        elements.Add(JSObjectBuilder.AddGetter(key, value));
+                        break;
+
+                    case AstPropertyKind.Set:
+                        elements.Add(JSObjectBuilder.AddSetter(key, value));
+                        break;
+
+                    default:
+                        elements.Add(JSObjectBuilder.AddValue(key, value));
+                        break;
+                }
+            }
+
+            if (elements.Any())
+            {
+                var r = JSObjectBuilder.New(elements);
+                return r;
+            }
+
+            return JSObjectBuilder.New();
+        }
+
+        using var temp = scope.Top.GetTempVariable(typeof(JSObject));
+        var statements = new Sequence<YExpression>
+        {
+            YExpression.Assign(temp.Variable, JSObjectBuilder.New())
+        };
+
+        var enWithProto = properties.GetFastEnumerator();
+        while (enWithProto.MoveNext(out var pn))
         {
             switch (pn.Type)
             {
                 case FastNodeType.SpreadElement:
                     var spread = pn as AstSpreadElement;
-                    elements.Add(new YElementInit(JSObjectBuilder._FastAddRange, Visit(spread.Argument)));
+                    statements.Add(JSObjectBuilder.AddRange(temp.Variable, Visit(spread.Argument)));
                     continue;
 
                 case FastNodeType.ClassProperty:
@@ -32,29 +178,26 @@ partial class FastCompiler
             AstClassProperty p = pn as AstClassProperty;
 
             YExpression key = null;
-            YExpression value = null;
+            YExpression value = VisitExpression(p.Init);
             var pKey = p.Key;
-
-            value = VisitExpression(p.Init);
 
             if (p.Computed)
             {
-                // there is a possibility of numeric index
                 var keyExp = pKey.IsUIntLiteral(out var num) ? YExpression.Constant(num) : Visit(pKey);
 
                 if (p.Kind == AstPropertyKind.Get)
                 {
-                    elements.Add(JSObjectBuilder.AddGetter(keyExp, value));
+                    statements.Add(JSObjectBuilder.AddGetter(temp.Variable, keyExp, value));
                     continue;
                 }
 
                 if (p.Kind == AstPropertyKind.Set)
                 {
-                    elements.Add(JSObjectBuilder.AddSetter(keyExp, value));
+                    statements.Add(JSObjectBuilder.AddSetter(temp.Variable, keyExp, value));
                     continue;
                 }
 
-                elements.Add(JSObjectBuilder.AddValue(keyExp, value));
+                statements.Add(JSObjectBuilder.AddValue(temp.Variable, keyExp, value));
                 continue;
             }
 
@@ -62,14 +205,7 @@ partial class FastCompiler
             {
                 case FastNodeType.Identifier:
                     var id = pKey as AstIdentifier;
-                    if (!p.Computed)
-                    {
-                        key = KeyOfName(id.Name);
-                    }
-                    else
-                    {
-                        key = scope.Top.GetVariable(id.Name).Expression;
-                    }
+                    key = KeyOfName(id.Name);
                     break;
 
                 case FastNodeType.Literal:
@@ -79,7 +215,6 @@ partial class FastCompiler
                         if (NumberParser.TryCoerceToUInt32(l.StringValue, out var ui))
                         {
                             key = YExpression.Constant(ui);
-
                         }
                         else
                         {
@@ -91,7 +226,9 @@ partial class FastCompiler
                         key = YExpression.Constant((uint)l.NumericValue);
                     }
                     else
+                    {
                         throw new NotSupportedException();
+                    }
 
                     break;
 
@@ -99,28 +236,29 @@ partial class FastCompiler
                     throw new NotSupportedException();
             }
 
+            if (IsObjectLiteralProtoSetter(p))
+            {
+                statements.Add(YExpression.Assign(JSValueBuilder.Index(temp.Variable, key), value));
+                continue;
+            }
+
             switch (p.Kind)
             {
                 case AstPropertyKind.Get:
-                    elements.Add(JSObjectBuilder.AddGetter(key, value));
+                    statements.Add(JSObjectBuilder.AddGetter(temp.Variable, key, value));
                     break;
 
                 case AstPropertyKind.Set:
-                    elements.Add(JSObjectBuilder.AddSetter(key, value));
+                    statements.Add(JSObjectBuilder.AddSetter(temp.Variable, key, value));
                     break;
 
                 default:
-                    elements.Add(JSObjectBuilder.AddValue(key, value));
+                    statements.Add(JSObjectBuilder.AddValue(temp.Variable, key, value));
                     break;
             }
         }
 
-        if (elements.Any())
-        {
-            var r = JSObjectBuilder.New(elements);
-            return r;
-        }
-
-        return JSObjectBuilder.New();
+        statements.Add(temp.Variable);
+        return YExpression.Block(new Sequence<YParameterExpression> { temp.Variable }, statements);
     }
 }

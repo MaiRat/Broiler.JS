@@ -1,4 +1,6 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using System;
+using System.Text.RegularExpressions;
+using Microsoft.CodeAnalysis;
 
 namespace Broiler.JavaScript.JSClassGenerator;
 
@@ -25,7 +27,8 @@ internal static class ITypeSymbolExtensions
             Property = method as IPropertySymbol,
             Field = method as IFieldSymbol,
             Member = method,
-            Name = method.Name
+            Name = method.Name,
+            Length = method is IMethodSymbol m ? InferLength(m).ToString() : null
         };
         bool hasExport = false;
         foreach (var a in method.GetAttributes())
@@ -64,6 +67,41 @@ internal static class ITypeSymbolExtensions
             }
         }
         return hasExport ? e : null;
+    }
+
+    private static int InferLength(IMethodSymbol method)
+    {
+        if (!method.IsJSFunction())
+            return method.Parameters.Length;
+
+        var syntax = method.DeclaringSyntaxReferences.Length > 0
+            ? method.DeclaringSyntaxReferences[0].GetSyntax().ToFullString()
+            : null;
+        if (string.IsNullOrEmpty(syntax))
+            return 0;
+
+        var parameterName = Regex.Escape(method.Parameters[0].Name);
+        var length = 0;
+
+        foreach (Match match in Regex.Matches(syntax, $@"\b{parameterName}\s*\.\s*Get(?<count>\d+)\s*\("))
+        {
+            if (int.TryParse(match.Groups["count"].Value, out var count))
+                length = Math.Max(length, count);
+        }
+
+        foreach (Match match in Regex.Matches(syntax, $@"\b{parameterName}\s*\[\s*(?<index>\d+)\s*\]"))
+        {
+            if (int.TryParse(match.Groups["index"].Value, out var index))
+                length = Math.Max(length, index + 1);
+        }
+
+        foreach (Match match in Regex.Matches(syntax, $@"\b{parameterName}\s*\.\s*GetAt\s*\(\s*(?<index>\d+)\s*\)"))
+        {
+            if (int.TryParse(match.Groups["index"].Value, out var index))
+                length = Math.Max(length, index + 1);
+        }
+
+        return length;
     }
 
     public static bool IsConstructor(this IMethodSymbol method) => method.Name == ".ctor";

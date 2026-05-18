@@ -32,7 +32,9 @@ public static class DirectEvalSupport
 
         if (JSEngine.Current is JSContext context)
         {
-            using var _ = context.PushDirectEvalScope(capturedBindings);
+            using var _ = disallowArgumentsDeclaration
+                ? context.PushDirectEvalScope(capturedBindings)
+                : null;
             return context.Eval(text, location, context);
         }
 

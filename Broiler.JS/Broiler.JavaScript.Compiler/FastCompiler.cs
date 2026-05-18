@@ -242,12 +242,15 @@ public partial class FastCompiler : AstMapVisitor<YExpression>
 
     private void AppendAnnexBOuterBindingAssignments(Sequence<YExpression> statements, FastFunctionScope.VariableScope currentBinding, in StringSpan name, YExpression value)
     {
-        if (IsStrictMode || scope.Top == scope.Top.RootScope)
+        if (IsStrictMode)
             return;
 
-        var outerBinding = GetAnnexBOuterBinding(name, currentBinding);
-        if (outerBinding != null && outerBinding != currentBinding)
-            statements.Add(YExpression.Assign(outerBinding.Expression, value));
+        if (scope.Top != scope.Top.RootScope)
+        {
+            var outerBinding = GetAnnexBOuterBinding(name, currentBinding);
+            if (outerBinding != null && outerBinding != currentBinding)
+                statements.Add(YExpression.Assign(outerBinding.Expression, value));
+        }
 
         if (scope.Top.Function == null)
             statements.Add(JSContextBuilder.AssignIdentifier(KeyOfName(name), value));
@@ -262,6 +265,17 @@ public partial class FastCompiler : AstMapVisitor<YExpression>
                 return variable;
 
             parent = parent.Parent;
+        }
+
+        if (scope.Top.RootScope.TryGetOwnVariable(name, out var rootVariable))
+            return rootVariable;
+
+        if (scope.Top.Function == null)
+        {
+            var globalVariable = scope.Top.RootScope.CreateVariable(name, null, true);
+            globalVariable.Expression = JSVariableBuilder.Property(globalVariable.Variable);
+            globalVariable.SetInit(JSVariableBuilder.New(JSValueBuilder.Index(scope.Top.RootScope.Context, KeyOfName(name)), name.Value));
+            return globalVariable;
         }
 
         return scope.Top.RootScope.CreateVariable(name, null, true);

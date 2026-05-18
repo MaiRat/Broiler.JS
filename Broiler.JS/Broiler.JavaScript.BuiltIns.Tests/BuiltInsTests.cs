@@ -5718,6 +5718,103 @@ public class BuiltInsTests
     }
 
     [Fact]
+    public void Iterator_Take_Drop_And_Map_Set_Constructors_Close_Iterators_On_Abrupt_Completion()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = CreateContext();
+        var result = ctx.Eval("""
+            (function () {
+              function outcome(fn) {
+                try {
+                  fn();
+                  return 'no-throw';
+                } catch (e) {
+                  return e && typeof e === 'object' ? e.constructor.name : String(e);
+                }
+              }
+
+              function makeClosable(nextValue, returnThrows) {
+                var iterable = { closed: false };
+                iterable[Symbol.iterator] = function () {
+                  return {
+                    first: true,
+                    next: function () {
+                      if (this.first) {
+                        this.first = false;
+                        return nextValue;
+                      }
+
+                      return { value: undefined, done: true };
+                    },
+                    return: function () {
+                      iterable.closed = true;
+                      if (returnThrows) {
+                        throw 'return throws';
+                      }
+
+                      return {};
+                    }
+                  };
+                };
+
+                return iterable;
+              }
+
+              var closed = false;
+              var closable = {
+                __proto__: Iterator.prototype,
+                get next() {
+                  throw new Test262Error('next should not be read');
+                },
+                return() {
+                  closed = true;
+                  throw new Test262Error('return should be ignored');
+                }
+              };
+
+              function constructorSnapshot(ctor, methodName, nextValue) {
+                var iterable = makeClosable(nextValue, true);
+                var original = ctor.prototype[methodName];
+                Object.defineProperty(ctor.prototype, methodName, {
+                  value: function () {
+                    throw methodName + ' throws';
+                  },
+                  configurable: true
+                });
+
+                try {
+                  return outcome(function () {
+                    new ctor(iterable);
+                  }) + ',' + String(iterable.closed);
+                } finally {
+                  Object.defineProperty(ctor.prototype, methodName, {
+                    value: original,
+                    configurable: true
+                  });
+                }
+              }
+
+              return [
+                outcome(function () { closable.take(); }) + ',' + String(closed),
+                (closed = false, outcome(function () { closable.drop(-1); }) + ',' + String(closed)),
+                (function () {
+                  var iterable = makeClosable({ value: 'non object', done: false }, false);
+                  return outcome(function () {
+                    new Map(iterable);
+                  }) + ',' + String(iterable.closed);
+                })(),
+                constructorSnapshot(Map, 'set', { value: [{}, {}], done: false }),
+                constructorSnapshot(WeakMap, 'set', { value: [{}, {}], done: false }),
+                constructorSnapshot(Set, 'add', { value: {}, done: false }),
+                constructorSnapshot(WeakSet, 'add', { value: {}, done: false })
+              ].join('|');
+            })();
+            """);
+
+        Assert.Equal("RangeError,true|RangeError,true|TypeError,true|set throws,true|set throws,true|add throws,true|add throws,true", result.ToString());
+    }
+
+    [Fact]
     public void Object_Literal_Proto_Setter_Uses_Prototype_Without_Creating_Own_Property()
     {
         EnsureBuiltInsLoaded();

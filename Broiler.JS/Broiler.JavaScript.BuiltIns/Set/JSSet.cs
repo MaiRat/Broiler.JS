@@ -1,5 +1,6 @@
 using Broiler.JavaScript.BuiltIns.Array;
 using Broiler.JavaScript.BuiltIns.Boolean;
+using Broiler.JavaScript.BuiltIns.Iterator;
 using Broiler.JavaScript.ExpressionCompiler;
 using System;
 using System.Collections.Generic;
@@ -32,7 +33,17 @@ public partial class JSSet : JSObject
 
         var en = iterable.GetIterableEnumerator();
         while (en.MoveNext(out var item))
-            adder.InvokeFunction(new Arguments(this, item));
+        {
+            try
+            {
+                adder.InvokeFunction(new Arguments(this, item));
+            }
+            catch
+            {
+                JSIteratorObject.CloseIteratorIfPossible(en);
+                throw;
+            }
+        }
     }
 
     [JSExport("add")]

@@ -1,5 +1,6 @@
-﻿using Broiler.JavaScript.BuiltIns.Array;
+using Broiler.JavaScript.BuiltIns.Array;
 using Broiler.JavaScript.BuiltIns.Boolean;
+using Broiler.JavaScript.BuiltIns.Iterator;
 using Broiler.JavaScript.ExpressionCompiler;
 using System;
 using Broiler.JavaScript.Runtime;
@@ -37,15 +38,18 @@ public partial class JSWeakMap: JSObject
         var en = iterable.GetIterableEnumerator();
         while (en.MoveNext(out var item))
         {
-            if (item is not JSObject entry)
+            try
             {
-                if (en is IReturnableEnumerator returnable)
-                    returnable.Return(JSUndefined.Value);
+                if (item is not JSObject entry)
+                    throw JSEngine.NewTypeError(JSObject.NotEntry(item));
 
-                throw JSEngine.NewTypeError(JSObject.NotEntry(item));
+                adder.InvokeFunction(new Arguments(this, entry[0], entry[1]));
             }
-
-            adder.InvokeFunction(new Arguments(this, entry[0], entry[1]));
+            catch
+            {
+                JSIteratorObject.CloseIteratorIfPossible(en);
+                throw;
+            }
         }
     }
 

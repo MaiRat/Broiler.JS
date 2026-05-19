@@ -5896,6 +5896,72 @@ public class BuiltInsTests
     }
 
     [Fact]
+    public void Function_Bind_Name_Length_And_HasInstance_Descriptor_Regresions_Match_Test262()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = CreateContext();
+        var result = ctx.Eval("String(Object.getOwnPropertyDescriptor(Function.prototype, Symbol.hasInstance).configurable);");
+
+        Assert.Equal("false", result.ToString());
+    }
+
+    [Fact]
+    public void Function_Bind_Uses_Current_Name_And_Length_Descriptors_When_Creating_Bound_Functions()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = CreateContext();
+        var result = ctx.Eval("""
+            (function () {
+              var fun = function () {};
+              Object.defineProperty(fun, 'name', { value: 1337 });
+              Object.defineProperty(fun, 'length', { value: '15' });
+              var nonStringName = fun.bind();
+
+              Object.defineProperty(fun, 'length', { value: Number.MAX_SAFE_INTEGER });
+              var maxSafeIntegerLength = fun.bind();
+
+              Object.defineProperty(fun, 'length', { value: -100 });
+              var negativeLength = fun.bind();
+
+              return [
+                nonStringName.name,
+                String(nonStringName.length),
+                String(maxSafeIntegerLength.length),
+                String(negativeLength.length)
+              ].join('|');
+            })();
+            """);
+
+        Assert.Equal("bound |15|9007199254740991|0", result.ToString());
+    }
+
+    [Fact]
+    public void Array_Includes_And_Date_DefaultValue_Regressions_Match_Test262()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = CreateContext();
+        var result = ctx.Eval("""
+            (function () {
+              Date.prototype.toString = function () { return 1; };
+              Date.prototype.valueOf = function () { return 0; };
+
+              return [
+                String(new Date == true),
+                String(new Date == false),
+                String(true == new Date),
+                String(false == new Date),
+                String([1,,2].includes(2)),
+                String([,].includes()),
+                String([].includes.call({ __proto__: { 1: 2 }, length: 3 }, 2)),
+                String([].includes.call(new Proxy([1], { get() { return 2; } }), 2))
+              ].join('|');
+            })();
+            """);
+
+        Assert.Equal("true|false|true|false|true|true|true|true", result.ToString());
+    }
+
+    [Fact]
     public void Iterable_And_Object_TypeError_Regressions_Match_Test262_Expectations()
     {
         EnsureBuiltInsLoaded();

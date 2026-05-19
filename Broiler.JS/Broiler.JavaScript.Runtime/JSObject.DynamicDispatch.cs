@@ -74,14 +74,10 @@ public partial class JSObject
         if (ReferenceEquals(this, value))
             return true;
 
-        if (value.IsString)
-            if (value.StringValue.Equals(ToString()))
-                return true;
+        if (value.IsObject)
+            return false;
 
-        if (DoubleValue == value.DoubleValue)
-            return true;
-
-        return false;
+        return ToPrimitiveDefault().Equals(value);
     }
 
     public override bool EqualsLiteral(double value) => DoubleValue == value;

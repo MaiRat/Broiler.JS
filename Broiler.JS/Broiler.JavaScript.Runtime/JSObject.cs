@@ -242,6 +242,28 @@ public partial class JSObject : JSValue
         throw NewTypeError("Cannot convert object to primitive value");
     }
 
+    private JSValue ToPrimitiveDefault()
+    {
+        var toPrimitiveSymbol = GetGlobalSymbolFactory?.Invoke("toPrimitive");
+        if (toPrimitiveSymbol != null)
+        {
+            var exoticToPrimitive = this[toPrimitiveSymbol];
+            if (!exoticToPrimitive.IsUndefined)
+            {
+                if (!exoticToPrimitive.IsFunction)
+                    throw NewTypeError("@@toPrimitive is not a function");
+
+                var primitive = exoticToPrimitive.InvokeFunction(new Arguments(this, CreateString("default")));
+                if (!primitive.IsObject)
+                    return primitive;
+
+                throw NewTypeError("Cannot convert object to primitive value");
+            }
+        }
+
+        return ToPrimitive(preferString: false);
+    }
+
     private JSValue TryCallPrimitiveMethod(in KeyString key)
     {
         var method = this[key];

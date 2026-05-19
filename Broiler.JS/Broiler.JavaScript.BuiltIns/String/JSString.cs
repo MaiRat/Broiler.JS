@@ -194,6 +194,9 @@ public partial class JSString : JSPrimitive
         if (ReferenceEquals(this, value))
             return true;
 
+        if (value.IsObject)
+            return value.Equals(this);
+
         switch (value)
         {
             case JSString strValue:

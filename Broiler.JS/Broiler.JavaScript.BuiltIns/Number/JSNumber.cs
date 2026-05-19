@@ -335,6 +335,9 @@ public sealed partial class JSNumber : JSPrimitive
             return true;
         }
 
+        if (value.IsObject)
+            return value.Equals(this);
+
         switch (value)
         {
             case JSNumber number:

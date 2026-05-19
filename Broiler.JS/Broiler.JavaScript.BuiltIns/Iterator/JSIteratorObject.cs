@@ -167,10 +167,18 @@ public partial class JSIteratorObject : JSObject
         return new JSIterator(@object);
     }
 
-    private static void CloseIteratorIfPossible(IElementEnumerator enumerator)
+    internal static void CloseIteratorIfPossible(IElementEnumerator enumerator)
     {
-        if (enumerator is IReturnableEnumerator returnable)
+        if (enumerator is not IReturnableEnumerator returnable)
+            return;
+
+        try
+        {
             returnable.Return(JSUndefined.Value);
+        }
+        catch
+        {
+        }
     }
 
     internal static JSValue StaticMap(in Arguments a)
@@ -203,22 +211,42 @@ public partial class JSIteratorObject : JSObject
 
     internal static JSValue StaticTake(in Arguments a)
     {
-        var n = a.Get1().DoubleValue;
+        var en = EnumeratorFrom(a.This);
 
-        if (double.IsNaN(n) || n < 0)
-            throw JSEngine.NewRangeError("Iterator.prototype.take requires a non-negative number");
+        try
+        {
+            var n = a.Get1().DoubleValue;
 
-        return new JSIteratorObject(new TakeEnumerator(EnumeratorFrom(a.This), (int)n));
+            if (double.IsNaN(n) || n < 0)
+                throw JSEngine.NewRangeError("Iterator.prototype.take requires a non-negative number");
+
+            return new JSIteratorObject(new TakeEnumerator(en, (int)n));
+        }
+        catch
+        {
+            CloseIteratorIfPossible(en);
+            throw;
+        }
     }
 
     internal static JSValue StaticDrop(in Arguments a)
     {
-        var n = a.Get1().DoubleValue;
+        var en = EnumeratorFrom(a.This);
 
-        if (double.IsNaN(n) || n < 0)
-            throw JSEngine.NewRangeError("Iterator.prototype.drop requires a non-negative number");
+        try
+        {
+            var n = a.Get1().DoubleValue;
 
-        return new JSIteratorObject(new DropEnumerator(EnumeratorFrom(a.This), (int)n));
+            if (double.IsNaN(n) || n < 0)
+                throw JSEngine.NewRangeError("Iterator.prototype.drop requires a non-negative number");
+
+            return new JSIteratorObject(new DropEnumerator(en, (int)n));
+        }
+        catch
+        {
+            CloseIteratorIfPossible(en);
+            throw;
+        }
     }
 
     internal static JSValue StaticFlatMap(in Arguments a)

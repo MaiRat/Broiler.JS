@@ -780,7 +780,7 @@ internal static class BuiltInsAssemblyInitializer
             if (!constructor.IsFunction)
                 return JSValue.BooleanFalse;
 
-            if (constructor is JSFunction { BoundTargetFunction: JSFunction boundTargetFunction })
+            if (constructor is JSFunction { BoundTargetFunction: JSValue boundTargetFunction } && boundTargetFunction != null && !boundTargetFunction.IsUndefined)
                 constructor = boundTargetFunction;
 
             var value = a.Get1();
@@ -801,7 +801,7 @@ internal static class BuiltInsAssemblyInitializer
             }
 
             return JSValue.BooleanFalse;
-        }, "[Symbol.hasInstance]", 1), JSPropertyAttributes.ConfigurableValue);
+        }, "[Symbol.hasInstance]", 1), JSPropertyAttributes.ReadonlyValue);
     }
 
     private static void PatchSymbolPrototype(JSContext context)

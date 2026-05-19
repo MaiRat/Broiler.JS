@@ -23,7 +23,7 @@ public partial class JSFunction : JSObject, IPropertyAccessor, IJSFunction
     private StringSpan source;
 
     internal JSFunction constructor;
-    internal JSFunction BoundTargetFunction;
+    internal JSValue BoundTargetFunction;
 
     public readonly StringSpan name;
 
@@ -306,21 +306,33 @@ public partial class JSFunction : JSObject, IPropertyAccessor, IJSFunction
     [JSExport("bind", Length = 1)]
     public static JSValue Bind(in Arguments a)
     {
-        if (a.This is not JSFunction fOriginal)
+        if (!a.This.IsFunction)
             throw JSEngine.NewTypeError($"{a.This} is not a function");
 
-        var targetName = fOriginal[KeyStrings.name];
-        var boundName = targetName.IsString ? $"bound {targetName.StringValue}" : "bound";
+        var target = a.This;
+        var originalFunction = target as JSFunction;
+        var boundTargetFunction = originalFunction?.BoundTargetFunction != null && !originalFunction.BoundTargetFunction.IsUndefined
+            ? originalFunction.BoundTargetFunction
+            : target;
+        var targetName = target[KeyStrings.name];
+        var boundName = $"bound {(targetName.IsString ? targetName.StringValue : string.Empty)}";
+        var targetLength = target[KeyStrings.length].DoubleValue;
+        var boundArgsLength = Math.Max(a.Length - 1, 0);
+        var boundLength = double.IsNaN(targetLength) || targetLength <= 0
+            ? 0
+            : Math.Max(Math.Floor(targetLength) - boundArgsLength, 0);
         var copy = a;
-        var fx = new JSFunction((in Arguments a2) => { return fOriginal.InvokeFunction(copy.CopyForBind(a2)); })
+        var fx = new JSFunction((in Arguments a2) => { return target.InvokeFunction(copy.CopyForBind(a2)); })
         {
-            // need to set prototypeChain...
-            prototypeChain = fOriginal.prototypeChain,
-            prototype = fOriginal.prototype,
-            constructor = fOriginal.constructor,
-            BoundTargetFunction = fOriginal.BoundTargetFunction ?? fOriginal
+            prototype = originalFunction?.prototype,
+            constructor = originalFunction?.constructor,
+            BoundTargetFunction = boundTargetFunction
         };
-        fx.FastAddValue(KeyStrings.name, JSValue.CreateString(boundName), JSPropertyAttributes.ConfigurableReadonlyValue);
+        if (originalFunction != null)
+            fx.prototypeChain = originalFunction.prototypeChain;
+        ref var ownProperties = ref fx.GetOwnProperties();
+        ownProperties.Put(KeyStrings.name, JSValue.CreateString(boundName), JSPropertyAttributes.ConfigurableReadonlyValue);
+        ownProperties.Put(KeyStrings.length, JSValue.CreateNumber(boundLength), JSPropertyAttributes.ConfigurableReadonlyValue);
 
         return fx;
     }

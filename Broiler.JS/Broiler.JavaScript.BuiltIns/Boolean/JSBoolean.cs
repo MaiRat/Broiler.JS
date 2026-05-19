@@ -101,6 +101,9 @@ public partial class JSBoolean : JSPrimitive
         if (ReferenceEquals(this, value))
             return true;
 
+        if (value.IsObject)
+            return value.Equals(this);
+
         if (!_value)
         {
             if (value.IsNullOrUndefined)

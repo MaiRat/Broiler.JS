@@ -46,19 +46,10 @@ public partial class JSArray
         if (fromIndex < 0)
             fromIndex = 0;
 
-        bool isUndefined = first.IsUndefined;
         for (uint index = (uint)fromIndex; index < length; index++)
         {
-            if (@this.TryGetElement(index, out var item))
-            {
-                if (item.SameValueZero(first))
-                    return JSBoolean.True;
-            }
-            else
-            {
-                if (isUndefined)
-                    return JSBoolean.True;
-            }
+            if (@this[index].SameValueZero(first))
+                return JSBoolean.True;
         }
 
         return JSBoolean.False;

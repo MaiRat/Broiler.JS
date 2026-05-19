@@ -445,6 +445,8 @@ public partial class JSObject
         {
             if (!old.IsConfigurable)
                 throw NewTypeError("Cannot redefine property");
+
+            CompletePropertyDescriptor(pd, in old);
         }
 
         symbols.Put(key) = pd.ToProperty(key);
@@ -460,6 +462,8 @@ public partial class JSObject
         {
             if (!old.IsConfigurable)
                 throw NewTypeError("Cannot redefine property");
+
+            CompletePropertyDescriptor(pd, in old);
         }
 
         elements.Put(key) = pd.ToProperty(key);
@@ -488,12 +492,41 @@ public partial class JSObject
             {
                 throw NewTypeError("Cannot redefine property");
             }
+
+            CompletePropertyDescriptor(pd, in old);
         }
         // p.key = name;
         ownProperties.Put(key) = pd.ToProperty(key);
         PropertyChanged?.Invoke(this, (name.Key, uint.MaxValue, null));
         return JSValue.UndefinedValue;
     }
+
+    private static void CompletePropertyDescriptor(JSObject descriptor, in JSProperty current)
+    {
+        if (descriptor.GetInternalProperty(KeyStrings.configurable, false).IsEmpty)
+            descriptor.FastAddValue(KeyStrings.configurable, current.IsConfigurable ? JSValue.BooleanTrue : JSValue.BooleanFalse, JSPropertyAttributes.EnumerableConfigurableValue);
+
+        if (descriptor.GetInternalProperty(KeyStrings.enumerable, false).IsEmpty)
+            descriptor.FastAddValue(KeyStrings.enumerable, current.IsEnumerable ? JSValue.BooleanTrue : JSValue.BooleanFalse, JSPropertyAttributes.EnumerableConfigurableValue);
+
+        if (current.IsProperty)
+        {
+            if (descriptor.GetInternalProperty(KeyStrings.get, false).IsEmpty)
+                descriptor[KeyStrings.get] = current.get as JSValue ?? JSValue.UndefinedValue;
+
+            if (descriptor.GetInternalProperty(KeyStrings.set, false).IsEmpty)
+                descriptor[KeyStrings.set] = current.set as JSValue ?? JSValue.UndefinedValue;
+
+            return;
+        }
+
+        if (descriptor.GetInternalProperty(KeyStrings.value, false).IsEmpty)
+            descriptor.FastAddValue(KeyStrings.value, current.value as JSValue ?? JSValue.UndefinedValue, JSPropertyAttributes.EnumerableConfigurableValue);
+
+        if (descriptor.GetInternalProperty(KeyStrings.writable, false).IsEmpty)
+            descriptor.FastAddValue(KeyStrings.writable, current.IsReadOnly ? JSValue.BooleanFalse : JSValue.BooleanTrue, JSPropertyAttributes.EnumerableConfigurableValue);
+    }
+
     public override IElementEnumerator GetAllKeys(bool showEnumerableOnly = true, bool inherited = true) => new KeyEnumerator(this, showEnumerableOnly, inherited);//var elements = this.elements;//if (elements != null)//{//    foreach (var (Key, Value) in elements.AllValues)//    {//        if (showEnumerableOnly)//        {//            if (!Value.IsEnumerable)//                continue;//        }//        yield return new JSNumber(Key);//    }//}//var ownProperties = this.ownProperties;//if (ownProperties != null)//{//    var en = new PropertySequence.Enumerator(ownProperties);//    while(en.MoveNext())//    {//        var p = en.Current;//        if (showEnumerableOnly)//        {//            if (!p.IsEnumerable)//                continue;//        }//        yield return p.ToJSValue();//    }//}//if (inherited)//{//    var @base = this.prototypeChain;//    if (@base != this && @base != null)//    {//        foreach (var i in @base.GetAllKeys(showEnumerableOnly))//            yield return i;//    }//}
 
     internal JSProperty ToProperty(uint key)

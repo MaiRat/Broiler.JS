@@ -1097,7 +1097,6 @@ test/built-ins/AsyncGeneratorFunction/invoked-as-function-single-argument.js
 test/built-ins/AsyncGeneratorFunction/is-a-constructor.js
 test/built-ins/AsyncGeneratorFunction/prototype/Symbol.toStringTag.js
 test/built-ins/AsyncGeneratorFunction/prototype/constructor.js
-test/built-ins/AsyncGeneratorFunction/prototype/extensibility.js
 test/built-ins/AsyncGeneratorFunction/prototype/prop-desc.js
 test/built-ins/AsyncGeneratorFunction/prototype/prototype.js
 test/built-ins/AsyncGeneratorPrototype/Symbol.toStringTag.js
@@ -1453,7 +1452,6 @@ test/built-ins/Error/instance-prototype.js
 test/built-ins/Error/prototype/S15.11.3.1_A1_T1.js
 test/built-ins/Error/prototype/S15.11.3.1_A3_T1.js
 test/built-ins/Error/prototype/constructor/S15.11.4.1_A1_T2.js
-test/built-ins/Error/prototype/message/prop-desc.js
 test/built-ins/Error/prototype/toString/15.11.4.4-6-1.js
 test/built-ins/Error/prototype/toString/15.11.4.4-8-2.js
 test/built-ins/Error/prototype/toString/15.11.4.4-9-1.js
@@ -1636,7 +1634,6 @@ test/built-ins/GeneratorFunction/invoked-as-function-single-argument.js
 test/built-ins/GeneratorFunction/is-a-constructor.js
 test/built-ins/GeneratorFunction/prototype/Symbol.toStringTag.js
 test/built-ins/GeneratorFunction/prototype/constructor.js
-test/built-ins/GeneratorFunction/prototype/extensibility.js
 test/built-ins/GeneratorFunction/prototype/prop-desc.js
 test/built-ins/GeneratorFunction/prototype/prototype.js
 test/built-ins/GeneratorPrototype/Symbol.toStringTag.js
@@ -2571,7 +2568,6 @@ test/built-ins/Object/prototype/toString/symbol-tag-array-builtin.js
 test/built-ins/Object/prototype/toString/symbol-tag-generators-builtin.js
 test/built-ins/Object/prototype/toString/symbol-tag-map-builtin.js
 test/built-ins/Object/prototype/toString/symbol-tag-non-str-bigint.js
-test/built-ins/Object/prototype/toString/symbol-tag-non-str-proxy-function.js
 test/built-ins/Object/prototype/toString/symbol-tag-override-bigint.js
 test/built-ins/Object/prototype/toString/symbol-tag-override-instances.js
 test/built-ins/Object/prototype/toString/symbol-tag-override-primitives.js

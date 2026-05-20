@@ -47,6 +47,7 @@ public partial class FastCompiler : AstMapVisitor<YExpression>
         var parser = new FastParser(new FastTokenStream(parserPool, code));
         var jScript = parser.ParseProgram();
         parserPool.Dispose();
+        SyntaxValidation.ValidateProgram(jScript, code.Value);
         var isStrictProgram = HasUseStrictDirective(jScript);
 
         using var fx = scope.Push(new FastFunctionScope(pool, null, isAsync: jScript.IsAsync));

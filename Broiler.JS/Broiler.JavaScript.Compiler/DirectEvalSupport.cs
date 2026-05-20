@@ -13,7 +13,7 @@ namespace Broiler.JavaScript.Compiler;
 
 public static class DirectEvalSupport
 {
-    public static JSValue Execute(Arguments arguments, bool inheritStrictMode, bool disallowArgumentsDeclaration, JSVariable[] capturedBindings)
+    public static JSValue Execute(Arguments arguments, bool inheritStrictMode, bool disallowArgumentsDeclaration, string[] lexicalBindings, JSVariable[] capturedBindings)
     {
         var value = arguments.Get1();
         if (!value.IsString)
@@ -27,8 +27,7 @@ public static class DirectEvalSupport
         if (inheritStrictMode)
             text = "\"use strict\";\n" + text;
 
-        if (inheritStrictMode || disallowArgumentsDeclaration)
-            Validate(text, inheritStrictMode, disallowArgumentsDeclaration);
+        Validate(text, inheritStrictMode, disallowArgumentsDeclaration, lexicalBindings);
 
         if (JSEngine.Current is JSContext context)
         {
@@ -41,7 +40,7 @@ public static class DirectEvalSupport
         return CoreScript.Evaluate(text, location);
     }
 
-    private static void Validate(string text, bool inheritStrictMode, bool disallowArgumentsDeclaration)
+    private static void Validate(string text, bool inheritStrictMode, bool disallowArgumentsDeclaration, string[] lexicalBindings)
     {
         if (inheritStrictMode && ContainsStrictReservedWordUsage(text))
             throw JSEngine.NewSyntaxError("Unexpected strict mode reserved word");
@@ -51,8 +50,9 @@ public static class DirectEvalSupport
             var pool = new FastPool();
             var parser = new FastParser(new FastTokenStream(pool, text));
             var program = parser.ParseProgram();
-            var statements = program.Statements.GetFastEnumerator();
+            SyntaxValidation.ValidateProgram(program, text, inheritStrictMode, lexicalBindings);
 
+            var statements = program.Statements.GetFastEnumerator();
             while (statements.MoveNext(out var statement))
             {
                 if (IsRestrictedDeclaration(statement, inheritStrictMode, disallowArgumentsDeclaration))
@@ -126,6 +126,7 @@ public static class DirectEvalSupport
             AstVariableDeclaration declaration => ContainsRestrictedDeclarator(declaration.Declarators, inheritStrictMode, disallowArgumentsDeclaration),
             AstExpressionStatement { Expression: AstFunctionExpression function } => IsRestrictedName(function.Id?.Name, inheritStrictMode, disallowArgumentsDeclaration),
             AstExpressionStatement { Expression: AstClassExpression @class } => IsRestrictedName(@class.Identifier?.Name, inheritStrictMode, disallowArgumentsDeclaration),
+            AstTryStatement @try => IsRestrictedName(@try.Identifier?.Name, inheritStrictMode, disallowArgumentsDeclaration),
             AstExportStatement { Declaration: AstVariableDeclaration declaration } => ContainsRestrictedDeclarator(declaration.Declarators, inheritStrictMode, disallowArgumentsDeclaration),
             AstExportStatement { Declaration: AstFunctionExpression function } => IsRestrictedName(function.Id?.Name, inheritStrictMode, disallowArgumentsDeclaration),
             AstExportStatement { Declaration: AstClassExpression @class } => IsRestrictedName(@class.Identifier?.Name, inheritStrictMode, disallowArgumentsDeclaration),

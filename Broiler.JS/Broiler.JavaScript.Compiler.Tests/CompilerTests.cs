@@ -306,6 +306,42 @@ public class CompilerTests
     }
 
     [Fact]
+    public void Compile_Syntax_Errors_Are_Reported_For_Strict_And_Direct_Eval_Cases()
+    {
+        using var ctx = new JSContext();
+
+        void AssertSyntaxError(string source)
+        {
+            var ex = Assert.Throws<JSException>(() => ctx.Eval(source));
+            Assert.Equal("SyntaxError", ex.Error[KeyStrings.constructor][KeyStrings.name].ToString());
+        }
+
+        AssertSyntaxError("""
+            (function () {
+                let x;
+                eval('var x;');
+            })();
+            """);
+
+        AssertSyntaxError("""eval('"use strict"; ({ x: function eval() {} });');""");
+        AssertSyntaxError("""
+            "use strict";
+            eval('(function () { var eval; })');
+            """);
+        AssertSyntaxError("""(0, eval)('"use strict"; var arguments;');""");
+        AssertSyntaxError("""
+            "use strict";
+            eval("try {} catch (arguments) { }");
+            """);
+        AssertSyntaxError("""eval("/\\\rn/;");""");
+        AssertSyntaxError("""
+            "use strict";
+            eval("a = 0x1; a = 01;");
+            """);
+        AssertSyntaxError("""eval("await 10");""");
+    }
+
+    [Fact]
     public void Compile_Default_Parameter_Self_Reference_Throws_ReferenceError()
     {
         using var ctx = new JSContext();

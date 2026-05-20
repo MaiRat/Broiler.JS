@@ -1452,10 +1452,6 @@ test/built-ins/Error/instance-prototype.js
 test/built-ins/Error/prototype/S15.11.3.1_A1_T1.js
 test/built-ins/Error/prototype/S15.11.3.1_A3_T1.js
 test/built-ins/Error/prototype/constructor/S15.11.4.1_A1_T2.js
-test/built-ins/Error/prototype/toString/15.11.4.4-6-1.js
-test/built-ins/Error/prototype/toString/15.11.4.4-8-2.js
-test/built-ins/Error/prototype/toString/15.11.4.4-9-1.js
-test/built-ins/Error/the-initial-value-of-errorprototypemessage-is-the-empty-string.js
 test/built-ins/Error/tostring-1.js
 test/built-ins/Error/tostring-2.js
 test/built-ins/FinalizationRegistry/newtarget-prototype-is-not-object.js
@@ -2795,7 +2791,6 @@ test/built-ins/Promise/withResolvers/result.js
 test/built-ins/Proxy/construct/trap-is-null-target-is-proxy.js
 test/built-ins/Proxy/construct/trap-is-undefined-target-is-proxy.js
 test/built-ins/Proxy/defineProperty/trap-is-missing-target-is-proxy.js
-test/built-ins/Proxy/defineProperty/trap-is-undefined-target-is-proxy.js
 test/built-ins/Proxy/deleteProperty/trap-is-missing-target-is-proxy.js
 test/built-ins/Proxy/deleteProperty/trap-is-null-target-is-proxy.js
 test/built-ins/Proxy/enumerate/removed-does-not-trigger.js
@@ -10397,7 +10392,6 @@ test/language/statements/class/subclass/builtin-objects/ArrayBuffer/super-must-b
 test/language/statements/class/subclass/builtin-objects/Boolean/super-must-be-called.js
 test/language/statements/class/subclass/builtin-objects/DataView/super-must-be-called.js
 test/language/statements/class/subclass/builtin-objects/Date/super-must-be-called.js
-test/language/statements/class/subclass/builtin-objects/Error/message-property-assignment.js
 test/language/statements/class/subclass/builtin-objects/Error/super-must-be-called.js
 test/language/statements/class/subclass/builtin-objects/Function/instance-length.js
 test/language/statements/class/subclass/builtin-objects/Function/instance-name.js
@@ -10408,17 +10402,11 @@ test/language/statements/class/subclass/builtin-objects/GeneratorFunction/instan
 test/language/statements/class/subclass/builtin-objects/GeneratorFunction/regular-subclassing.js
 test/language/statements/class/subclass/builtin-objects/GeneratorFunction/super-must-be-called.js
 test/language/statements/class/subclass/builtin-objects/Map/super-must-be-called.js
-test/language/statements/class/subclass/builtin-objects/NativeError/EvalError-message.js
 test/language/statements/class/subclass/builtin-objects/NativeError/EvalError-super.js
-test/language/statements/class/subclass/builtin-objects/NativeError/RangeError-message.js
 test/language/statements/class/subclass/builtin-objects/NativeError/RangeError-super.js
-test/language/statements/class/subclass/builtin-objects/NativeError/ReferenceError-message.js
 test/language/statements/class/subclass/builtin-objects/NativeError/ReferenceError-super.js
-test/language/statements/class/subclass/builtin-objects/NativeError/SyntaxError-message.js
 test/language/statements/class/subclass/builtin-objects/NativeError/SyntaxError-super.js
-test/language/statements/class/subclass/builtin-objects/NativeError/TypeError-message.js
 test/language/statements/class/subclass/builtin-objects/NativeError/TypeError-super.js
-test/language/statements/class/subclass/builtin-objects/NativeError/URIError-message.js
 test/language/statements/class/subclass/builtin-objects/NativeError/URIError-super.js
 test/language/statements/class/subclass/builtin-objects/Number/super-must-be-called.js
 test/language/statements/class/subclass/builtin-objects/Object/constructor-return-undefined-throws.js

@@ -840,7 +840,7 @@ public class FastScanner
                                 break;
                             }
 
-                            if (CanConsume('\n'))
+                            if (CanConsume('\n', '\r'))
                                 return false;
 
                             t.Append('\\');

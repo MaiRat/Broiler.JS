@@ -120,6 +120,7 @@ public class FastFunctionScope : LinkedStackItem<FastFunctionScope>
         public YExpression Expression { get; internal set; }
         public string Name { get; internal set; }
         public bool Create { get; internal set; }
+        public bool IsLexical { get; internal set; }
         public YExpression Init { get; private set; }
 
         /// <summary>
@@ -365,6 +366,44 @@ public class FastFunctionScope : LinkedStackItem<FastFunctionScope>
         }
     }
 
+    public IEnumerable<string> GetDirectEvalLexicalBindingNames()
+    {
+        var scopes = new List<FastFunctionScope>();
+        var current = this;
+
+        while (current != null && current.Function == Function)
+        {
+            scopes.Add(current);
+            current = current.Parent;
+        }
+
+        var lastIncludedScope = Function == null
+            ? scopes.Count - 2
+            : scopes.Count - 1;
+
+        if (lastIncludedScope <= 0)
+            yield break;
+
+        var seen = new HashSet<string>(StringComparer.Ordinal);
+        for (int i = 0; i < lastIncludedScope; i++)
+        {
+            var variables = scopes[i].variableScopeList.AllValues;
+            while (variables.MoveNext(out var entry))
+            {
+                var variable = entry.Value;
+                if (!variable.IsLexical
+                    || variable.IsTemp
+                    || string.IsNullOrEmpty(variable.Name)
+                    || !seen.Add(variable.Name))
+                {
+                    continue;
+                }
+
+                yield return variable.Name;
+            }
+        }
+    }
+
     public VariableScope CreateException(string name)
     {
         var v = new VariableScope { Variable = YExpression.Parameter(typeof(Exception), name + "Exp") };
@@ -438,7 +477,8 @@ public class FastFunctionScope : LinkedStackItem<FastFunctionScope>
             Name = name.Value,
             Expression = ve,
             Variable = pe,
-            Create = true
+            Create = true,
+            IsLexical = newScope
         };
         
         v.SetInit(init, initialize);

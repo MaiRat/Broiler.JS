@@ -6393,7 +6393,6 @@ test/language/eval-code/direct/var-env-func-non-strict.js
 test/language/eval-code/direct/var-env-func-strict-caller-2.js
 test/language/eval-code/direct/var-env-func-strict-caller.js
 test/language/eval-code/direct/var-env-func-strict-source.js
-test/language/eval-code/direct/var-env-lower-lex-non-strict.js
 test/language/eval-code/direct/var-env-var-init-global-new.js
 test/language/eval-code/direct/var-env-var-init-local-exstng.js
 test/language/eval-code/direct/var-env-var-init-local-new-delete.js
@@ -6453,7 +6452,6 @@ test/language/expressions/arrow-function/lexical-super-property.js
 test/language/expressions/arrow-function/lexical-supercall-from-immediately-invoked-arrow.js
 test/language/expressions/arrow-function/param-dflt-yield-id-non-strict.js
 test/language/expressions/arrow-function/prototype-rules.js
-test/language/expressions/arrow-function/scope-body-lex-distinct.js
 test/language/expressions/arrow-function/scope-param-elem-var-close.js
 test/language/expressions/arrow-function/scope-param-elem-var-open.js
 test/language/expressions/arrow-function/scope-param-rest-elem-var-close.js
@@ -8226,11 +8224,9 @@ test/language/expressions/function/dstr/obj-ptrn-rest-getter.js
 test/language/expressions/function/dstr/obj-ptrn-rest-skip-non-enumerable.js
 test/language/expressions/function/dstr/obj-ptrn-rest-val-obj.js
 test/language/expressions/function/eval-var-scope-syntax-err.js
-test/language/expressions/function/name-eval-stricteval.js
 test/language/expressions/function/named-strict-error-reassign-fn-name-in-body-in-eval.js
 test/language/expressions/function/param-dflt-yield-non-strict.js
 test/language/expressions/function/param-duplicated-non-strict.js
-test/language/expressions/function/scope-body-lex-distinct.js
 test/language/expressions/function/scope-param-elem-var-close.js
 test/language/expressions/function/scope-param-elem-var-open.js
 test/language/expressions/function/scope-param-rest-elem-var-close.js
@@ -8261,7 +8257,6 @@ test/language/expressions/generators/no-name.js
 test/language/expressions/generators/prototype-own-properties.js
 test/language/expressions/generators/prototype-property-descriptor.js
 test/language/expressions/generators/prototype-value.js
-test/language/expressions/generators/scope-body-lex-distinct.js
 test/language/expressions/generators/scope-param-elem-var-close.js
 test/language/expressions/generators/scope-param-elem-var-open.js
 test/language/expressions/generators/scope-param-rest-elem-var-close.js
@@ -8514,18 +8509,14 @@ test/language/expressions/object/object-spread-proxy-no-excluded-keys.js
 test/language/expressions/object/object-spread-proxy-ownkeys-returned-keys-order.js
 test/language/expressions/object/prop-def-id-eval-error-2.js
 test/language/expressions/object/prop-def-id-eval-error.js
-test/language/expressions/object/scope-gen-meth-body-lex-distinct.js
 test/language/expressions/object/scope-gen-meth-param-elem-var-close.js
 test/language/expressions/object/scope-gen-meth-param-elem-var-open.js
 test/language/expressions/object/scope-gen-meth-param-rest-elem-var-close.js
 test/language/expressions/object/scope-gen-meth-param-rest-elem-var-open.js
-test/language/expressions/object/scope-getter-body-lex-distinc.js
-test/language/expressions/object/scope-meth-body-lex-distinct.js
 test/language/expressions/object/scope-meth-param-elem-var-close.js
 test/language/expressions/object/scope-meth-param-elem-var-open.js
 test/language/expressions/object/scope-meth-param-rest-elem-var-close.js
 test/language/expressions/object/scope-meth-param-rest-elem-var-open.js
-test/language/expressions/object/scope-setter-body-lex-distinc.js
 test/language/expressions/object/setter-super-prop.js
 test/language/expressions/object/yield-non-strict-access.js
 test/language/expressions/object/yield-non-strict-syntax.js
@@ -8942,17 +8933,14 @@ test/language/import/import-defer/evaluation-top-level-await/sync-dependency-of-
 test/language/import/import-defer/evaluation-triggers/dep-then_FIXTURE.js
 test/language/import/import-defer/evaluation-triggers/dep_FIXTURE.js
 test/language/import/import-defer/syntax/dep_FIXTURE.js
-test/language/literals/numeric/7.8.3-3gs.js
 test/language/literals/numeric/legacy-octal-integer.js
 test/language/literals/numeric/numeric-separators/numeric-separator-literal-oil-od-nsl-od-one-of.js
 test/language/literals/numeric/octal.js
-test/language/literals/regexp/7.8.5-1.js
 test/language/literals/regexp/S7.8.5_A1.1_T2.js
 test/language/literals/regexp/S7.8.5_A1.3_T4.js
 test/language/literals/regexp/S7.8.5_A1.3_T5.js
 test/language/literals/regexp/S7.8.5_A1.3_T6.js
 test/language/literals/regexp/S7.8.5_A1.4_T2.js
-test/language/literals/regexp/S7.8.5_A1.5_T4.js
 test/language/literals/regexp/S7.8.5_A1.5_T5.js
 test/language/literals/regexp/S7.8.5_A1.5_T6.js
 test/language/literals/regexp/S7.8.5_A2.1_T2.js
@@ -8960,7 +8948,6 @@ test/language/literals/regexp/S7.8.5_A2.3_T4.js
 test/language/literals/regexp/S7.8.5_A2.3_T5.js
 test/language/literals/regexp/S7.8.5_A2.3_T6.js
 test/language/literals/regexp/S7.8.5_A2.4_T2.js
-test/language/literals/regexp/S7.8.5_A2.5_T4.js
 test/language/literals/regexp/S7.8.5_A2.5_T5.js
 test/language/literals/regexp/S7.8.5_A2.5_T6.js
 test/language/literals/regexp/lastIndex.js
@@ -11730,7 +11717,6 @@ test/language/statements/for/tco-const-body.js
 test/language/statements/for/tco-let-body.js
 test/language/statements/for/tco-lhs-body.js
 test/language/statements/for/tco-var-body.js
-test/language/statements/function/13.1-41-s.js
 test/language/statements/function/13.2-18-1.js
 test/language/statements/function/S13.2.2_A17_T2.js
 test/language/statements/function/S13.2.2_A17_T3.js
@@ -11772,10 +11758,8 @@ test/language/statements/function/dstr/obj-ptrn-rest-getter.js
 test/language/statements/function/dstr/obj-ptrn-rest-skip-non-enumerable.js
 test/language/statements/function/dstr/obj-ptrn-rest-val-obj.js
 test/language/statements/function/eval-var-scope-syntax-err.js
-test/language/statements/function/name-eval-stricteval.js
 test/language/statements/function/param-dflt-yield-non-strict.js
 test/language/statements/function/param-duplicated-non-strict.js
-test/language/statements/function/scope-body-lex-distinct.js
 test/language/statements/function/scope-param-elem-var-close.js
 test/language/statements/function/scope-param-elem-var-open.js
 test/language/statements/function/scope-param-rest-elem-var-close.js
@@ -11804,7 +11788,6 @@ test/language/statements/generators/has-instance.js
 test/language/statements/generators/prototype-own-properties.js
 test/language/statements/generators/prototype-property-descriptor.js
 test/language/statements/generators/prototype-value.js
-test/language/statements/generators/scope-body-lex-distinct.js
 test/language/statements/generators/scope-param-elem-var-close.js
 test/language/statements/generators/scope-param-elem-var-open.js
 test/language/statements/generators/scope-param-rest-elem-var-close.js
@@ -11893,8 +11876,6 @@ test/language/statements/try/S12.14_A5.js
 test/language/statements/try/S12.14_A9_T2.js
 test/language/statements/try/S12.14_A9_T3.js
 test/language/statements/try/S12.14_A9_T4.js
-test/language/statements/try/catch-parameter-boundnames-restriction-arguments-eval-throws.js
-test/language/statements/try/catch-parameter-boundnames-restriction-eval-eval-throws.js
 test/language/statements/try/completion-values-fn-finally-return.js
 test/language/statements/try/completion-values.js
 test/language/statements/try/dstr/ary-init-iter-close.js
@@ -11996,8 +11977,6 @@ test/language/statements/try/tco-catch-finally.js
 test/language/statements/try/tco-catch.js
 test/language/statements/try/tco-finally.js
 test/language/statements/variable/12.2.1-17-s.js
-test/language/statements/variable/12.2.1-22-s.js
-test/language/statements/variable/12.2.1-3-s.js
 test/language/statements/variable/S12.2_A10.js
 test/language/statements/variable/S12.2_A4.js
 test/language/statements/variable/S12.2_A7.js
@@ -12614,7 +12593,6 @@ test/staging/sm/WeakMap/symbols.js
 test/staging/sm/argumentsLengthOpt.js
 test/staging/sm/async-functions/async-contains-unicode-escape.js
 test/staging/sm/async-functions/async-property-name-error.js
-test/staging/sm/async-functions/await-error.js
 test/staging/sm/async-functions/await-in-arrow-parameters.js
 test/staging/sm/async-functions/await-in-parameters-of-async-func.js
 test/staging/sm/async-functions/constructor.js
@@ -12898,7 +12876,6 @@ test/staging/sm/regress/regress-610026.js
 test/staging/sm/regress/regress-617405-1.js
 test/staging/sm/regress/regress-617405-2.js
 test/staging/sm/regress/regress-633741.js
-test/staging/sm/regress/regress-640075.js
 test/staging/sm/regress/regress-672892.js
 test/staging/sm/regress/regress-694306.js
 test/staging/sm/regress/regress-699682.js
@@ -12922,8 +12899,6 @@ test/staging/sm/strict/11.4.4.js
 test/staging/sm/strict/11.4.5.js
 test/staging/sm/strict/12.10.1.js
 test/staging/sm/strict/12.14.1.js
-test/staging/sm/strict/12.2.1-01.js
-test/staging/sm/strict/12.2.1.js
 test/staging/sm/strict/13.1.js
 test/staging/sm/strict/15.10.7.js
 test/staging/sm/strict/15.3.4.5.js
@@ -12941,7 +12916,6 @@ test/staging/sm/strict/directive-prologue-01.js
 test/staging/sm/strict/eval-variable-environment.js
 test/staging/sm/strict/primitive-assignment.js
 test/staging/sm/strict/primitive-this-getter.js
-test/staging/sm/strict/rebind-eval-should-fail-in-strict-mode.js
 test/staging/sm/strict/regress-599159.js
 test/staging/sm/strict/strict-function-statements.js
 test/staging/sm/syntax/class-error.js

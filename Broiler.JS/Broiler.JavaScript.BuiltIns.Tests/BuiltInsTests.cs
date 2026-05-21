@@ -1537,6 +1537,24 @@ public class BuiltInsTests
     }
 
     [Fact]
+    public void JSON_Parse_Invalid_Text_Throws_SyntaxError()
+    {
+        EnsureBuiltInsLoaded();
+        using var defaultContext = new JSContext();
+        using var sourceContext = CreateContext(JavaScriptFeatureFlags.JsonParseSourceTextAccess);
+
+        var script = """
+            [
+              (() => { try { JSON.parse('{'); return 'no error'; } catch (e) { return e.name; } })(),
+              (() => { try { JSON.parse('{', function (k, v, c) { return v; }); return 'no error'; } catch (e) { return e.name; } })()
+            ].join('|');
+            """;
+
+        Assert.Equal("SyntaxError|SyntaxError", defaultContext.Eval(script).ToString());
+        Assert.Equal("SyntaxError|SyntaxError", sourceContext.Eval(script).ToString());
+    }
+
+    [Fact]
     public void JSON_Stringify_WithIndent()
     {
         EnsureBuiltInsLoaded();

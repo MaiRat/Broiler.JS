@@ -17,6 +17,7 @@ using Broiler.JavaScript.BuiltIns.Function;
 using Broiler.JavaScript.BuiltIns.Proxy;
 using Broiler.JavaScript.BuiltIns.Symbol;
 using Broiler.JavaScript.Storage;
+using System.Text.Json;
 
 namespace Broiler.JavaScript.BuiltIns.Json;
 
@@ -319,15 +320,23 @@ public partial class JSJSON : JSObject
         var sourceTextAccessEnabled = JSEngine.Current is JSContext context
             && context.HasExperimentalFeature(JavaScriptFeatureFlags.JsonParseSourceTextAccess);
 
-        var parsed = sourceTextAccessEnabled
-            ? JSJsonParser.ParseWithSource(
-                text.ToString(),
-                p =>
-                {
-                    RecordSource(sourceMap ??= [], p.holder, p.key, p.source);
-                    return p.value;
-                })
-            : JSJsonParser.Parse(text.ToString(), null);
+        JSValue parsed;
+        try
+        {
+            parsed = sourceTextAccessEnabled
+                ? JSJsonParser.ParseWithSource(
+                    text.ToString(),
+                    p =>
+                    {
+                        RecordSource(sourceMap ??= [], p.holder, p.key, p.source);
+                        return p.value;
+                    })
+                : JSJsonParser.Parse(text.ToString(), null);
+        }
+        catch (Exception ex) when (ex is JsonException or InvalidOperationException or NotSupportedException)
+        {
+            throw JSEngine.NewSyntaxError(ex.Message);
+        }
 
         parsed ??= JSNull.Value;
 

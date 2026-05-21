@@ -93,9 +93,13 @@ public partial class JSUInt8Array : JSTypedArray
     [JSExport("toBase64")]
     public JSValue ToBase64(in Arguments a)
     {
+        var alphabet = GetBase64Alphabet(a.Length > 0 ? a[0] : JSUndefined.Value);
         var src = new byte[length];
         System.Array.Copy(buffer.buffer, byteOffset, src, 0, length);
-        return new JSString(System.Convert.ToBase64String(src));
+        var text = System.Convert.ToBase64String(src);
+        if (alphabet == Base64UrlAlphabet)
+            text = text.Replace('+', '-').Replace('/', '_').TrimEnd('=');
+        return new JSString(text);
     }
 
     /// <summary>
@@ -133,6 +137,7 @@ public partial class JSUInt8Array : JSTypedArray
     private static byte[] DecodeBase64(string text, JSValue options)
     {
         var alphabet = GetBase64Alphabet(options);
+        _ = GetBase64LastChunkHandling(options);
 
         if (alphabet == Base64UrlAlphabet)
         {
@@ -163,7 +168,10 @@ public partial class JSUInt8Array : JSTypedArray
             var alphabet = @object["alphabet"];
             if (!alphabet.IsNullOrUndefined)
             {
-                var value = alphabet.ToString();
+                if (!alphabet.IsString)
+                    throw JSEngine.NewTypeError("alphabet option must be a string");
+
+                var value = alphabet.StringValue;
                 if (value != Base64Alphabet && value != Base64UrlAlphabet)
                     throw JSEngine.NewTypeError($"Invalid alphabet option {value}");
 
@@ -172,6 +180,27 @@ public partial class JSUInt8Array : JSTypedArray
         }
 
         return Base64Alphabet;
+    }
+
+    private static string GetBase64LastChunkHandling(JSValue options)
+    {
+        if (options is JSObject @object)
+        {
+            var lastChunkHandling = @object["lastChunkHandling"];
+            if (!lastChunkHandling.IsNullOrUndefined)
+            {
+                if (!lastChunkHandling.IsString)
+                    throw JSEngine.NewTypeError("lastChunkHandling option must be a string");
+
+                var value = lastChunkHandling.StringValue;
+                if (value != "loose" && value != "strict" && value != "stop-before-partial")
+                    throw JSEngine.NewTypeError($"Invalid lastChunkHandling option {value}");
+
+                return value;
+            }
+        }
+
+        return "loose";
     }
 
     /// <summary>

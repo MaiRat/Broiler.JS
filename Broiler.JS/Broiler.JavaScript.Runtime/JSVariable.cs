@@ -13,7 +13,7 @@ public class JSVariable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static JSValue PrepareAnonymousFunctionNameForDestructuring(JSValue value, string name, bool assignName)
     {
-        if (value is not JSObject functionObject || !value.IsFunction)
+        if (value is not JSObject functionObject || value is not IJSFunction)
             return value;
 
         if (functionObject[KeyStrings.name].ToString() != "native")
@@ -26,7 +26,7 @@ public class JSVariable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private JSValue InferAnonymousFunctionName(JSValue value)
     {
-        if (Name.IsEmpty || value is not JSObject functionObject || !value.IsFunction)
+        if (Name.IsEmpty || value is not JSObject functionObject || value is not IJSFunction)
             return value;
 
         if (functionObject[KeyStrings.name].ToString() != "native")
@@ -63,7 +63,7 @@ public class JSVariable
                 return;
             }
 
-            if (IsStrictMode?.Invoke() == true)
+            if (ThrowOnReadOnlyWrite || IsStrictMode?.Invoke() == true)
                 throw (JSException.NewTypeErrorFactory
                     ?? throw new InvalidOperationException("JSException.NewTypeErrorFactory delegate is not initialized. Ensure the Core assembly module initializer has run."))
                     ("Cannot assign to read only variable");
@@ -81,6 +81,7 @@ public class JSVariable
         return _value;
     }
     internal bool IsReadOnly;
+    internal bool ThrowOnReadOnlyWrite;
 
     static readonly PropertyInfo _ValueProperty = typeof(JSVariable).GetProperty("Value");
     internal readonly StringSpan Name;

@@ -51,6 +51,50 @@ public class CompilerTests
     }
 
     [Fact]
+    public void Compile_Assigning_Callable_Proxy_Does_Not_Infer_Function_Name()
+    {
+        using var ctx = new JSContext();
+        var result = ctx.Eval("""
+            (function () {
+                var proxy = new Proxy(() => {}, {
+                    get() {
+                        throw new Error("proxy trap should not be touched");
+                    }
+                });
+
+                return 1;
+            })()
+            """);
+
+        Assert.Equal(1.0, result.DoubleValue);
+    }
+
+    [Fact]
+    public void Compile_ClassExtends_Proxy_Of_ArrowFunction_Throws_TypeError_Before_Prototype_Lookup()
+    {
+        using var ctx = new JSContext();
+        var result = ctx.Eval("""
+            (function () {
+                var proxy = new Proxy(() => {}, {
+                    get() {
+                        throw new Error("superclass.prototype should be unreachable");
+                    }
+                });
+
+                try {
+                    class C extends proxy {}
+                } catch (e) {
+                    return e instanceof TypeError;
+                }
+
+                return false;
+            })()
+            """);
+
+        Assert.True(result.BooleanValue);
+    }
+
+    [Fact]
     public void Compile_ArrowFunction_ArrayDestructuringElisions_Work()
     {
         using var ctx = new JSContext();

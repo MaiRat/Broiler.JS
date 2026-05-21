@@ -411,6 +411,12 @@ public partial class JSObject
         return @object;
     }
 
+    internal static JSObject FreezeObject(JSObject @object)
+    {
+        Freeze(new Arguments(JSUndefined.Value, @object));
+        return @object;
+    }
+
     [JSExport("fromEntries")]
     internal static JSValue FromEntries(in Arguments a)
     {

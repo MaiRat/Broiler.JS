@@ -1,4 +1,5 @@
 using System;
+using Broiler.JavaScript.Ast.Expressions;
 using Broiler.JavaScript.ExpressionCompiler.Expressions;
 using Broiler.JavaScript.ExpressionCompiler.Core;
 using Broiler.JavaScript.Ast.Misc;
@@ -63,7 +64,12 @@ partial class FastCompiler
                 YExpression value = null;
                 var pKey = p.Key;
 
-                value = VisitExpression(p.Init);
+                value = p.Kind switch
+                {
+                    AstPropertyKind.Method or AstPropertyKind.Get or AstPropertyKind.Set when p.Init is AstFunctionExpression function =>
+                        CreateFunction(function, createPrototype: false),
+                    _ => VisitExpression(p.Init)
+                };
 
                 if (p.Computed)
                 {
@@ -178,7 +184,12 @@ partial class FastCompiler
             AstClassProperty p = pn as AstClassProperty;
 
             YExpression key = null;
-            YExpression value = VisitExpression(p.Init);
+            YExpression value = p.Kind switch
+            {
+                AstPropertyKind.Method or AstPropertyKind.Get or AstPropertyKind.Set when p.Init is AstFunctionExpression function =>
+                    CreateFunction(function, createPrototype: false),
+                _ => VisitExpression(p.Init)
+            };
             var pKey = p.Key;
 
             if (p.Computed)

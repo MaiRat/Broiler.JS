@@ -55,7 +55,7 @@ public class JSFunctionBuilder
     public static Expression InvokeSuperConstructor(Expression super, Expression returnValue, Expression args)
     {
         return Expression.Assign(returnValue,
-            Expression.Call(super, type.PublicMethod("InvokeSuper", typeof(Arguments).MakeByRefType()), args));
+            Expression.Call(null, _invokeSuperConstructor, returnValue, super, args));
     }
 
     public static Expression InvokeFunction(Expression target, Expression args, bool coalesce = false)

@@ -472,7 +472,11 @@ internal static class BuiltInsAssemblyInitializer
                 if (a.This is not JSObject @object)
                     throw JSEngine.NewTypeError("Date.prototype[Symbol.toPrimitive] requires an object receiver");
 
-                return a.Get1().StringValue switch
+                var hint = a.Get1();
+                if (!hint.IsString)
+                    throw JSEngine.NewTypeError("Date.prototype[Symbol.toPrimitive] requires a valid hint");
+
+                return hint.StringValue switch
                 {
                     "string" or "default" => OrdinaryToPrimitive(@object, preferString: true),
                     "number" => OrdinaryToPrimitive(@object, preferString: false),
@@ -494,6 +498,7 @@ internal static class BuiltInsAssemblyInitializer
         PatchObjectPrototype(context);
         PatchPromisePrototype(context);
         PatchFunctionPrototype(context);
+        PatchProxyConstructor(context);
         PatchSpeciesConstructors(context);
         PatchSymbolPrototype(context);
         PatchRegExpPrototype(context);
@@ -804,6 +809,16 @@ internal static class BuiltInsAssemblyInitializer
 
             return JSValue.BooleanFalse;
         }, "[Symbol.hasInstance]", 1), JSPropertyAttributes.ReadonlyValue);
+    }
+
+    private static void PatchProxyConstructor(JSContext context)
+    {
+        var proxyKey = KeyStrings.GetOrCreate("Proxy");
+        if (context[proxyKey] is not JSFunction proxyCtor)
+            return;
+
+        ref var ownProperties = ref proxyCtor.GetOwnProperties();
+        ownProperties.Put(KeyStrings.prototype.Key) = JSProperty.Property(KeyStrings.prototype, JSUndefined.Value, JSPropertyAttributes.Value);
     }
 
     private static void PatchSymbolPrototype(JSContext context)

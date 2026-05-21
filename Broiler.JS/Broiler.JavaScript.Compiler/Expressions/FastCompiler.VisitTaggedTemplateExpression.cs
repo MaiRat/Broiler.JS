@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using System.Reflection;
 using Broiler.JavaScript.ExpressionCompiler.Expressions;
 using Broiler.JavaScript.ExpressionCompiler.Core;
 using Broiler.JavaScript.Ast.Misc;
@@ -10,6 +11,9 @@ namespace Broiler.JavaScript.Compiler;
 
 partial class FastCompiler
 {
+    private static readonly MethodInfo FreezeObjectMethod = typeof(JSObject).GetMethod("FreezeObject", BindingFlags.Static | BindingFlags.NonPublic)
+        ?? throw new InvalidOperationException("JSObject.FreezeObject not found");
+
     protected override YExpression VisitTaggedTemplateExpression(AstTaggedTemplateExpression template)
     {
         var callee = template.Tag;
@@ -47,10 +51,10 @@ partial class FastCompiler
         }
 
         // replace first node...
-        var rawArray = JSArrayBuilder.New(raw);
+        var rawArray = YExpression.Call(null, FreezeObjectMethod, JSArrayBuilder.New(raw));
         parts.Add(new YElementInit(JSObjectBuilder._FastAddValueKeyString, KeyOfName("raw"), rawArray, JSPropertyAttributesBuilder.EnumerableConfigurableValue));
 
-        var partsArray = JSArrayBuilder.New(parts);
+        var partsArray = YExpression.Call(null, FreezeObjectMethod, JSArrayBuilder.New(parts));
         args[0] = partsArray;
 
         if (callee.Type == FastNodeType.MemberExpression && callee is AstMemberExpression me)

@@ -25,6 +25,7 @@ public partial class JSProxy : JSObject
     readonly JSObject target;
     private readonly JSObject handler;
     private readonly bool callable;
+    private readonly bool constructable;
     private bool revoked;
 
     protected JSProxy((JSObject target, JSObject handler) p) : base((JSEngine.Current as IJSExecutionContext)?.ObjectPrototype)
@@ -36,6 +37,7 @@ public partial class JSProxy : JSObject
         this.target = target;
         this.handler = handler;
         callable = IsCallableTarget(target);
+        constructable = IsConstructableTarget(target);
     }
 
     public override bool BooleanValue => target.BooleanValue;
@@ -58,6 +60,17 @@ public partial class JSProxy : JSObject
     {
         JSFunction => true,
         JSProxy proxy => proxy.callable,
+        _ => false
+    };
+
+    internal bool IsConstructable => constructable;
+
+    private static bool IsConstructableTarget(JSObject target) => target switch
+    {
+        JSFunction function when function.BoundTargetFunction is JSObject boundTarget && !function.BoundTargetFunction.IsUndefined
+            => IsConstructableTarget(boundTarget),
+        JSFunction function => function.prototype != null,
+        JSProxy proxy => proxy.constructable,
         _ => false
     };
 
@@ -372,6 +385,9 @@ public partial class JSProxy : JSObject
     public override JSValue CreateInstance(in Arguments a)
     {
         var target = RequireTarget();
+        if (!constructable)
+            throw JSEngine.NewTypeError("Proxy target is not a constructor");
+
         var ec = JSEngine.Current as IJSExecutionContext;
         var newTarget = ec?.CurrentNewTarget ?? this;
         var constructTrap = GetTrap(ConstructTrapKey);

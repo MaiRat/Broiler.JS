@@ -1,6 +1,7 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using Broiler.JavaScript.BuiltIns.Function;
+using Broiler.JavaScript.BuiltIns.Proxy;
 using Broiler.JavaScript.Engine;
 using Broiler.JavaScript.Engine.Core;
 using Broiler.JavaScript.Runtime;
@@ -9,12 +10,43 @@ namespace Broiler.JavaScript.BuiltIns.Class;
 
 public class JSClass : JSFunction
 {
-    internal readonly JSFunction super;
-    public JSClass(JSFunctionDelegate fx, JSFunction super, string name = null, string code = null) : base(fx ?? super.f ?? empty, name, code)
+    internal readonly JSValue super;
+
+    internal static JSObject ResolveSuperclassPrototype(JSValue super)
+    {
+        if (super.IsNull)
+            return null;
+
+        if (!IsConstructableSuperclass(super))
+            throw JSEngine.NewTypeError("Class extends value is not a constructor or null");
+
+        var superPrototype = super[KeyStrings.prototype];
+        if (superPrototype.IsNull)
+            return null;
+
+        if (superPrototype is JSObject superPrototypeObject)
+            return superPrototypeObject;
+
+        throw JSEngine.NewTypeError("Class extends value does not have a valid prototype property");
+    }
+
+    private static bool IsConstructableSuperclass(JSValue value) => value switch
+    {
+        JSFunction function when function.BoundTargetFunction != null && !function.BoundTargetFunction.IsUndefined
+            => IsConstructableSuperclass(function.BoundTargetFunction),
+        JSFunction function => function.prototype != null,
+        JSProxy proxy => proxy.IsConstructable,
+        _ => false
+    };
+
+    public JSClass(JSFunctionDelegate fx, JSValue super, string name = null, string code = null)
+        : base(fx ?? (super as JSFunction)?.Delegate ?? empty, name, code)
     {
         this.super = super;
-        BasePrototypeObject = super;
-        prototype.BasePrototypeObject = super.prototype;
+        if (super is JSObject superObject)
+            BasePrototypeObject = superObject;
+
+        prototype.BasePrototypeObject = ResolveSuperclassPrototype(super);
     }
 
     [EditorBrowsable(EditorBrowsableState.Never)]

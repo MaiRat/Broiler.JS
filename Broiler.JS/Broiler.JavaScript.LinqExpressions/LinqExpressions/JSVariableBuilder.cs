@@ -1,12 +1,18 @@
-﻿using Broiler.JavaScript.LinqExpressions.LambdaGen;
+using Broiler.JavaScript.LinqExpressions.LambdaGen;
 using Broiler.JavaScript.Runtime;
 using System;
+using System.Reflection;
 using Expression = Broiler.JavaScript.ExpressionCompiler.Expressions.YExpression;
 
 namespace Broiler.JavaScript.LinqExpressions.LinqExpressions;
 
 public class JSVariableBuilder
 {
+    private static readonly FieldInfo _isReadOnly = typeof(JSVariable).GetField("IsReadOnly", BindingFlags.Instance | BindingFlags.NonPublic)
+        ?? throw new InvalidOperationException("JSVariable.IsReadOnly field not found");
+    private static readonly FieldInfo _throwOnReadOnlyWrite = typeof(JSVariable).GetField("ThrowOnReadOnlyWrite", BindingFlags.Instance | BindingFlags.NonPublic)
+        ?? throw new InvalidOperationException("JSVariable.ThrowOnReadOnlyWrite field not found");
+
     public static Expression Assign(Expression target, Expression value)
         => target.CallExpression<JSVariable, JSValue, JSValue>(() => (x, v) => x.Assign(v), value);
 
@@ -34,6 +40,10 @@ public class JSVariableBuilder
 
     public static Expression NewUninitialized(string name) => NewLambdaExpression.NewExpression<JSVariable>(() => () =>
     new JSVariable(null as JSValue, "", false), JSUndefinedBuilder.Value, Expression.Constant(name), Expression.Constant(false));
+
+    public static Expression SetReadOnly(Expression target, bool throwOnWrite = false) => Expression.Block(
+        Expression.Assign(Expression.Field(target, _isReadOnly), Expression.Constant(true)),
+        Expression.Assign(Expression.Field(target, _throwOnReadOnlyWrite), Expression.Constant(throwOnWrite)));
 
     public static Expression Property(Expression target) => target.PropertyExpression<JSVariable, JSValue>(() => (x) => x.GlobalValue);
 }

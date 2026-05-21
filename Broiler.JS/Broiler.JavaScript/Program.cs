@@ -56,9 +56,7 @@ namespace BroilerJS
                 var code = await File.ReadAllTextAsync(file.FullName);
                 // Pass the global context explicitly so top-level `this` resolves to
                 // the same host object that owns the evaluated script.
-                var result = context.Eval(code, file.FullName, context);
-                if (!result.IsUndefined)
-                    Console.WriteLine(result);
+                context.Eval(code, file.FullName, context);
                 return;
             }
 

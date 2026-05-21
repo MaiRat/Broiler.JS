@@ -71,7 +71,7 @@ public partial class JSFunction : JSObject, IPropertyAccessor, IJSFunction
         prototype = type.prototype;
 
         prototype.FastAddValue(KeyStrings.constructor, type, JSPropertyAttributes.EnumerableConfigurableValue);
-        ownProperties.Put(KeyStrings.prototype.Key) = JSProperty.Property(KeyStrings.prototype, (IPropertyValue)prototype);
+        ownProperties.Put(KeyStrings.prototype.Key) = JSProperty.Property(KeyStrings.prototype, (IPropertyValue)prototype, JSPropertyAttributes.Value);
 
         FastAddValue(KeyStrings.name, name.IsEmpty ? JSValue.CreateString("native") : JSValue.CreateString(name.Value), JSPropertyAttributes.ConfigurableReadonlyValue);
         FastAddValue(KeyStrings.length, JSValue.CreateNumber(0), JSPropertyAttributes.ConfigurableReadonlyValue);
@@ -99,7 +99,7 @@ public partial class JSFunction : JSObject, IPropertyAccessor, IJSFunction
         prototype = _prototype;
         prototype.GetOwnProperties(true).Put(KeyStrings.constructor, this);
 
-        ownProperties.Put(KeyStrings.prototype, prototype);
+            ownProperties.Put(KeyStrings.prototype, prototype, JSPropertyAttributes.Value);
         ownProperties.Put(KeyStrings.length, JSValue.NumberZero, JSPropertyAttributes.ConfigurableReadonlyValue);
         ownProperties.Put(KeyStrings.name, name.IsEmpty ? JSValue.CreateString("native") : JSValue.CreateString(name.Value), JSPropertyAttributes.ConfigurableReadonlyValue);
 
@@ -127,7 +127,7 @@ public partial class JSFunction : JSObject, IPropertyAccessor, IJSFunction
             prototype.FastAddValue(KeyStrings.constructor, this, JSPropertyAttributes.ConfigurableValue);
             // ref var opp = ref prototype.GetOwnProperties(true);
             // opp[KeyStrings.constructor.Key] = JSProperty.Property(this, JSPropertyAttributes.ConfigurableReadonlyValue);
-            ownProperties.Put(KeyStrings.prototype, prototype, JSPropertyAttributes.ConfigurableValue);
+            ownProperties.Put(KeyStrings.prototype, prototype, JSPropertyAttributes.Value);
         }
 
         ownProperties.Put(KeyStrings.length, JSValue.CreateNumber(length), JSPropertyAttributes.ConfigurableReadonlyValue);
@@ -150,7 +150,7 @@ public partial class JSFunction : JSObject, IPropertyAccessor, IJSFunction
             prototype.FastAddValue(KeyStrings.constructor, this, JSPropertyAttributes.ConfigurableValue);
             // ref var opp = ref prototype.GetOwnProperties(true);
             // opp[KeyStrings.constructor.Key] = JSProperty.Property(this, JSPropertyAttributes.ConfigurableReadonlyValue);
-            ownProperties.Put(KeyStrings.prototype, prototype, JSPropertyAttributes.ConfigurableValue);
+            ownProperties.Put(KeyStrings.prototype, prototype, JSPropertyAttributes.Value);
         }
 
         ownProperties.Put(KeyStrings.length, JSValue.CreateNumber(length), JSPropertyAttributes.ConfigurableReadonlyValue);
@@ -322,7 +322,7 @@ public partial class JSFunction : JSObject, IPropertyAccessor, IJSFunction
             ? 0
             : Math.Max(Math.Floor(targetLength) - boundArgsLength, 0);
         var copy = a;
-        var fx = new JSFunction((in Arguments a2) => { return target.InvokeFunction(copy.CopyForBind(a2)); })
+        var fx = new JSFunction((in Arguments a2) => { return target.InvokeFunction(copy.CopyForBind(a2)); }, StringSpan.Empty, StringSpan.Empty, 0, createPrototype: false)
         {
             prototype = originalFunction?.prototype,
             constructor = originalFunction?.constructor,
@@ -357,10 +357,8 @@ public partial class JSFunction : JSObject, IPropertyAccessor, IJSFunction
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static JSValue InvokeSuperConstructor(JSValue newTarget, JSValue super, in Arguments a)
     {
-        var target = newTarget;
-
         var @this = a.This;
-        var r = (super as JSFunction).CreateInstance(a.OverrideThis(a.This));
+        var r = super.CreateInstance(a.OverrideThis(a.This));
         return r.IsObject ? r : @this;
     }
 

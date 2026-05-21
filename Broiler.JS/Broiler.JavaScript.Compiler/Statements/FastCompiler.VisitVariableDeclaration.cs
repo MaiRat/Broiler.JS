@@ -14,6 +14,7 @@ partial class FastCompiler
     {
         var dispose = variableDeclaration.Using;
         var async = variableDeclaration.AwaitUsing;
+        var readOnlyAfterAssign = variableDeclaration.Kind == FastVariableKind.Const;
         var list = new Sequence<YExpression>();
         var top = scope.Top;
         var newScope = variableDeclaration.Kind == FastVariableKind.Const || variableDeclaration.Kind == FastVariableKind.Let;
@@ -34,6 +35,9 @@ partial class FastCompiler
                         list.Add(YExpression.Assign(v.Expression, Visit(d.Init)));
                     }
 
+                    if (readOnlyAfterAssign)
+                        list.Add(JSVariableBuilder.SetReadOnly(v.Variable, true));
+
                     if (dispose)
                     {
                         list.Add(top.Disposable.CallExpression<IJSDisposableStack, JSValue, bool>(() => (j, v, b) => 
@@ -48,7 +52,7 @@ partial class FastCompiler
                         if (d.Init != null)
                             list.Add(YExpression.Assign(temp.Variable, Visit(d.Init)));
 
-                        list.Add(CreateAssignment(objectPattern, temp.Expression, true, newScope, suppressAnonymousFunctionNameInference: true));
+                        CreateAssignment(list, objectPattern, temp.Expression, true, newScope, suppressAnonymousFunctionNameInference: true, readOnlyAfterAssign: readOnlyAfterAssign);
 
                         if (dispose)
                         {
@@ -65,7 +69,7 @@ partial class FastCompiler
                         if (d.Init != null)
                             list.Add(YExpression.Assign(temp.Variable, Visit(d.Init)));
 
-                        list.Add(CreateAssignment(arrayPattern, temp.Expression, true, newScope, suppressAnonymousFunctionNameInference: true));
+                        CreateAssignment(list, arrayPattern, temp.Expression, true, newScope, suppressAnonymousFunctionNameInference: true, readOnlyAfterAssign: readOnlyAfterAssign);
                         if (dispose)
                         {
                             list.Add(top.Disposable.CallExpression<IJSDisposableStack, JSValue, bool>(() => (j, v, b) => 

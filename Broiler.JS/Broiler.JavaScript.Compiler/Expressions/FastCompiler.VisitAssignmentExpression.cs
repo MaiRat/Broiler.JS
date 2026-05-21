@@ -119,7 +119,7 @@ partial class FastCompiler
     }
 
     private void CreateAssignment(Sequence<YExpression> inits, AstExpression pattern, YExpression init, bool createVariable = false, bool newScope = false,
-        bool suppressAnonymousFunctionNameInference = false, bool initializeVariable = true)
+        bool suppressAnonymousFunctionNameInference = false, bool initializeVariable = true, bool readOnlyAfterAssign = false)
     {
         YExpression target;
 
@@ -132,6 +132,14 @@ partial class FastCompiler
                     {
                         var v = scope.Top.CreateVariable(id.Name.Value, null, newScope, initialize: initializeVariable);
                         target = v.Expression;
+                        if (suppressAnonymousFunctionNameInference)
+                        {
+                            init = YExpression.Call(null, PrepareAnonymousFunctionNameForDestructuringMethod, init, YExpression.Constant(id.Name.Value), YExpression.Constant(false));
+                        }
+                        inits.Add(YExpression.Assign(target, init));
+                        if (readOnlyAfterAssign)
+                            inits.Add(JSVariableBuilder.SetReadOnly(v.Variable, true));
+                        return;
                     }
                     else
                     {
@@ -165,7 +173,6 @@ partial class FastCompiler
                     {
                         init = YExpression.Call(null, PrepareAnonymousFunctionNameForDestructuringMethod, init, YExpression.Constant(id.Name.Value), YExpression.Constant(false));
                     }
-
                     inits.Add(YExpression.Assign(target, init));
                 }
                 return;
@@ -224,7 +231,7 @@ partial class FastCompiler
                             case FastNodeType.MemberExpression:
                             case FastNodeType.ArrayPattern:
                             case FastNodeType.ObjectPattern:
-                                CreateAssignment(inits, property.Value, start, createVariable, newScope, suppressAnonymousFunctionNameInference, initializeVariable);
+                                CreateAssignment(inits, property.Value, start, createVariable, newScope, suppressAnonymousFunctionNameInference, initializeVariable, readOnlyAfterAssign);
                                 break;
                             // TODO
                             case FastNodeType.BinaryExpression:
@@ -239,7 +246,8 @@ partial class FastCompiler
                                         JSValueExtensionsBuilder.NullIfUndefined(start),
                                         defaultValue),
                                     suppressAnonymousFunctionNameInference: suppressAnonymousFunctionNameInference,
-                                    initializeVariable: initializeVariable);
+                                    initializeVariable: initializeVariable,
+                                    readOnlyAfterAssign: readOnlyAfterAssign);
                                 break;
                             default:
                                 throw new NotImplementedException();
@@ -273,11 +281,14 @@ partial class FastCompiler
                                 break;
                             case FastNodeType.Identifier:
                                 var id = element as AstIdentifier;
+                                FastFunctionScope.VariableScope variable = null;
                                 if (createVariable)
-                                    scope.Top.CreateVariable(id.Name.Value, null, newScope);
+                                    variable = scope.Top.CreateVariable(id.Name.Value, null, newScope);
 
                                 var assignee = VisitIdentifierReference(id);
                                 arrayInits.Add(IElementEnumeratorBuilder.AssignMoveNext(assignee, destExp));
+                                if (readOnlyAfterAssign && variable != null)
+                                    arrayInits.Add(JSVariableBuilder.SetReadOnly(variable.Variable, true));
                                 break;
                             case FastNodeType.BinaryExpression:
                                 var be = element as AstBinaryExpression;
@@ -299,8 +310,9 @@ partial class FastCompiler
                                 }
 
                                 id = be.Left as AstIdentifier;
+                                variable = null;
                                 if (createVariable)
-                                    scope.Top.CreateVariable(id.Name.Value, null, newScope);
+                                    variable = scope.Top.CreateVariable(id.Name.Value, null, newScope);
 
                                 assignee = VisitIdentifierReference(id);
                                 arrayInits.Add(IElementEnumeratorBuilder.AssignMoveNext(assignee, destExp));
@@ -311,6 +323,8 @@ partial class FastCompiler
                                 }
 
                                 arrayInits.Add(JSValueExtensionsBuilder.AssignCoalesce(assignee, identifierDefaultValue));
+                                if (readOnlyAfterAssign && variable != null)
+                                    arrayInits.Add(JSVariableBuilder.SetReadOnly(variable.Variable, true));
                                 break;
 
                             case FastNodeType.SpreadElement:
@@ -329,7 +343,7 @@ partial class FastCompiler
                                 {
                                     var check = IElementEnumeratorBuilder.MoveNext(destExp, te.Expression);
                                     arrayInits.Add(check);
-                                    CreateAssignment(arrayInits, ape, te.Expression, createVariable, newScope, suppressAnonymousFunctionNameInference, initializeVariable);
+                                CreateAssignment(arrayInits, ape, te.Expression, createVariable, newScope, suppressAnonymousFunctionNameInference, initializeVariable, readOnlyAfterAssign);
                                 }
                                 break;
 

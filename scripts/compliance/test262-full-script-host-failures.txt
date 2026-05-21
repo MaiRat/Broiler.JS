@@ -2340,9 +2340,7 @@ test/built-ins/Object/defineProperty/15.2.3.6-4-360-5.js
 test/built-ins/Object/defineProperty/15.2.3.6-4-360-6.js
 test/built-ins/Object/defineProperty/15.2.3.6-4-404.js
 test/built-ins/Object/defineProperty/15.2.3.6-4-409.js
-test/built-ins/Object/defineProperty/15.2.3.6-4-410.js
 test/built-ins/Object/defineProperty/15.2.3.6-4-414.js
-test/built-ins/Object/defineProperty/15.2.3.6-4-415.js
 test/built-ins/Object/defineProperty/15.2.3.6-4-419.js
 test/built-ins/Object/defineProperty/15.2.3.6-4-430.js
 test/built-ins/Object/defineProperty/15.2.3.6-4-439.js
@@ -3864,7 +3862,6 @@ test/built-ins/Symbol/isConcatSpreadable/prop-desc.js
 test/built-ins/Symbol/iterator/prop-desc.js
 test/built-ins/Symbol/match/prop-desc.js
 test/built-ins/Symbol/matchAll/prop-desc.js
-test/built-ins/Symbol/not-callable.js
 test/built-ins/Symbol/prototype/Symbol.toPrimitive/prop-desc.js
 test/built-ins/Symbol/prototype/Symbol.toPrimitive/redefined-symbol-wrapper-ordinary-toprimitive.js
 test/built-ins/Symbol/prototype/Symbol.toPrimitive/removed-symbol-wrapper-ordinary-toprimitive.js
@@ -6373,7 +6370,6 @@ test/language/expressions/arrow-function/lexical-super-property-from-within-cons
 test/language/expressions/arrow-function/lexical-super-property.js
 test/language/expressions/arrow-function/lexical-supercall-from-immediately-invoked-arrow.js
 test/language/expressions/arrow-function/param-dflt-yield-id-non-strict.js
-test/language/expressions/arrow-function/prototype-rules.js
 test/language/expressions/arrow-function/scope-param-elem-var-close.js
 test/language/expressions/arrow-function/scope-param-elem-var-open.js
 test/language/expressions/arrow-function/scope-param-rest-elem-var-close.js
@@ -6382,11 +6378,8 @@ test/language/expressions/arrow-function/syntax/arrowparameters-bindingidentifie
 test/language/expressions/arrow-function/syntax/arrowparameters-bindingidentifier-yield.js
 test/language/expressions/arrow-function/syntax/arrowparameters-cover-formalparameters-arguments.js
 test/language/expressions/arrow-function/syntax/arrowparameters-cover-formalparameters-yield.js
-test/language/expressions/arrow-function/throw-new.js
 test/language/expressions/arrow-function/unscopables-with-in-nested-fn.js
 test/language/expressions/arrow-function/unscopables-with.js
-test/language/expressions/assignment/8.14.4-8-b_1.js
-test/language/expressions/assignment/8.14.4-8-b_2.js
 test/language/expressions/assignment/S11.13.1_A5_T1.js
 test/language/expressions/assignment/S11.13.1_A5_T2.js
 test/language/expressions/assignment/S11.13.1_A5_T3.js
@@ -12042,8 +12035,6 @@ test/staging/sm/Function/arrow-has-duplicated.js
 test/staging/sm/Function/bound-length-and-name.js
 test/staging/sm/Function/builtin-no-construct.js
 test/staging/sm/Function/builtin-no-prototype.js
-test/staging/sm/Function/configurable-length-builtins.js
-test/staging/sm/Function/configurable-length.js
 test/staging/sm/Function/create-function-parse-before-getprototype.js
 test/staging/sm/Function/function-bind.js
 test/staging/sm/Function/function-call.js
@@ -12313,7 +12304,6 @@ test/staging/sm/Symbol/constructor.js
 test/staging/sm/Symbol/conversions.js
 test/staging/sm/Symbol/enumeration-order.js
 test/staging/sm/Symbol/enumeration.js
-test/staging/sm/Symbol/errors.js
 test/staging/sm/Symbol/for-in-order.js
 test/staging/sm/Symbol/json-stringify-values.js
 test/staging/sm/Symbol/property-accessor.js
@@ -12599,7 +12589,6 @@ test/staging/sm/object/15.2.3.5-01.js
 test/staging/sm/object/15.2.3.7-01.js
 test/staging/sm/object/accessor-arguments-rest.js
 test/staging/sm/object/accessor-name.js
-test/staging/sm/object/add-property-non-extensible.js
 test/staging/sm/object/bug-1206700.js
 test/staging/sm/object/defineProperties-order.js
 test/staging/sm/object/defineProperty-proxy.js

@@ -1168,7 +1168,6 @@ test/built-ins/Boolean/S9.2_A6_T1.js
 test/built-ins/Boolean/prop-desc.js
 test/built-ins/Boolean/prototype/S15.6.3.1_A1.js
 test/built-ins/Boolean/prototype/S15.6.3.1_A2.js
-test/built-ins/Boolean/prototype/S15.6.3.1_A3.js
 test/built-ins/Boolean/prototype/S15.6.3.1_A4.js
 test/built-ins/Boolean/prototype/toString/S15.6.4.2_A1_T1.js
 test/built-ins/Boolean/prototype/toString/S15.6.4.2_A1_T2.js
@@ -1356,7 +1355,6 @@ test/built-ins/Date/UTC/year-offset.js
 test/built-ins/Date/parse/time-value-maximum-range.js
 test/built-ins/Date/parse/zero.js
 test/built-ins/Date/prop-desc.js
-test/built-ins/Date/prototype/Symbol.toPrimitive/hint-invalid.js
 test/built-ins/Date/prototype/Symbol.toPrimitive/prop-desc.js
 test/built-ins/Date/prototype/getDate/this-value-valid-date.js
 test/built-ins/Date/prototype/getTime/this-value-valid-date.js
@@ -1494,14 +1492,11 @@ test/built-ins/Function/length/S15.3.5.1_A4_T2.js
 test/built-ins/Function/length/S15.3.5.1_A4_T3.js
 test/built-ins/Function/prop-desc.js
 test/built-ins/Function/prototype/S15.3.3.1_A1.js
-test/built-ins/Function/prototype/S15.3.3.1_A3.js
 test/built-ins/Function/prototype/S15.3.4_A1.js
 test/built-ins/Function/prototype/S15.3.4_A2_T1.js
 test/built-ins/Function/prototype/S15.3.4_A2_T2.js
 test/built-ins/Function/prototype/S15.3.4_A2_T3.js
 test/built-ins/Function/prototype/S15.3.4_A4.js
-test/built-ins/Function/prototype/S15.3.5.2_A1_T1.js
-test/built-ins/Function/prototype/S15.3.5.2_A1_T2.js
 test/built-ins/Function/prototype/arguments/prop-desc.js
 test/built-ins/Function/prototype/bind/15.3.4.5-2-6.js
 test/built-ins/Function/prototype/bind/15.3.4.5-2-9.js
@@ -1972,7 +1967,6 @@ test/built-ins/Math/sign/sign-specialVals.js
 test/built-ins/Math/sqrt/results.js
 test/built-ins/Math/sumPrecise/sum-is-minus-zero.js
 test/built-ins/Math/sumPrecise/sum.js
-test/built-ins/Math/sumPrecise/throws-on-non-number.js
 test/built-ins/NaN/S15.1.1.1_A3_T2.js
 test/built-ins/NativeErrors/EvalError/is-error-object.js
 test/built-ins/NativeErrors/EvalError/proto.js
@@ -2454,7 +2448,6 @@ test/built-ins/Object/preventExtensions/symbol-object-contains-symbol-properties
 test/built-ins/Object/prop-desc.js
 test/built-ins/Object/prototype/15.2.3.1.js
 test/built-ins/Object/prototype/S15.2.3.1_A1.js
-test/built-ins/Object/prototype/S15.2.3.1_A3.js
 test/built-ins/Object/prototype/__defineGetter__/define-non-extensible.js
 test/built-ins/Object/prototype/__defineSetter__/define-non-extensible.js
 test/built-ins/Object/prototype/__defineSetter__/setter-non-callable.js
@@ -2714,7 +2707,6 @@ test/built-ins/Promise/withResolvers/result.js
 test/built-ins/Proxy/construct/trap-is-null-target-is-proxy.js
 test/built-ins/Proxy/construct/trap-is-undefined-target-is-proxy.js
 test/built-ins/Proxy/defineProperty/trap-is-missing-target-is-proxy.js
-test/built-ins/Proxy/deleteProperty/trap-is-missing-target-is-proxy.js
 test/built-ins/Proxy/deleteProperty/trap-is-null-target-is-proxy.js
 test/built-ins/Proxy/enumerate/removed-does-not-trigger.js
 test/built-ins/Proxy/get/trap-is-missing-target-is-proxy.js
@@ -3662,7 +3654,6 @@ test/built-ins/String/S15.5.5_A2_T2.js
 test/built-ins/String/fromCodePoint/argument-is-not-integer.js
 test/built-ins/String/numeric-properties.js
 test/built-ins/String/prop-desc.js
-test/built-ins/String/prototype/S15.5.3.1_A3.js
 test/built-ins/String/prototype/S15.5.3.1_A4.js
 test/built-ins/String/prototype/S15.5.4_A1.js
 test/built-ins/String/prototype/S15.5.4_A2.js
@@ -4980,12 +4971,10 @@ test/built-ins/Uint8Array/fromBase64/ignores-receiver.js
 test/built-ins/Uint8Array/fromBase64/last-chunk-handling.js
 test/built-ins/Uint8Array/fromBase64/last-chunk-invalid.js
 test/built-ins/Uint8Array/fromBase64/length.js
-test/built-ins/Uint8Array/fromBase64/option-coercion.js
 test/built-ins/Uint8Array/fromBase64/whitespace.js
 test/built-ins/Uint8Array/fromHex/ignores-receiver.js
 test/built-ins/Uint8Array/prototype/setFromBase64/last-chunk-handling.js
 test/built-ins/Uint8Array/prototype/setFromBase64/length.js
-test/built-ins/Uint8Array/prototype/setFromBase64/option-coercion.js
 test/built-ins/Uint8Array/prototype/setFromBase64/subarray.js
 test/built-ins/Uint8Array/prototype/setFromBase64/target-size.js
 test/built-ins/Uint8Array/prototype/setFromBase64/throws-when-target-is-backed-by-immutable-arraybuffer.js
@@ -4995,9 +4984,7 @@ test/built-ins/Uint8Array/prototype/setFromBase64/whitespace.js
 test/built-ins/Uint8Array/prototype/setFromBase64/writes-up-to-error.js
 test/built-ins/Uint8Array/prototype/setFromHex/throws-when-target-is-backed-by-immutable-arraybuffer.js
 test/built-ins/Uint8Array/prototype/setFromHex/writes-up-to-error.js
-test/built-ins/Uint8Array/prototype/toBase64/alphabet.js
 test/built-ins/Uint8Array/prototype/toBase64/omit-padding.js
-test/built-ins/Uint8Array/prototype/toBase64/option-coercion.js
 test/built-ins/WeakMap/iterable-with-symbol-keys.js
 test/built-ins/WeakMap/iterator-items-keys-cannot-be-held-weakly.js
 test/built-ins/WeakMap/prototype/Symbol.toStringTag.js
@@ -6388,7 +6375,6 @@ test/language/expressions/assignment/dstr/array-elem-nested-array.js
 test/language/expressions/assignment/dstr/array-elem-nested-obj-yield-expr.js
 test/language/expressions/assignment/dstr/array-elem-nested-obj-yield-ident-valid.js
 test/language/expressions/assignment/dstr/array-elem-nested-obj.js
-test/language/expressions/assignment/dstr/array-elem-put-const.js
 test/language/expressions/assignment/dstr/array-elem-put-let.js
 test/language/expressions/assignment/dstr/array-elem-put-obj-literal-prop-ref-init-active.js
 test/language/expressions/assignment/dstr/array-elem-put-obj-literal-prop-ref-init.js
@@ -6455,7 +6441,6 @@ test/language/expressions/assignment/dstr/array-rest-nested-obj-undefined.js
 test/language/expressions/assignment/dstr/array-rest-nested-obj-yield-expr.js
 test/language/expressions/assignment/dstr/array-rest-nested-obj-yield-ident-valid.js
 test/language/expressions/assignment/dstr/array-rest-nested-obj.js
-test/language/expressions/assignment/dstr/array-rest-put-const.js
 test/language/expressions/assignment/dstr/array-rest-put-prop-ref-no-get.js
 test/language/expressions/assignment/dstr/array-rest-put-prop-ref.js
 test/language/expressions/assignment/dstr/array-rest-put-unresolvable-no-strict.js
@@ -6510,7 +6495,6 @@ test/language/expressions/assignment/dstr/obj-id-init-order.js
 test/language/expressions/assignment/dstr/obj-id-init-simple-no-strict.js
 test/language/expressions/assignment/dstr/obj-id-init-yield-expr.js
 test/language/expressions/assignment/dstr/obj-id-init-yield-ident-valid.js
-test/language/expressions/assignment/dstr/obj-id-put-const.js
 test/language/expressions/assignment/dstr/obj-id-put-unresolvable-no-strict.js
 test/language/expressions/assignment/dstr/obj-id-simple-no-strict.js
 test/language/expressions/assignment/dstr/obj-prop-elem-init-assignment-missing.js
@@ -6544,7 +6528,6 @@ test/language/expressions/assignment/dstr/obj-prop-nested-array.js
 test/language/expressions/assignment/dstr/obj-prop-nested-obj-yield-expr.js
 test/language/expressions/assignment/dstr/obj-prop-nested-obj-yield-ident-valid.js
 test/language/expressions/assignment/dstr/obj-prop-nested-obj.js
-test/language/expressions/assignment/dstr/obj-prop-put-const.js
 test/language/expressions/assignment/dstr/obj-prop-put-order.js
 test/language/expressions/assignment/dstr/obj-prop-put-prop-ref-no-get.js
 test/language/expressions/assignment/dstr/obj-prop-put-prop-ref.js
@@ -7749,8 +7732,6 @@ test/language/expressions/class/elements/wrapped-in-sc-static-private-fields.js
 test/language/expressions/class/elements/wrapped-in-sc-static-private-methods-with-fields.js
 test/language/expressions/class/elements/wrapped-in-sc-static-private-methods.js
 test/language/expressions/class/elements/wrapped-in-sc-string-literal-names.js
-test/language/expressions/class/heritage-arrow-function.js
-test/language/expressions/class/heritage-async-arrow-function.js
 test/language/expressions/class/name.js
 test/language/expressions/class/private-getter-brand-check-multiple-evaluations-of-class-eval-indirect.js
 test/language/expressions/class/private-getter-brand-check-multiple-evaluations-of-class-eval.js
@@ -7907,18 +7888,6 @@ test/language/expressions/compound-assignment/left-hand-side-private-reference-d
 test/language/expressions/compound-assignment/left-hand-side-private-reference-data-property-rshift.js
 test/language/expressions/compound-assignment/left-hand-side-private-reference-data-property-srshift.js
 test/language/expressions/compound-assignment/left-hand-side-private-reference-data-property-sub.js
-test/language/expressions/compound-assignment/left-hand-side-private-reference-method-add.js
-test/language/expressions/compound-assignment/left-hand-side-private-reference-method-bitand.js
-test/language/expressions/compound-assignment/left-hand-side-private-reference-method-bitor.js
-test/language/expressions/compound-assignment/left-hand-side-private-reference-method-bitxor.js
-test/language/expressions/compound-assignment/left-hand-side-private-reference-method-div.js
-test/language/expressions/compound-assignment/left-hand-side-private-reference-method-exp.js
-test/language/expressions/compound-assignment/left-hand-side-private-reference-method-lshift.js
-test/language/expressions/compound-assignment/left-hand-side-private-reference-method-mod.js
-test/language/expressions/compound-assignment/left-hand-side-private-reference-method-mult.js
-test/language/expressions/compound-assignment/left-hand-side-private-reference-method-rshift.js
-test/language/expressions/compound-assignment/left-hand-side-private-reference-method-srshift.js
-test/language/expressions/compound-assignment/left-hand-side-private-reference-method-sub.js
 test/language/expressions/compound-assignment/lshift-whitespace.js
 test/language/expressions/compound-assignment/mod-whitespace.js
 test/language/expressions/compound-assignment/mult-whitespace.js
@@ -8070,7 +8039,6 @@ test/language/expressions/generators/named-yield-identifier-non-strict.js
 test/language/expressions/generators/named-yield-identifier-spread-non-strict.js
 test/language/expressions/generators/no-name.js
 test/language/expressions/generators/prototype-own-properties.js
-test/language/expressions/generators/prototype-property-descriptor.js
 test/language/expressions/generators/prototype-value.js
 test/language/expressions/generators/scope-param-elem-var-close.js
 test/language/expressions/generators/scope-param-elem-var-open.js
@@ -8299,13 +8267,11 @@ test/language/expressions/object/method-definition/generator-prototype.js
 test/language/expressions/object/method-definition/generator-super-prop-body.js
 test/language/expressions/object/method-definition/generator-super-prop-param.js
 test/language/expressions/object/method-definition/meth-eval-var-scope-syntax-err.js
-test/language/expressions/object/method-definition/name-invoke-ctor.js
 test/language/expressions/object/method-definition/name-name-prop-symbol.js
 test/language/expressions/object/method-definition/name-param-id-yield.js
 test/language/expressions/object/method-definition/name-param-init-yield.js
 test/language/expressions/object/method-definition/name-prop-name-yield-expr.js
 test/language/expressions/object/method-definition/name-prop-name-yield-id.js
-test/language/expressions/object/method-definition/name-prototype-prop.js
 test/language/expressions/object/method-definition/name-super-prop-body.js
 test/language/expressions/object/method-definition/name-super-prop-param.js
 test/language/expressions/object/method-definition/static-init-await-binding-accessor.js
@@ -8490,8 +8456,6 @@ test/language/expressions/tagged-template/cache-same-site.js
 test/language/expressions/tagged-template/invalid-escape-sequences.js
 test/language/expressions/tagged-template/tco-call.js
 test/language/expressions/tagged-template/tco-member.js
-test/language/expressions/tagged-template/template-object-frozen-non-strict.js
-test/language/expressions/tagged-template/template-object-frozen-strict.js
 test/language/expressions/tagged-template/template-object-template-map.js
 test/language/expressions/tagged-template/template-object.js
 test/language/expressions/tco-pos.js
@@ -9020,7 +8984,6 @@ test/language/statements/class/decorator/syntax/valid/decorator-parenthesized-ex
 test/language/statements/class/decorator/syntax/valid/decorator-parenthesized-expr-identifier-reference.js
 test/language/statements/class/definition/accessors.js
 test/language/statements/class/definition/basics.js
-test/language/statements/class/definition/constructable-but-no-prototype.js
 test/language/statements/class/definition/constructor-strict-by-default.js
 test/language/statements/class/definition/constructor.js
 test/language/statements/class/definition/fn-length-static-precedence-order.js
@@ -9029,15 +8992,10 @@ test/language/statements/class/definition/fn-name-accessor-set.js
 test/language/statements/class/definition/fn-name-gen-method.js
 test/language/statements/class/definition/fn-name-method.js
 test/language/statements/class/definition/fn-name-static-precedence-order.js
-test/language/statements/class/definition/getters-prop-desc.js
-test/language/statements/class/definition/invalid-extends.js
-test/language/statements/class/definition/methods.js
 test/language/statements/class/definition/numeric-property-names.js
 test/language/statements/class/definition/prototype-getter.js
 test/language/statements/class/definition/prototype-property.js
-test/language/statements/class/definition/prototype-setter.js
 test/language/statements/class/definition/prototype-wiring.js
-test/language/statements/class/definition/setters-prop-desc.js
 test/language/statements/class/definition/this-access-restriction-2.js
 test/language/statements/class/definition/this-access-restriction.js
 test/language/statements/class/definition/this-check-ordering.js
@@ -9771,7 +9729,6 @@ test/language/statements/class/elements/private-method-double-initialisation.js
 test/language/statements/class/elements/private-method-is-not-a-own-property.js
 test/language/statements/class/elements/private-method-is-not-clobbered-by-computed-property.js
 test/language/statements/class/elements/private-method-is-visible-in-computed-properties.js
-test/language/statements/class/elements/private-method-not-writable.js
 test/language/statements/class/elements/private-method-on-nested-class.js
 test/language/statements/class/elements/private-method-referenced-from-static-method.js
 test/language/statements/class/elements/private-method-shadowed-by-field-on-nested-class.js
@@ -9809,7 +9766,6 @@ test/language/statements/class/elements/private-static-field-visible-to-direct-e
 test/language/statements/class/elements/private-static-generator-method-name.js
 test/language/statements/class/elements/private-static-getter-visible-to-direct-eval.js
 test/language/statements/class/elements/private-static-method-name.js
-test/language/statements/class/elements/private-static-method-not-writable.js
 test/language/statements/class/elements/private-static-method-shadowed-by-field-on-nested-class.js
 test/language/statements/class/elements/private-static-method-shadowed-by-getter-on-nested-class.js
 test/language/statements/class/elements/private-static-method-shadowed-by-method-on-nested-class.js
@@ -10038,7 +9994,6 @@ test/language/statements/class/elements/same-line-method-static-private-methods-
 test/language/statements/class/elements/same-line-method-static-private-methods.js
 test/language/statements/class/elements/same-line-method-string-literal-names.js
 test/language/statements/class/elements/set-access-of-missing-shadowed-private-setter.js
-test/language/statements/class/elements/set-access-of-private-method.js
 test/language/statements/class/elements/set-access-of-shadowed-private-method.js
 test/language/statements/class/elements/static-as-valid-instance-field-assigned.js
 test/language/statements/class/elements/static-as-valid-instance-field.js
@@ -10173,13 +10128,11 @@ test/language/statements/class/subclass/builtin-objects/Object/constructor-retur
 test/language/statements/class/subclass/builtin-objects/Object/constructor-returns-non-object.js
 test/language/statements/class/subclass/builtin-objects/Promise/regular-subclassing.js
 test/language/statements/class/subclass/builtin-objects/Promise/super-must-be-called.js
-test/language/statements/class/subclass/builtin-objects/Proxy/no-prototype-throws.js
 test/language/statements/class/subclass/builtin-objects/RegExp/lastIndex.js
 test/language/statements/class/subclass/builtin-objects/RegExp/super-must-be-called.js
 test/language/statements/class/subclass/builtin-objects/Set/super-must-be-called.js
 test/language/statements/class/subclass/builtin-objects/String/super-must-be-called.js
 test/language/statements/class/subclass/builtin-objects/Symbol/new-symbol-with-super-throws.js
-test/language/statements/class/subclass/builtin-objects/Symbol/symbol-valid-as-extends-value.js
 test/language/statements/class/subclass/builtin-objects/TypedArray/super-must-be-called.js
 test/language/statements/class/subclass/builtin-objects/WeakMap/regular-subclassing.js
 test/language/statements/class/subclass/builtin-objects/WeakMap/super-must-be-called.js
@@ -10191,7 +10144,6 @@ test/language/statements/class/subclass/class-definition-null-proto-contains-ret
 test/language/statements/class/subclass/class-definition-null-proto-missing-return-override.js
 test/language/statements/class/subclass/class-definition-null-proto-super.js
 test/language/statements/class/subclass/class-definition-null-proto-this.js
-test/language/statements/class/subclass/class-definition-null-proto.js
 test/language/statements/class/subclass/default-constructor-2.js
 test/language/statements/class/subclass/default-constructor-spread-override.js
 test/language/statements/class/subclass/default-constructor.js
@@ -10214,8 +10166,6 @@ test/language/statements/class/subclass/derived-class-return-override-with-symbo
 test/language/statements/class/subclass/derived-class-return-override-with-this.js
 test/language/statements/class/subclass/derived-class-return-override-with-undefined.js
 test/language/statements/class/subclass/private-class-field-on-nonextensible-return-override.js
-test/language/statements/class/subclass/superclass-arrow-function.js
-test/language/statements/class/subclass/superclass-async-function.js
 test/language/statements/class/subclass/superclass-async-generator-function.js
 test/language/statements/class/subclass/superclass-generator-function.js
 test/language/statements/class/super/in-constructor-superproperty-evaluation.js
@@ -11463,7 +11413,6 @@ test/language/statements/for/tco-const-body.js
 test/language/statements/for/tco-let-body.js
 test/language/statements/for/tco-lhs-body.js
 test/language/statements/for/tco-var-body.js
-test/language/statements/function/13.2-18-1.js
 test/language/statements/function/S13.2.2_A17_T2.js
 test/language/statements/function/S13.2.2_A17_T3.js
 test/language/statements/function/S13.2.2_A18_T1.js
@@ -11532,7 +11481,6 @@ test/language/statements/generators/dstr/obj-ptrn-rest-val-obj.js
 test/language/statements/generators/eval-var-scope-syntax-err.js
 test/language/statements/generators/has-instance.js
 test/language/statements/generators/prototype-own-properties.js
-test/language/statements/generators/prototype-property-descriptor.js
 test/language/statements/generators/prototype-value.js
 test/language/statements/generators/scope-param-elem-var-close.js
 test/language/statements/generators/scope-param-elem-var-open.js
@@ -11916,7 +11864,6 @@ test/language/types/reference/put-value-prop-base-primitive.js
 test/language/types/string/S8.4_A7.2.js
 test/language/types/string/S8.4_A7.3.js
 test/language/types/string/S8.4_A7.4.js
-test/staging/Uint8Array/fromBase64/invalid-options.js
 test/staging/built-ins/RegExp/escape/surrogate-pair.js
 test/staging/built-ins/RegExp/named-groups/duplicate-named-groups-replace.js
 test/staging/built-ins/RegExp/named-groups/duplicate-named-groups.js
@@ -12163,7 +12110,6 @@ test/staging/sm/PrivateName/unicode-names.js
 test/staging/sm/Promise/bug-1288382.js
 test/staging/sm/Promise/for-of-iterator-uses-getv.js
 test/staging/sm/Proxy/getPrototypeOf.js
-test/staging/sm/Proxy/hasInstance.js
 test/staging/sm/Proxy/proxy-no-receiver-overwrite.js
 test/staging/sm/Proxy/regress-bug1062349.js
 test/staging/sm/Proxy/revoke-as-side-effect.js
@@ -12448,7 +12394,6 @@ test/staging/sm/expressions/object-literal-__proto__.js
 test/staging/sm/expressions/object-literal-accessor-arguments.js
 test/staging/sm/expressions/object-literal-computed-property-evaluation.js
 test/staging/sm/expressions/octal-literals.js
-test/staging/sm/expressions/optional-chain-class-heritage.js
 test/staging/sm/expressions/optional-chain-first-expression.js
 test/staging/sm/expressions/optional-chain.js
 test/staging/sm/expressions/primitive-this-boxing-behavior.js
@@ -12573,7 +12518,6 @@ test/staging/sm/object/toPrimitive-callers.js
 test/staging/sm/object/toPrimitive.js
 test/staging/sm/object/values-entries-lazy-props.js
 test/staging/sm/object/values.js
-test/staging/sm/regress/regress-383902.js
 test/staging/sm/regress/regress-428366.js
 test/staging/sm/regress/regress-470758-02.js
 test/staging/sm/regress/regress-499524.js
@@ -12598,7 +12542,6 @@ test/staging/sm/regress/regress-591897.js
 test/staging/sm/regress/regress-593256.js
 test/staging/sm/regress/regress-597945-1.js
 test/staging/sm/regress/regress-610026.js
-test/staging/sm/regress/regress-617405-1.js
 test/staging/sm/regress/regress-617405-2.js
 test/staging/sm/regress/regress-633741.js
 test/staging/sm/regress/regress-672892.js
@@ -12626,7 +12569,6 @@ test/staging/sm/strict/12.14.1.js
 test/staging/sm/strict/13.1.js
 test/staging/sm/strict/15.10.7.js
 test/staging/sm/strict/15.3.4.5.js
-test/staging/sm/strict/15.3.5.2.js
 test/staging/sm/strict/15.4.5.1.js
 test/staging/sm/strict/15.5.5.1.js
 test/staging/sm/strict/15.5.5.2.js

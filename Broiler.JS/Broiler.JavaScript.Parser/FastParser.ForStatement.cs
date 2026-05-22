@@ -286,7 +286,7 @@ partial class FastParser
                     var tid = Interlocked.Increment(ref TempVarID).ToString();
                     var id = new AstIdentifier(d.Identifier.Start, tid);
 
-                    tempDeclarations.Add(new VariableDeclarator(id));
+                    tempDeclarations.Add(new VariableDeclarator(id, d.Init));
                     scopedDeclarations.Add(new VariableDeclarator(d.Identifier, id));
                 }
             }

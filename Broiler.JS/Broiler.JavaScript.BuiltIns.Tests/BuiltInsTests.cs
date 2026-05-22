@@ -1701,6 +1701,47 @@ public class BuiltInsTests
     }
 
     [Fact]
+    public void Built_In_Constructors_Expose_Non_Writable_Prototype_Descriptors_Without_Changing_User_Functions()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = CreateContext();
+        var result = ctx.Eval("""
+            (function () {
+              function UserCtor() {}
+              var asyncPrototype = Object.getPrototypeOf(async function () {});
+              var generatorPrototype = Object.getPrototypeOf(function* () {});
+              var asyncGeneratorPrototype = Object.getPrototypeOf(async function* () {});
+              var descriptors = [
+                Object.getOwnPropertyDescriptor(Array, 'prototype'),
+                Object.getOwnPropertyDescriptor(Map, 'prototype'),
+                Object.getOwnPropertyDescriptor(Promise, 'prototype'),
+                Object.getOwnPropertyDescriptor(TypedArray, 'prototype'),
+                Object.getOwnPropertyDescriptor(Int8Array, 'prototype'),
+                Object.getOwnPropertyDescriptor(asyncPrototype.constructor, 'prototype'),
+                Object.getOwnPropertyDescriptor(generatorPrototype.constructor, 'prototype'),
+                Object.getOwnPropertyDescriptor(asyncGeneratorPrototype.constructor, 'prototype')
+              ];
+              var userDescriptor = Object.getOwnPropertyDescriptor(UserCtor, 'prototype');
+
+              return [
+                descriptors.every(function (descriptor) {
+                  return descriptor
+                    && descriptor.value
+                    && descriptor.writable === false
+                    && descriptor.enumerable === false
+                    && descriptor.configurable === false;
+                }),
+                userDescriptor.writable,
+                userDescriptor.enumerable,
+                userDescriptor.configurable
+              ].join('|');
+            })();
+            """);
+
+        Assert.Equal("true|true|false|false", result.ToString());
+    }
+
+    [Fact]
     public void Custom_Error_Subclass_Chains_Preserve_Instanceof_And_Message()
     {
         EnsureBuiltInsLoaded();

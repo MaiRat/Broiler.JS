@@ -595,10 +595,6 @@ test/built-ins/Array/prototype/every/15.4.4.16-7-c-i-22.js
 test/built-ins/Array/prototype/every/15.4.4.16-7-c-i-7.js
 test/built-ins/Array/prototype/every/15.4.4.16-7-c-i-8.js
 test/built-ins/Array/prototype/every/15.4.4.16-7-c-ii-16.js
-test/built-ins/Array/prototype/every/15.4.4.16-7-c-iii-17.js
-test/built-ins/Array/prototype/every/15.4.4.16-7-c-iii-18.js
-test/built-ins/Array/prototype/every/15.4.4.16-7-c-iii-19.js
-test/built-ins/Array/prototype/every/15.4.4.16-7-c-iii-29.js
 test/built-ins/Array/prototype/every/15.4.4.16-8-10.js
 test/built-ins/Array/prototype/every/15.4.4.16-8-2.js
 test/built-ins/Array/prototype/every/15.4.4.16-8-3.js
@@ -644,10 +640,6 @@ test/built-ins/Array/prototype/filter/15.4.4.20-9-c-i-22.js
 test/built-ins/Array/prototype/filter/15.4.4.20-9-c-i-7.js
 test/built-ins/Array/prototype/filter/15.4.4.20-9-c-i-8.js
 test/built-ins/Array/prototype/filter/15.4.4.20-9-c-ii-16.js
-test/built-ins/Array/prototype/filter/15.4.4.20-9-c-iii-18.js
-test/built-ins/Array/prototype/filter/15.4.4.20-9-c-iii-19.js
-test/built-ins/Array/prototype/filter/15.4.4.20-9-c-iii-20.js
-test/built-ins/Array/prototype/filter/15.4.4.20-9-c-iii-30.js
 test/built-ins/Array/prototype/filter/create-ctor-non-object.js
 test/built-ins/Array/prototype/find/array-altered-during-loop.js
 test/built-ins/Array/prototype/find/predicate-call-this-non-strict.js
@@ -919,10 +911,6 @@ test/built-ins/Array/prototype/some/15.4.4.17-5-22.js
 test/built-ins/Array/prototype/some/15.4.4.17-5-25.js
 test/built-ins/Array/prototype/some/15.4.4.17-7-b-16.js
 test/built-ins/Array/prototype/some/15.4.4.17-7-c-ii-16.js
-test/built-ins/Array/prototype/some/15.4.4.17-7-c-iii-17.js
-test/built-ins/Array/prototype/some/15.4.4.17-7-c-iii-18.js
-test/built-ins/Array/prototype/some/15.4.4.17-7-c-iii-19.js
-test/built-ins/Array/prototype/some/15.4.4.17-7-c-iii-29.js
 test/built-ins/Array/prototype/some/15.4.4.17-8-10.js
 test/built-ins/Array/prototype/some/15.4.4.17-8-2.js
 test/built-ins/Array/prototype/some/15.4.4.17-8-3.js
@@ -1148,7 +1136,6 @@ test/built-ins/BigInt/prototype/valueOf/return.js
 test/built-ins/BigInt/valueof-throws.js
 test/built-ins/BigInt/wrapper-object-ordinary-toprimitive.js
 test/built-ins/Boolean/S15.6.2.1_A4.js
-test/built-ins/Boolean/S9.2_A6_T1.js
 test/built-ins/Boolean/prop-desc.js
 test/built-ins/Boolean/prototype/S15.6.3.1_A1.js
 test/built-ins/Boolean/prototype/S15.6.3.1_A2.js
@@ -1338,7 +1325,6 @@ test/built-ins/Date/UTC/time-clip.js
 test/built-ins/Date/UTC/year-offset.js
 test/built-ins/Date/parse/zero.js
 test/built-ins/Date/prop-desc.js
-test/built-ins/Date/prototype/Symbol.toPrimitive/prop-desc.js
 test/built-ins/Date/prototype/getDate/this-value-valid-date.js
 test/built-ins/Date/prototype/prop-desc.js
 test/built-ins/Date/prototype/setDate/arg-coercion-order.js
@@ -2120,19 +2106,8 @@ test/built-ins/Object/assign/assign-length.js
 test/built-ins/Object/bigint.js
 test/built-ins/Object/create/15.2.3.5-0-2.js
 test/built-ins/Object/create/15.2.3.5-4-15.js
-test/built-ins/Object/create/15.2.3.5-4-151.js
-test/built-ins/Object/create/15.2.3.5-4-218.js
-test/built-ins/Object/create/15.2.3.5-4-219.js
-test/built-ins/Object/create/15.2.3.5-4-220.js
-test/built-ins/Object/create/15.2.3.5-4-230.js
-test/built-ins/Object/create/15.2.3.5-4-86.js
-test/built-ins/Object/create/15.2.3.5-4-98.js
 test/built-ins/Object/defineProperties/15.2.3.7-0-2.js
 test/built-ins/Object/defineProperties/15.2.3.7-2-16.js
-test/built-ins/Object/defineProperties/15.2.3.7-5-b-111.js
-test/built-ins/Object/defineProperties/15.2.3.7-5-b-190.js
-test/built-ins/Object/defineProperties/15.2.3.7-5-b-46.js
-test/built-ins/Object/defineProperties/15.2.3.7-5-b-58.js
 test/built-ins/Object/defineProperties/15.2.3.7-6-a-121.js
 test/built-ins/Object/defineProperties/15.2.3.7-6-a-129.js
 test/built-ins/Object/defineProperties/15.2.3.7-6-a-130.js
@@ -2213,13 +2188,6 @@ test/built-ins/Object/defineProperty/15.2.3.6-2-28.js
 test/built-ins/Object/defineProperty/15.2.3.6-2-29.js
 test/built-ins/Object/defineProperty/15.2.3.6-2-30.js
 test/built-ins/Object/defineProperty/15.2.3.6-2-31.js
-test/built-ins/Object/defineProperty/15.2.3.6-3-115.js
-test/built-ins/Object/defineProperty/15.2.3.6-3-125.js
-test/built-ins/Object/defineProperty/15.2.3.6-3-204.js
-test/built-ins/Object/defineProperty/15.2.3.6-3-60.js
-test/built-ins/Object/defineProperty/15.2.3.6-3-61.js
-test/built-ins/Object/defineProperty/15.2.3.6-3-62.js
-test/built-ins/Object/defineProperty/15.2.3.6-3-72.js
 test/built-ins/Object/defineProperty/15.2.3.6-4-117.js
 test/built-ins/Object/defineProperty/15.2.3.6-4-184.js
 test/built-ins/Object/defineProperty/15.2.3.6-4-19.js
@@ -3592,7 +3560,6 @@ test/built-ins/ShadowRealm/prototype/proto.js
 test/built-ins/String/S15.5.2.1_A3.js
 test/built-ins/String/S15.5.5.1_A3.js
 test/built-ins/String/S15.5.5.1_A4_T1.js
-test/built-ins/String/S15.5.5.1_A5.js
 test/built-ins/String/S15.5.5_A2_T2.js
 test/built-ins/String/fromCodePoint/argument-is-not-integer.js
 test/built-ins/String/numeric-properties.js
@@ -7504,8 +7471,6 @@ test/language/expressions/compound-assignment/sub-whitespace.js
 test/language/expressions/compound-assignment/urshift-whitespace.js
 test/language/expressions/compound-assignment/xor-whitespace.js
 test/language/expressions/concatenation/S9.8_A5_T2.js
-test/language/expressions/conditional/S11.12_A4_T1.js
-test/language/expressions/conditional/S11.12_A4_T2.js
 test/language/expressions/conditional/in-branch-1.js
 test/language/expressions/conditional/tco-cond.js
 test/language/expressions/conditional/tco-pos.js
@@ -7531,8 +7496,6 @@ test/language/expressions/division/bigint-complex-infinity.js
 test/language/expressions/division/bigint-toprimitive.js
 test/language/expressions/division/bigint-wrapped-values.js
 test/language/expressions/does-not-equals/S11.9.2_A6.2_T2.js
-test/language/expressions/does-not-equals/S11.9.2_A7.6.js
-test/language/expressions/does-not-equals/S11.9.2_A7.9.js
 test/language/expressions/does-not-equals/bigint-and-boolean.js
 test/language/expressions/does-not-equals/bigint-and-number-extremes.js
 test/language/expressions/does-not-equals/bigint-and-object.js
@@ -7585,8 +7548,6 @@ test/language/expressions/dynamic-import/usage/eval-gtbndng-indirect-update-dflt
 test/language/expressions/dynamic-import/usage/eval-gtbndng-indirect-update_FIXTURE.js
 test/language/expressions/dynamic-import/usage/module-code_FIXTURE.js
 test/language/expressions/equals/S11.9.1_A6.2_T2.js
-test/language/expressions/equals/S11.9.1_A7.6.js
-test/language/expressions/equals/S11.9.1_A7.8.js
 test/language/expressions/equals/bigint-and-boolean.js
 test/language/expressions/equals/bigint-and-number-extremes.js
 test/language/expressions/equals/bigint-and-object.js
@@ -7710,8 +7671,6 @@ test/language/expressions/less-than/bigint-and-boolean.js
 test/language/expressions/less-than/bigint-and-incomparable-string.js
 test/language/expressions/less-than/bigint-and-string.js
 test/language/expressions/less-than/bigint-and-symbol.js
-test/language/expressions/logical-and/S11.11.1_A4_T1.js
-test/language/expressions/logical-and/S11.11.1_A4_T2.js
 test/language/expressions/logical-and/tco-right.js
 test/language/expressions/logical-assignment/left-hand-side-private-reference-accessor-property-and.js
 test/language/expressions/logical-assignment/left-hand-side-private-reference-accessor-property-nullish.js
@@ -7768,13 +7727,6 @@ test/language/expressions/logical-assignment/lgcl-or-assignment-operator-unresol
 test/language/expressions/logical-assignment/lgcl-or-assignment-operator.js
 test/language/expressions/logical-assignment/lgcl-or-whitespace.js
 test/language/expressions/logical-not/S11.4.9_A1.js
-test/language/expressions/logical-not/S11.4.9_A3_T1.js
-test/language/expressions/logical-not/S11.4.9_A3_T2.js
-test/language/expressions/logical-not/S11.4.9_A3_T3.js
-test/language/expressions/logical-not/S9.2_A6_T2.js
-test/language/expressions/logical-or/S11.11.2_A2.1_T1.js
-test/language/expressions/logical-or/S11.11.2_A4_T1.js
-test/language/expressions/logical-or/S11.11.2_A4_T2.js
 test/language/expressions/logical-or/tco-right.js
 test/language/expressions/member-expression/computed-reference-null-or-undefined.js
 test/language/expressions/modulus/bigint-arithmetic.js
@@ -10870,11 +10822,6 @@ test/language/statements/for-of/uint8array-mutate.js
 test/language/statements/for-of/uint8array.js
 test/language/statements/for-of/uint8clampedarray-mutate.js
 test/language/statements/for-of/uint8clampedarray.js
-test/language/statements/for/12.6.3_2-3-a-ii-2.js
-test/language/statements/for/12.6.3_2-3-a-ii-3.js
-test/language/statements/for/12.6.3_2-3-a-ii-4.js
-test/language/statements/for/12.6.3_2-3-a-ii-5.js
-test/language/statements/for/12.6.3_2-3-a-ii-7.js
 test/language/statements/for/S12.6.3_A10.1_T1.js
 test/language/statements/for/S12.6.3_A10.1_T2.js
 test/language/statements/for/S12.6.3_A10_T1.js
@@ -11064,8 +11011,6 @@ test/language/statements/generators/yield-as-generator-declaration-binding-ident
 test/language/statements/generators/yield-as-identifier-in-nested-function.js
 test/language/statements/generators/yield-identifier-non-strict.js
 test/language/statements/generators/yield-identifier-spread-non-strict.js
-test/language/statements/if/S12.5_A1.2_T1.js
-test/language/statements/if/S12.5_A1.2_T2.js
 test/language/statements/if/cptn-no-else-true-abrupt-empty.js
 test/language/statements/if/tco-else-body.js
 test/language/statements/if/tco-if-body.js
@@ -11508,7 +11453,6 @@ test/staging/sm/Date/makeday-year-month-is-infinity.js
 test/staging/sm/Date/non-iso.js
 test/staging/sm/Date/setTime-argument-shortcircuiting.js
 test/staging/sm/Date/toISOString-01.js
-test/staging/sm/Date/toPrimitive.js
 test/staging/sm/Date/two-digit-years.js
 test/staging/sm/Error/constructor-proto.js
 test/staging/sm/Error/prototype-properties.js
@@ -11656,7 +11600,6 @@ test/staging/sm/Number/0x-without-following-hexdigits.js
 test/staging/sm/Number/20.1.3.2-toExponential.js
 test/staging/sm/Number/20.1.3.2-toPrecision.js
 test/staging/sm/Number/20.1.3.3-toFixed.js
-test/staging/sm/Number/defaultvalue.js
 test/staging/sm/Number/numericSeparator.js
 test/staging/sm/Number/parseFloat-01.js
 test/staging/sm/Number/parseInt-01.js
@@ -11759,7 +11702,6 @@ test/staging/sm/String/AdvanceStringIndex.js
 test/staging/sm/String/IsRegExp.js
 test/staging/sm/String/at.js
 test/staging/sm/String/codePointAt.js
-test/staging/sm/String/defaultvalue.js
 test/staging/sm/String/fromCodePoint.js
 test/staging/sm/String/internalUsage.js
 test/staging/sm/String/match-GetMethod.js

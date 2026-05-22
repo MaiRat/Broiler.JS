@@ -70,6 +70,7 @@ public class JSContext : JSObject, IJSExecutionContext, IDisposable
 
     SAUint32Map<JSVariable> globalVars = new();
     private int directEvalDepth;
+    private int directEvalCompilationDepth;
 
     private sealed class DirectEvalScope : IDisposable
     {
@@ -164,6 +165,19 @@ public class JSContext : JSObject, IJSExecutionContext, IDisposable
     }
 
     public IDisposable PushDirectEvalScope(JSVariable[] variables) => new DirectEvalScope(this, variables);
+
+    private sealed class DirectEvalCompilationScope(JSContext context) : IDisposable
+    {
+        public void Dispose() => context.directEvalCompilationDepth--;
+    }
+
+    public IDisposable PushDirectEvalCompilation()
+    {
+        directEvalCompilationDepth++;
+        return new DirectEvalCompilationScope(this);
+    }
+
+    public bool IsCompilingDirectEval => directEvalCompilationDepth > 0;
 
     public JSValue Register(JSVariable variable)
     {

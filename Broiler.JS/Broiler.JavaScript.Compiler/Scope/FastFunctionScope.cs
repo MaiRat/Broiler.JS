@@ -121,6 +121,8 @@ public class FastFunctionScope : LinkedStackItem<FastFunctionScope>
         public string Name { get; internal set; }
         public bool Create { get; internal set; }
         public bool IsLexical { get; internal set; }
+        public bool IsDeletable { get; internal set; }
+        public AstFunctionExpression OwnerFunction { get; internal set; }
         public YExpression Init { get; private set; }
 
         /// <summary>
@@ -478,7 +480,8 @@ public class FastFunctionScope : LinkedStackItem<FastFunctionScope>
             Expression = ve,
             Variable = pe,
             Create = true,
-            IsLexical = newScope
+            IsLexical = newScope,
+            OwnerFunction = Function
         };
         
         v.SetInit(init, initialize);

@@ -791,7 +791,6 @@ test/built-ins/Array/prototype/pop/S15.4.4.6_A3_T2.js
 test/built-ins/Array/prototype/pop/clamps-to-integer-limit.js
 test/built-ins/Array/prototype/pop/length-near-integer-limit.js
 test/built-ins/Array/prototype/pop/set-length-array-is-frozen.js
-test/built-ins/Array/prototype/prop-desc.js
 test/built-ins/Array/prototype/push/S15.4.4.7_A3.js
 test/built-ins/Array/prototype/push/S15.4.4.7_A4_T2.js
 test/built-ins/Array/prototype/push/clamps-to-integer-limit.js
@@ -1049,7 +1048,6 @@ test/built-ins/ArrayIteratorPrototype/next/length.js
 test/built-ins/AsyncFunction/AsyncFunction-construct.js
 test/built-ins/AsyncFunction/AsyncFunction-is-subclass.js
 test/built-ins/AsyncFunction/AsyncFunction-name.js
-test/built-ins/AsyncFunction/AsyncFunction-prototype.js
 test/built-ins/AsyncFunction/AsyncFunctionPrototype-prototype.js
 test/built-ins/AsyncFunction/AsyncFunctionPrototype-to-string.js
 test/built-ins/AsyncFunction/is-a-constructor.js
@@ -1061,7 +1059,6 @@ test/built-ins/AsyncGeneratorFunction/invoked-as-constructor-no-arguments.js
 test/built-ins/AsyncGeneratorFunction/is-a-constructor.js
 test/built-ins/AsyncGeneratorFunction/prototype/Symbol.toStringTag.js
 test/built-ins/AsyncGeneratorFunction/prototype/constructor.js
-test/built-ins/AsyncGeneratorFunction/prototype/prop-desc.js
 test/built-ins/AsyncGeneratorFunction/prototype/prototype.js
 test/built-ins/AsyncGeneratorPrototype/Symbol.toStringTag.js
 test/built-ins/AsyncGeneratorPrototype/constructor.js
@@ -1123,7 +1120,6 @@ test/built-ins/BigInt/nan-throws-rangeerror.js
 test/built-ins/BigInt/negative-infinity-throws.rangeerror.js
 test/built-ins/BigInt/prop-desc.js
 test/built-ins/BigInt/prototype/Symbol.toStringTag.js
-test/built-ins/BigInt/prototype/prop-desc.js
 test/built-ins/BigInt/prototype/toString/a-z.js
 test/built-ins/BigInt/prototype/toString/name.js
 test/built-ins/BigInt/prototype/toString/radix-err.js
@@ -1136,7 +1132,6 @@ test/built-ins/BigInt/wrapper-object-ordinary-toprimitive.js
 test/built-ins/Boolean/S15.6.2.1_A4.js
 test/built-ins/Boolean/prop-desc.js
 test/built-ins/Boolean/prototype/S15.6.3.1_A1.js
-test/built-ins/Boolean/prototype/S15.6.3.1_A2.js
 test/built-ins/Boolean/prototype/S15.6.3.1_A4.js
 test/built-ins/Boolean/prototype/toString/S15.6.4.2_A1_T1.js
 test/built-ins/Boolean/prototype/toString/S15.6.4.2_A1_T2.js
@@ -1152,7 +1147,6 @@ test/built-ins/DataView/excessive-bytelength-throws.js
 test/built-ins/DataView/excessive-byteoffset-throws.js
 test/built-ins/DataView/negative-bytelength-throws.js
 test/built-ins/DataView/negative-byteoffset-throws.js
-test/built-ins/DataView/prototype.js
 test/built-ins/DataView/prototype/Symbol.toStringTag.js
 test/built-ins/DataView/prototype/byteLength/return-bytelength.js
 test/built-ins/DataView/prototype/byteOffset/return-byteoffset.js
@@ -1322,7 +1316,6 @@ test/built-ins/Date/UTC/year-offset.js
 test/built-ins/Date/parse/zero.js
 test/built-ins/Date/prop-desc.js
 test/built-ins/Date/prototype/getDate/this-value-valid-date.js
-test/built-ins/Date/prototype/prop-desc.js
 test/built-ins/Date/prototype/setDate/arg-coercion-order.js
 test/built-ins/Date/prototype/setDate/date-value-read-before-tonumber-when-date-is-invalid.js
 test/built-ins/Date/prototype/setDate/date-value-read-before-tonumber-when-date-is-valid.js
@@ -1407,7 +1400,6 @@ test/built-ins/Error/tostring-2.js
 test/built-ins/FinalizationRegistry/prop-desc.js
 test/built-ins/FinalizationRegistry/prototype-from-newtarget-custom.js
 test/built-ins/FinalizationRegistry/prototype/Symbol.toStringTag.js
-test/built-ins/FinalizationRegistry/prototype/prop-desc.js
 test/built-ins/FinalizationRegistry/prototype/register/throws-when-target-cannot-be-held-weakly.js
 test/built-ins/FinalizationRegistry/prototype/register/throws-when-unregisterToken-not-undefined-and-cannot-be-held-weakly.js
 test/built-ins/FinalizationRegistry/prototype/unregister/throws-when-unregisterToken-cannot-be-held-weakly.js
@@ -1540,7 +1532,6 @@ test/built-ins/GeneratorFunction/invoked-as-constructor-no-arguments.js
 test/built-ins/GeneratorFunction/is-a-constructor.js
 test/built-ins/GeneratorFunction/prototype/Symbol.toStringTag.js
 test/built-ins/GeneratorFunction/prototype/constructor.js
-test/built-ins/GeneratorFunction/prototype/prop-desc.js
 test/built-ins/GeneratorFunction/prototype/prototype.js
 test/built-ins/GeneratorPrototype/Symbol.toStringTag.js
 test/built-ins/GeneratorPrototype/constructor.js
@@ -1671,7 +1662,6 @@ test/built-ins/Iterator/prototype/forEach/next-method-returns-throwing-value-don
 test/built-ins/Iterator/prototype/forEach/next-method-returns-throwing-value.js
 test/built-ins/Iterator/prototype/forEach/next-method-throws.js
 test/built-ins/Iterator/prototype/forEach/this-plain-iterator.js
-test/built-ins/Iterator/prototype/initial-value.js
 test/built-ins/Iterator/prototype/map/exhaustion-does-not-call-return.js
 test/built-ins/Iterator/prototype/map/get-next-method-only-once.js
 test/built-ins/Iterator/prototype/map/get-next-method-throws.js
@@ -1877,7 +1867,6 @@ test/built-ins/Map/prototype/Symbol.toStringTag.js
 test/built-ins/Map/prototype/clear/map-data-list-is-preserved.js
 test/built-ins/Map/prototype/delete/does-not-break-iterators.js
 test/built-ins/Map/prototype/delete/returns-false.js
-test/built-ins/Map/prototype/descriptor.js
 test/built-ins/Map/prototype/entries/name.js
 test/built-ins/Map/prototype/forEach/callback-parameters.js
 test/built-ins/Map/prototype/forEach/callback-this-non-strict.js
@@ -1969,7 +1958,6 @@ test/built-ins/Number/prototype/S15.7.3.1_A2_T1.js
 test/built-ins/Number/prototype/S15.7.3.1_A2_T2.js
 test/built-ins/Number/prototype/S15.7.3.1_A3.js
 test/built-ins/Number/prototype/S15.7.4_A1.js
-test/built-ins/Number/prototype/prop-desc.js
 test/built-ins/Number/prototype/toExponential/nan.js
 test/built-ins/Number/prototype/toExponential/range.js
 test/built-ins/Number/prototype/toExponential/return-values.js
@@ -2282,16 +2270,9 @@ test/built-ins/Object/getOwnPropertyDescriptor/15.2.3.3-2-25.js
 test/built-ins/Object/getOwnPropertyDescriptor/15.2.3.3-2-26.js
 test/built-ins/Object/getOwnPropertyDescriptor/15.2.3.3-2-27.js
 test/built-ins/Object/getOwnPropertyDescriptor/15.2.3.3-2-30.js
-test/built-ins/Object/getOwnPropertyDescriptor/15.2.3.3-4-182.js
-test/built-ins/Object/getOwnPropertyDescriptor/15.2.3.3-4-185.js
-test/built-ins/Object/getOwnPropertyDescriptor/15.2.3.3-4-189.js
-test/built-ins/Object/getOwnPropertyDescriptor/15.2.3.3-4-190.js
-test/built-ins/Object/getOwnPropertyDescriptor/15.2.3.3-4-193.js
-test/built-ins/Object/getOwnPropertyDescriptor/15.2.3.3-4-195.js
 test/built-ins/Object/getOwnPropertyDescriptor/15.2.3.3-4-198.js
 test/built-ins/Object/getOwnPropertyDescriptor/15.2.3.3-4-199.js
 test/built-ins/Object/getOwnPropertyDescriptor/15.2.3.3-4-200.js
-test/built-ins/Object/getOwnPropertyDescriptor/15.2.3.3-4-210.js
 test/built-ins/Object/getOwnPropertyDescriptor/15.2.3.3-4-211.js
 test/built-ins/Object/getOwnPropertyDescriptor/15.2.3.3-4-212.js
 test/built-ins/Object/getOwnPropertyDescriptor/15.2.3.3-4-213.js
@@ -2356,8 +2337,6 @@ test/built-ins/Object/keys/return-order.js
 test/built-ins/Object/preventExtensions/15.2.3.10-0-2.js
 test/built-ins/Object/preventExtensions/symbol-object-contains-symbol-properties-non-strict.js
 test/built-ins/Object/prop-desc.js
-test/built-ins/Object/prototype/15.2.3.1.js
-test/built-ins/Object/prototype/S15.2.3.1_A1.js
 test/built-ins/Object/prototype/__defineGetter__/define-non-extensible.js
 test/built-ins/Object/prototype/__defineSetter__/define-non-extensible.js
 test/built-ins/Object/prototype/__defineSetter__/setter-non-callable.js
@@ -2521,7 +2500,6 @@ test/built-ins/Promise/prototype/finally/subclass-reject-count.js
 test/built-ins/Promise/prototype/finally/subclass-resolve-count.js
 test/built-ins/Promise/prototype/finally/this-value-proxy.js
 test/built-ins/Promise/prototype/finally/this-value-thenable.js
-test/built-ins/Promise/prototype/prop-desc.js
 test/built-ins/Promise/prototype/then/S25.4.5.3_A4.2_T1.js
 test/built-ins/Promise/prototype/then/S25.4.5.3_A4.2_T2.js
 test/built-ins/Promise/prototype/then/capability-executor-called-twice.js
@@ -3555,7 +3533,6 @@ test/built-ins/String/S15.5.5_A2_T2.js
 test/built-ins/String/fromCodePoint/argument-is-not-integer.js
 test/built-ins/String/numeric-properties.js
 test/built-ins/String/prop-desc.js
-test/built-ins/String/prototype/S15.5.3.1_A4.js
 test/built-ins/String/prototype/S15.5.4_A1.js
 test/built-ins/String/prototype/S15.5.4_A2.js
 test/built-ins/String/prototype/S15.5.4_A3.js
@@ -3744,7 +3721,6 @@ test/built-ins/TypedArray/from/length.js
 test/built-ins/TypedArray/from/mapfn-is-not-callable.js
 test/built-ins/TypedArray/invoked.js
 test/built-ins/TypedArray/of/invoked-as-method.js
-test/built-ins/TypedArray/prototype.js
 test/built-ins/TypedArray/prototype/Symbol.iterator.js
 test/built-ins/TypedArray/prototype/Symbol.iterator/not-a-constructor.js
 test/built-ins/TypedArray/prototype/at/index-argument-tointeger.js
@@ -4390,28 +4366,17 @@ test/built-ins/TypedArray/prototype/with/order-of-evaluation.js
 test/built-ins/TypedArray/prototype/with/property-descriptor.js
 test/built-ins/TypedArray/prototype/with/value-throw-completion.js
 test/built-ins/TypedArrayConstructors/BigInt64Array/prop-desc.js
-test/built-ins/TypedArrayConstructors/BigInt64Array/prototype.js
 test/built-ins/TypedArrayConstructors/BigInt64Array/prototype/BYTES_PER_ELEMENT.js
 test/built-ins/TypedArrayConstructors/BigUint64Array/prop-desc.js
-test/built-ins/TypedArrayConstructors/BigUint64Array/prototype.js
 test/built-ins/TypedArrayConstructors/BigUint64Array/prototype/BYTES_PER_ELEMENT.js
-test/built-ins/TypedArrayConstructors/Float32Array/prototype.js
 test/built-ins/TypedArrayConstructors/Float32Array/prototype/BYTES_PER_ELEMENT.js
-test/built-ins/TypedArrayConstructors/Float64Array/prototype.js
 test/built-ins/TypedArrayConstructors/Float64Array/prototype/BYTES_PER_ELEMENT.js
-test/built-ins/TypedArrayConstructors/Int16Array/prototype.js
 test/built-ins/TypedArrayConstructors/Int16Array/prototype/BYTES_PER_ELEMENT.js
-test/built-ins/TypedArrayConstructors/Int32Array/prototype.js
 test/built-ins/TypedArrayConstructors/Int32Array/prototype/BYTES_PER_ELEMENT.js
-test/built-ins/TypedArrayConstructors/Int8Array/prototype.js
 test/built-ins/TypedArrayConstructors/Int8Array/prototype/BYTES_PER_ELEMENT.js
-test/built-ins/TypedArrayConstructors/Uint16Array/prototype.js
 test/built-ins/TypedArrayConstructors/Uint16Array/prototype/BYTES_PER_ELEMENT.js
-test/built-ins/TypedArrayConstructors/Uint32Array/prototype.js
 test/built-ins/TypedArrayConstructors/Uint32Array/prototype/BYTES_PER_ELEMENT.js
-test/built-ins/TypedArrayConstructors/Uint8Array/prototype.js
 test/built-ins/TypedArrayConstructors/Uint8Array/prototype/BYTES_PER_ELEMENT.js
-test/built-ins/TypedArrayConstructors/Uint8ClampedArray/prototype.js
 test/built-ins/TypedArrayConstructors/Uint8ClampedArray/prototype/BYTES_PER_ELEMENT.js
 test/built-ins/TypedArrayConstructors/ctors-bigint/buffer-arg/byteoffset-is-negative-throws.js
 test/built-ins/TypedArrayConstructors/ctors-bigint/buffer-arg/defined-length-and-offset.js
@@ -4665,7 +4630,6 @@ test/built-ins/WeakMap/prototype/has/returns-false-when-key-cannot-be-held-weakl
 test/built-ins/WeakMap/prototype/has/returns-false-when-object-key-not-present.js
 test/built-ins/WeakMap/prototype/has/returns-false-when-symbol-key-not-present.js
 test/built-ins/WeakMap/prototype/has/returns-true-when-symbol-key-present.js
-test/built-ins/WeakMap/prototype/prototype-attributes.js
 test/built-ins/WeakMap/prototype/set/adds-symbol-element.js
 test/built-ins/WeakMap/prototype/set/name.js
 test/built-ins/WeakMap/prototype/set/returns-this-when-ignoring-duplicate.js
@@ -4676,7 +4640,6 @@ test/built-ins/WeakRef/length.js
 test/built-ins/WeakRef/prop-desc.js
 test/built-ins/WeakRef/prototype-from-newtarget-custom.js
 test/built-ins/WeakRef/prototype/Symbol.toStringTag.js
-test/built-ins/WeakRef/prototype/prop-desc.js
 test/built-ins/WeakRef/throws-when-target-cannot-be-held-weakly.js
 test/built-ins/WeakSet/iterable-with-symbol-values.js
 test/built-ins/WeakSet/prototype/Symbol.toStringTag.js
@@ -4700,7 +4663,6 @@ test/built-ins/WeakSet/prototype/has/returns-false-when-symbol-value-not-present
 test/built-ins/WeakSet/prototype/has/returns-false-when-value-cannot-be-held-weakly.js
 test/built-ins/WeakSet/prototype/has/returns-true-when-object-value-present.js
 test/built-ins/WeakSet/prototype/has/returns-true-when-symbol-value-present.js
-test/built-ins/WeakSet/prototype/prototype-attributes.js
 test/built-ins/WeakSet/weakset.js
 test/built-ins/decodeURI/S15.1.3.1_A5.5.js
 test/built-ins/decodeURI/S15.1.3.1_A6_T1.js
@@ -11436,7 +11398,6 @@ test/staging/sm/Iterator/from/return-iterator-if-iterable.js
 test/staging/sm/Iterator/from/wrap-next-not-object-throws.js
 test/staging/sm/Iterator/from/wrap-return-closes-iterator.js
 test/staging/sm/Iterator/iterator.js
-test/staging/sm/Iterator/proto.js
 test/staging/sm/Iterator/prototype/drop/drop-more-than-available.js
 test/staging/sm/Iterator/prototype/every/check-fn-after-getting-iterator.js
 test/staging/sm/Iterator/prototype/every/fn-throws-close-iterator.js

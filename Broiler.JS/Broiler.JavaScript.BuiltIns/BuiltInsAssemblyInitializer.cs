@@ -61,6 +61,7 @@ internal static class BuiltInsAssemblyInitializer
                 PatchErrorConstructors(context);
                 PatchLegacyDatePrototype(context);
                 PatchCompatibilityBuiltIns(context);
+                PatchBuiltInConstructorPrototypeDescriptors(context);
             }
             : context =>
             {
@@ -69,6 +70,7 @@ internal static class BuiltInsAssemblyInitializer
                 PatchErrorConstructors(context);
                 PatchLegacyDatePrototype(context);
                 PatchCompatibilityBuiltIns(context);
+                PatchBuiltInConstructorPrototypeDescriptors(context);
             };
 
         // Wire factory delegate for JSDisposableStack so the Compiler can create
@@ -1497,5 +1499,59 @@ internal static class BuiltInsAssemblyInitializer
 
         existing.prototype[KeyStrings.constructor] = replacement;
         context.FastAddValue(key, replacement, JSPropertyAttributes.ConfigurableValue);
+    }
+
+    private static void PatchBuiltInConstructorPrototypeDescriptors(JSContext context)
+    {
+        HashSet<JSObject> visited = [];
+        PatchBuiltInConstructorPrototypeDescriptors(context, visited, depth: 2);
+    }
+
+    private static void PatchBuiltInConstructorPrototypeDescriptors(JSObject holder, HashSet<JSObject> visited, int depth)
+    {
+        if (!visited.Add(holder))
+            return;
+
+        var properties = holder.GetOwnProperties(false).GetEnumerator();
+        while (properties.MoveNext(out var _, out var property))
+        {
+            if (!property.IsValue || property.value is not JSValue value || !value.IsObject)
+                continue;
+
+            if (value is JSFunction function)
+            {
+                PatchBuiltInConstructorPrototypeDescriptor(function);
+                continue;
+            }
+
+            if (depth > 0 && value is JSObject nestedObject)
+                PatchBuiltInConstructorPrototypeDescriptors(nestedObject, visited, depth - 1);
+        }
+    }
+
+    private static void PatchBuiltInConstructorPrototypeDescriptor(JSFunction function)
+    {
+        if (function.ToDetailString().IndexOf("[native", StringComparison.Ordinal) < 0)
+            return;
+
+        ref var ownProperties = ref function.GetOwnProperties(false);
+        if (ownProperties.IsEmpty)
+            return;
+
+        ref var prototypeProperty = ref ownProperties.GetValue(KeyStrings.prototype.Key);
+        if (prototypeProperty.IsEmpty
+            || !prototypeProperty.IsValue
+            || prototypeProperty.value is not JSObject
+            || (prototypeProperty.IsReadOnly && !prototypeProperty.IsConfigurable))
+        {
+            return;
+        }
+
+        prototypeProperty = new JSProperty(
+            KeyStrings.prototype,
+            prototypeProperty.get,
+            prototypeProperty.set,
+            prototypeProperty.value,
+            JSPropertyAttributes.ReadonlyValue);
     }
 }

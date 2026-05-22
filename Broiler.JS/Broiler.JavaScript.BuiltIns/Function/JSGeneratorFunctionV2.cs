@@ -27,7 +27,7 @@ public class JSGeneratorFunctionV2 : JSFunction
 
             return created;
         }, constructorName, $"function {constructorName}() {{ [native code] }}", 1, createPrototype: false);
-        constructor.FastAddValue(KeyStrings.prototype, prototype, JSPropertyAttributes.ConfigurableValue);
+        constructor.FastAddValue(KeyStrings.prototype, prototype, JSPropertyAttributes.ReadonlyValue);
         prototype.FastAddValue(KeyStrings.constructor, constructor, JSPropertyAttributes.ConfigurableValue);
 
         return prototype;

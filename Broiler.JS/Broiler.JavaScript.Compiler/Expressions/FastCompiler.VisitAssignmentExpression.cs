@@ -68,8 +68,7 @@ partial class FastCompiler
         if (left.Type == FastNodeType.Identifier)
         {
             var identifier = (AstIdentifier)left;
-            var variable = scope.Top.GetVariable(identifier.Name, true);
-            if (variable == null)
+            if (!TryGetStaticIdentifierVariable(identifier, out var variable) || variable == null)
                 return AssignIdentifier(identifier, right, assignmentOperator);
 
             if (assignmentOperator == TokenTypes.Assign && variable.IsLexical && variable.Variable?.Type == typeof(JSVariable))
@@ -146,8 +145,7 @@ partial class FastCompiler
                     }
                     else
                     {
-                        var variable = scope.Top.GetVariable(id.Name, true);
-                        if (variable == null)
+                        if (!TryGetStaticIdentifierVariable(id, out var variable) || variable == null)
                         {
                             if (suppressAnonymousFunctionNameInference)
                             {

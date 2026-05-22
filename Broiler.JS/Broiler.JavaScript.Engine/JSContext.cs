@@ -71,6 +71,25 @@ public class JSContext : JSObject, IJSExecutionContext, IDisposable
     SAUint32Map<JSVariable> globalVars = new();
     private int directEvalDepth;
     private int directEvalCompilationDepth;
+    private WithScope withScope;
+
+    private sealed class WithScope : IDisposable
+    {
+        private readonly JSContext context;
+
+        public WithScope(JSContext context, JSObject @object)
+        {
+            this.context = context;
+            Previous = context.withScope;
+            Object = @object;
+            context.withScope = this;
+        }
+
+        public JSObject Object { get; }
+        public WithScope Previous { get; }
+
+        public void Dispose() => context.withScope = Previous;
+    }
 
     private sealed class DirectEvalScope : IDisposable
     {
@@ -221,8 +240,39 @@ public class JSContext : JSObject, IJSExecutionContext, IDisposable
         }
     }
 
+    public IDisposable PushWithScope(JSValue value)
+    {
+        value.RequireObjectCoercible();
+        var @object = value as JSObject
+            ?? JSObject.CreatePrimitiveObject(value) as JSObject
+            ?? throw new InvalidOperationException("CreatePrimitiveObject returned a non-object value.");
+        return new WithScope(this, @object);
+    }
+
+    private bool TryResolveWithObject(in KeyString name, out JSObject @object)
+    {
+        var propertyKey = name.ToJSValue();
+        for (var current = withScope; current != null; current = current.Previous)
+        {
+            if (current.Object.HasProperty(propertyKey).BooleanValue)
+            {
+                @object = current.Object;
+                return true;
+            }
+        }
+
+        @object = null;
+        return false;
+    }
+
     public JSValue ResolveIdentifier(in KeyString name)
     {
+        if (TryResolveWithObject(name, out var withObject))
+            return withObject[name];
+
+        if (globalVars.TryGetValue(name.Key, out var variable))
+            return variable.Value;
+
         if (!GetInternalProperty(name).IsEmpty)
             return this[name];
 
@@ -231,6 +281,12 @@ public class JSContext : JSObject, IJSExecutionContext, IDisposable
 
     public JSValue AssignIdentifier(in KeyString name, JSValue value)
     {
+        if (TryResolveWithObject(name, out var withObject))
+        {
+            withObject[name] = value;
+            return value;
+        }
+
         var hasVariable = globalVars.TryGetValue(name.Key, out var variable);
         var hasProperty = !GetInternalProperty(name).IsEmpty;
 
@@ -254,6 +310,9 @@ public class JSContext : JSObject, IJSExecutionContext, IDisposable
 
     public JSValue DeleteIdentifier(in KeyString name)
     {
+        if (TryResolveWithObject(name, out var withObject))
+            return withObject.Delete(name);
+
         var hasVariable = globalVars.TryGetValue(name.Key, out _);
         var property = GetInternalProperty(name, false);
 

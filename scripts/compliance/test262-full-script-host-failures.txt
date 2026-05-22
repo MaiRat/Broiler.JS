@@ -768,10 +768,6 @@ test/built-ins/Array/prototype/map/15.4.4.19-1-5.js
 test/built-ins/Array/prototype/map/15.4.4.19-1-7.js
 test/built-ins/Array/prototype/map/15.4.4.19-1-8.js
 test/built-ins/Array/prototype/map/15.4.4.19-2-4.js
-test/built-ins/Array/prototype/map/15.4.4.19-3-14.js
-test/built-ins/Array/prototype/map/15.4.4.19-3-28.js
-test/built-ins/Array/prototype/map/15.4.4.19-3-29.js
-test/built-ins/Array/prototype/map/15.4.4.19-3-8.js
 test/built-ins/Array/prototype/map/15.4.4.19-5-1.js
 test/built-ins/Array/prototype/map/15.4.4.19-5-22.js
 test/built-ins/Array/prototype/map/15.4.4.19-8-6.js
@@ -797,8 +793,6 @@ test/built-ins/Array/prototype/map/15.4.4.19-9-7.js
 test/built-ins/Array/prototype/map/15.4.4.19-9-8.js
 test/built-ins/Array/prototype/map/15.4.4.19-9-9.js
 test/built-ins/Array/prototype/map/create-ctor-non-object.js
-test/built-ins/Array/prototype/map/create-non-array-invalid-len.js
-test/built-ins/Array/prototype/map/create-species-undef-invalid-len.js
 test/built-ins/Array/prototype/methods-called-as-functions.js
 test/built-ins/Array/prototype/pop/S15.4.4.6_A2_T2.js
 test/built-ins/Array/prototype/pop/S15.4.4.6_A3_T1.js
@@ -944,16 +938,10 @@ test/built-ins/Array/prototype/sort/comparefn-nonfunction-call-throws.js
 test/built-ins/Array/prototype/sort/stability-2048-elements.js
 test/built-ins/Array/prototype/sort/stability-513-elements.js
 test/built-ins/Array/prototype/splice/S15.4.4.12_A3_T1.js
-test/built-ins/Array/prototype/splice/S15.4.4.12_A3_T3.js
-test/built-ins/Array/prototype/splice/S15.4.4.12_A4_T1.js
-test/built-ins/Array/prototype/splice/S15.4.4.12_A4_T2.js
-test/built-ins/Array/prototype/splice/S15.4.4.12_A4_T3.js
 test/built-ins/Array/prototype/splice/S15.4.4.12_A6.1_T3.js
 test/built-ins/Array/prototype/splice/clamps-length-to-integer-limit.js
 test/built-ins/Array/prototype/splice/create-ctor-non-object.js
-test/built-ins/Array/prototype/splice/create-non-array-invalid-len.js
 test/built-ins/Array/prototype/splice/create-species-length-exceeding-integer-limit.js
-test/built-ins/Array/prototype/splice/create-species-undef-invalid-len.js
 test/built-ins/Array/prototype/splice/length-and-deleteCount-exceeding-integer-limit.js
 test/built-ins/Array/prototype/splice/length-exceeding-integer-limit-shrink-array.js
 test/built-ins/Array/prototype/splice/length-near-integer-limit-grow-array.js
@@ -969,7 +957,6 @@ test/built-ins/Array/prototype/toReversed/length-exceeding-array-length-limit.js
 test/built-ins/Array/prototype/toReversed/this-value-boolean.js
 test/built-ins/Array/prototype/toSorted/comparefn-not-a-function.js
 test/built-ins/Array/prototype/toSorted/ignores-species.js
-test/built-ins/Array/prototype/toSorted/length-exceeding-array-length-limit.js
 test/built-ins/Array/prototype/toSorted/this-value-boolean.js
 test/built-ins/Array/prototype/toSpliced/deleteCount-clamped-between-zero-and-remaining-count.js
 test/built-ins/Array/prototype/toSpliced/deleteCount-missing.js
@@ -1028,9 +1015,7 @@ test/built-ins/Array/prototype/with/no-get-replaced-index.js
 test/built-ins/Array/prototype/with/not-a-constructor.js
 test/built-ins/Array/prototype/with/property-descriptor.js
 test/built-ins/Array/prototype/with/this-value-boolean.js
-test/built-ins/ArrayBuffer/allocation-limit.js
 test/built-ins/ArrayBuffer/length-is-too-large-throws.js
-test/built-ins/ArrayBuffer/negative-length-throws.js
 test/built-ins/ArrayBuffer/newtarget-prototype-is-not-object.js
 test/built-ins/ArrayBuffer/prop-desc.js
 test/built-ins/ArrayBuffer/prototype-from-newtarget.js
@@ -1150,7 +1135,6 @@ test/built-ins/BigInt/infinity-throws-rangeerror.js
 test/built-ins/BigInt/is-a-constructor.js
 test/built-ins/BigInt/nan-throws-rangeerror.js
 test/built-ins/BigInt/negative-infinity-throws.rangeerror.js
-test/built-ins/BigInt/non-integer-rangeerror.js
 test/built-ins/BigInt/prop-desc.js
 test/built-ins/BigInt/prototype/Symbol.toStringTag.js
 test/built-ins/BigInt/prototype/prop-desc.js
@@ -1352,17 +1336,14 @@ test/built-ins/Date/UTC/no-arg.js
 test/built-ins/Date/UTC/non-integer-values.js
 test/built-ins/Date/UTC/time-clip.js
 test/built-ins/Date/UTC/year-offset.js
-test/built-ins/Date/parse/time-value-maximum-range.js
 test/built-ins/Date/parse/zero.js
 test/built-ins/Date/prop-desc.js
 test/built-ins/Date/prototype/Symbol.toPrimitive/prop-desc.js
 test/built-ins/Date/prototype/getDate/this-value-valid-date.js
-test/built-ins/Date/prototype/getTime/this-value-valid-date.js
 test/built-ins/Date/prototype/prop-desc.js
 test/built-ins/Date/prototype/setDate/arg-coercion-order.js
 test/built-ins/Date/prototype/setDate/date-value-read-before-tonumber-when-date-is-invalid.js
 test/built-ins/Date/prototype/setDate/date-value-read-before-tonumber-when-date-is-valid.js
-test/built-ins/Date/prototype/setDate/new-value-time-clip.js
 test/built-ins/Date/prototype/setFullYear/arg-date-to-number.js
 test/built-ins/Date/prototype/setFullYear/arg-month-to-number.js
 test/built-ins/Date/prototype/setFullYear/arg-year-to-number.js
@@ -1389,7 +1370,6 @@ test/built-ins/Date/prototype/setMonth/arg-date-to-number.js
 test/built-ins/Date/prototype/setMonth/arg-month-to-number.js
 test/built-ins/Date/prototype/setMonth/date-value-read-before-tonumber-when-date-is-invalid.js
 test/built-ins/Date/prototype/setMonth/date-value-read-before-tonumber-when-date-is-valid.js
-test/built-ins/Date/prototype/setMonth/new-value-time-clip.js
 test/built-ins/Date/prototype/setMonth/this-value-valid-date-date.js
 test/built-ins/Date/prototype/setSeconds/arg-coercion-order.js
 test/built-ins/Date/prototype/setSeconds/arg-ms-to-number.js
@@ -1422,10 +1402,8 @@ test/built-ins/Date/prototype/toDateString/negative-year.js
 test/built-ins/Date/prototype/toISOString/15.9.5.43-0-10.js
 test/built-ins/Date/prototype/toISOString/15.9.5.43-0-11.js
 test/built-ins/Date/prototype/toISOString/15.9.5.43-0-12.js
-test/built-ins/Date/prototype/toISOString/15.9.5.43-0-13.js
 test/built-ins/Date/prototype/toISOString/15.9.5.43-0-14.js
 test/built-ins/Date/prototype/toISOString/15.9.5.43-0-15.js
-test/built-ins/Date/prototype/toISOString/15.9.5.43-0-8.js
 test/built-ins/Date/prototype/toISOString/15.9.5.43-0-9.js
 test/built-ins/Date/prototype/toJSON/to-object.js
 test/built-ins/Date/prototype/toString/negative-year.js
@@ -5011,8 +4989,6 @@ test/intl402/DateTimeFormat/date-time-options.js
 test/intl402/DateTimeFormat/default-options-object-prototype.js
 test/intl402/DateTimeFormat/ignore-invalid-unicode-ext-values.js
 test/intl402/DateTimeFormat/numbering-system-calendar-options.js
-test/intl402/DateTimeFormat/offset-timezone-no-unicode-minus-sign.js
-test/intl402/DateTimeFormat/prototype/format/date-constructor-not-called.js
 test/intl402/DateTimeFormat/prototype/format/dayPeriod-long-en.js
 test/intl402/DateTimeFormat/prototype/format/dayPeriod-narrow-en.js
 test/intl402/DateTimeFormat/prototype/format/dayPeriod-short-en.js
@@ -5021,8 +4997,6 @@ test/intl402/DateTimeFormat/prototype/format/fractionalSecondDigits.js
 test/intl402/DateTimeFormat/prototype/format/numbering-system.js
 test/intl402/DateTimeFormat/prototype/format/proleptic-gregorian-calendar.js
 test/intl402/DateTimeFormat/prototype/format/related-year-zh.js
-test/intl402/DateTimeFormat/prototype/format/throws-value-non-finite.js
-test/intl402/DateTimeFormat/prototype/format/time-clip-near-time-boundaries.js
 test/intl402/DateTimeFormat/prototype/format/time-clip-to-integer.js
 test/intl402/DateTimeFormat/prototype/format/timedatestyle-en.js
 test/intl402/DateTimeFormat/prototype/formatRange/argument-date-string.js
@@ -11655,7 +11629,6 @@ test/staging/sm/Date/makeday-year-month-is-infinity.js
 test/staging/sm/Date/non-iso.js
 test/staging/sm/Date/setTime-argument-shortcircuiting.js
 test/staging/sm/Date/toISOString-01.js
-test/staging/sm/Date/toISOString.js
 test/staging/sm/Date/toPrimitive.js
 test/staging/sm/Date/two-digit-years.js
 test/staging/sm/Error/constructor-proto.js

@@ -79,6 +79,80 @@ public partial class JSString
         return new JSString(result.ToString());
     }
 
+    [JSPrototypeMethod]
+    [JSExport("replaceAll", Length = 2)]
+    internal static JSValue ReplaceAll(in Arguments a)
+    {
+        var @thisValue = a.This;
+        if (@thisValue.IsNullOrUndefined)
+            throw JSEngine.NewTypeError("String.prototype.replaceAll called on null or undefined");
+
+        var @this = @thisValue.ToString();
+        var (searchValue, replaceValue) = a.Get2();
+
+        if (!searchValue.IsNullOrUndefined)
+        {
+            var isRegExp = searchValue[(IJSSymbol)JSSymbol.match];
+            if (!isRegExp.IsUndefined && isRegExp.BooleanValue)
+            {
+                var flags = searchValue[KeyStrings.GetOrCreate("flags")];
+                if (!flags.StringValue.Contains('g'))
+                    throw JSEngine.NewTypeError("String.prototype.replaceAll called with a non-global RegExp argument");
+            }
+
+            var replacer = searchValue[(IJSSymbol)JSSymbol.replace];
+            if (!replacer.IsUndefined)
+            {
+                if (!replacer.IsFunction)
+                    throw JSEngine.NewTypeError("@@replace is not callable");
+
+                return replacer.Call(searchValue, @thisValue, replaceValue);
+            }
+        }
+
+        var searchString = searchValue.IsUndefined ? "undefined" : searchValue.ToString();
+        var functionalReplace = replaceValue.IsFunction;
+        var replacementText = functionalReplace ? null : replaceValue.ToString();
+        var source = JSValue.CreateString(@this);
+
+        string GetReplacement(int position)
+            => functionalReplace
+                ? replaceValue.InvokeFunction(new Arguments(JSUndefined.Value, JSValue.CreateString(searchString), JSValue.CreateNumber(position), source)).ToString()
+                : replacementText!;
+
+        if (searchString.Length == 0)
+        {
+            var emptySearchResult = new StringBuilder();
+            for (var position = 0; position <= @this.Length; position++)
+            {
+                emptySearchResult.Append(GetReplacement(position));
+                if (position < @this.Length)
+                    emptySearchResult.Append(@this[position]);
+            }
+
+            return JSValue.CreateString(emptySearchResult.ToString());
+        }
+
+        var result = new StringBuilder();
+        var searchStart = 0;
+        while (true)
+        {
+            var matchIndex = @this.IndexOf(searchString, searchStart, StringComparison.Ordinal);
+            if (matchIndex < 0)
+                break;
+
+            result.Append(@this, searchStart, matchIndex - searchStart);
+            result.Append(GetReplacement(matchIndex));
+            searchStart = matchIndex + searchString.Length;
+        }
+
+        if (result.Length == 0 && searchStart == 0)
+            return JSValue.CreateString(@this);
+
+        result.Append(@this, searchStart, @this.Length - searchStart);
+        return JSValue.CreateString(result.ToString());
+    }
+
     /// <summary>
     /// Splits this string into an array of strings by separating the string into substrings.
     /// </summary>

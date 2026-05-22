@@ -503,27 +503,36 @@ public partial class JSObject
 
     private static void CompletePropertyDescriptor(JSObject descriptor, in JSProperty current)
     {
-        if (descriptor.GetInternalProperty(KeyStrings.configurable, false).IsEmpty)
+        var hasConfigurable = !descriptor.GetInternalProperty(KeyStrings.configurable, false).IsEmpty;
+        var hasEnumerable = !descriptor.GetInternalProperty(KeyStrings.enumerable, false).IsEmpty;
+        var hasGet = !descriptor.GetInternalProperty(KeyStrings.get, false).IsEmpty;
+        var hasSet = !descriptor.GetInternalProperty(KeyStrings.set, false).IsEmpty;
+        var hasValue = !descriptor.GetInternalProperty(KeyStrings.value, false).IsEmpty;
+        var hasWritable = !descriptor.GetInternalProperty(KeyStrings.writable, false).IsEmpty;
+        var descriptorIsAccessor = hasGet || hasSet;
+        var descriptorIsData = hasValue || hasWritable;
+
+        if (!hasConfigurable)
             descriptor.FastAddValue(KeyStrings.configurable, current.IsConfigurable ? JSValue.BooleanTrue : JSValue.BooleanFalse, JSPropertyAttributes.EnumerableConfigurableValue);
 
-        if (descriptor.GetInternalProperty(KeyStrings.enumerable, false).IsEmpty)
+        if (!hasEnumerable)
             descriptor.FastAddValue(KeyStrings.enumerable, current.IsEnumerable ? JSValue.BooleanTrue : JSValue.BooleanFalse, JSPropertyAttributes.EnumerableConfigurableValue);
 
         if (current.IsProperty)
         {
-            if (descriptor.GetInternalProperty(KeyStrings.get, false).IsEmpty)
+            if (!descriptorIsData && !hasGet)
                 descriptor[KeyStrings.get] = current.get as JSValue ?? JSValue.UndefinedValue;
 
-            if (descriptor.GetInternalProperty(KeyStrings.set, false).IsEmpty)
+            if (!descriptorIsData && !hasSet)
                 descriptor[KeyStrings.set] = current.set as JSValue ?? JSValue.UndefinedValue;
 
             return;
         }
 
-        if (descriptor.GetInternalProperty(KeyStrings.value, false).IsEmpty)
+        if (!descriptorIsAccessor && !hasValue)
             descriptor.FastAddValue(KeyStrings.value, current.value as JSValue ?? JSValue.UndefinedValue, JSPropertyAttributes.EnumerableConfigurableValue);
 
-        if (descriptor.GetInternalProperty(KeyStrings.writable, false).IsEmpty)
+        if (!descriptorIsAccessor && !hasWritable)
             descriptor.FastAddValue(KeyStrings.writable, current.IsReadOnly ? JSValue.BooleanFalse : JSValue.BooleanTrue, JSPropertyAttributes.EnumerableConfigurableValue);
     }
 

@@ -22,16 +22,19 @@ public static class JSIntl
     private static readonly KeyString ListFormatKey = KeyStrings.GetOrCreate("ListFormat");
     private static readonly KeyString LocaleKey = KeyStrings.GetOrCreate("Locale");
     private static readonly KeyString PluralRulesKey = KeyStrings.GetOrCreate("PluralRules");
+    private static readonly KeyString SegmenterKey = KeyStrings.GetOrCreate("Segmenter");
     private static readonly KeyString FormatKey = KeyStrings.GetOrCreate("format");
     private static readonly KeyString FormatRangeKey = KeyStrings.GetOrCreate("formatRange");
     private static readonly KeyString FormatRangeToPartsKey = KeyStrings.GetOrCreate("formatRangeToParts");
     private static readonly KeyString SupportedValuesOfKey = KeyStrings.GetOrCreate("supportedValuesOf");
+    private static readonly KeyString GetCanonicalLocalesKey = KeyStrings.GetOrCreate("getCanonicalLocales");
     private static readonly KeyString SupportedLocalesOfKey = KeyStrings.GetOrCreate("supportedLocalesOf");
     private static readonly KeyString StyleKey = KeyStrings.GetOrCreate("style");
     private static readonly KeyString CurrencyKey = KeyStrings.GetOrCreate("currency");
     private static readonly KeyString UnitKey = KeyStrings.GetOrCreate("unit");
     private static readonly KeyString TypeKey = KeyStrings.GetOrCreate("type");
     private static readonly KeyString LocaleMatcherKey = KeyStrings.GetOrCreate("localeMatcher");
+    private static readonly KeyString GranularityKey = KeyStrings.GetOrCreate("granularity");
     private static readonly KeyString FallbackKey = KeyStrings.GetOrCreate("fallback");
     private static readonly KeyString LanguageDisplayKey = KeyStrings.GetOrCreate("languageDisplay");
     private static readonly KeyString RoundingIncrementKey = KeyStrings.GetOrCreate("roundingIncrement");
@@ -59,6 +62,8 @@ public static class JSIntl
         intl.FastAddValue(ListFormatKey, CreateListFormatConstructor(), JSPropertyAttributes.ConfigurableValue);
         intl.FastAddValue(LocaleKey, CreateLocaleConstructor(), JSPropertyAttributes.ConfigurableValue);
         intl.FastAddValue(PluralRulesKey, CreateSimpleConstructor("PluralRules", 0), JSPropertyAttributes.ConfigurableValue);
+        intl.FastAddValue(SegmenterKey, CreateSegmenterConstructor(), JSPropertyAttributes.ConfigurableValue);
+        intl.FastAddValue(GetCanonicalLocalesKey, CreateGetCanonicalLocalesFunction(), JSPropertyAttributes.ConfigurableValue);
         intl.FastAddValue(SupportedValuesOfKey,
             new JSFunction(static (in Arguments a) =>
             {
@@ -79,6 +84,13 @@ public static class JSIntl
 
     private static JSFunction CreateSupportedLocalesOfFunction()
         => new(static (in Arguments a) => JSValue.CreateArray(), "supportedLocalesOf", "function supportedLocalesOf() { [native code] }", length: 1, createPrototype: false);
+
+    private static JSFunction CreateGetCanonicalLocalesFunction()
+        => new(static (in Arguments a) => CanonicalizeLocaleList(a.Get1()),
+            "getCanonicalLocales",
+            "function getCanonicalLocales() { [native code] }",
+            length: 1,
+            createPrototype: false);
 
     private static JSFunction CreateDurationFormatConstructor()
     {
@@ -117,6 +129,13 @@ public static class JSIntl
             ValidateLocaleConstructorArguments(in a);
             return new JSIntlLocale();
         }, "Locale", "function Locale() { [native code] }", length: 1);
+
+    private static JSFunction CreateSegmenterConstructor()
+        => new((in Arguments a) =>
+        {
+            ObserveOptions(ValidateConstructorArguments("Segmenter", in a), LocaleMatcherKey, GranularityKey);
+            return new JSObject();
+        }, "Segmenter", "function Segmenter() { [native code] }", length: 0);
 
     private static JSFunction CreateDisplayNamesConstructor()
         => new((in Arguments a) =>
@@ -225,36 +244,51 @@ public static class JSIntl
 
     private static void ValidateLocalesArgument(JSValue locales)
     {
+        _ = CanonicalizeLocaleList(locales);
+    }
+
+    private static JSValue CanonicalizeLocaleList(JSValue locales)
+    {
+        var result = JSValue.CreateArray();
+
         if (locales.IsUndefined)
-            return;
+            return result;
 
         if (locales.IsNull)
             throw JSEngine.NewTypeError("Cannot convert undefined or null to object");
 
         if (locales.IsString)
-            return;
+        {
+            result.AddArrayItem(JSValue.CreateString(locales.StringValue));
+            return result;
+        }
 
         if (locales is not JSObject localesObject)
         {
             if (locales.IsSymbol)
                 _ = locales.StringValue;
 
-            return;
+            return result;
         }
 
         var lengthValue = localesObject[KeyStrings.length];
         if (lengthValue.IsUndefined)
-            return;
+            return result;
 
         var length = lengthValue.UIntValue;
         for (uint i = 0; i < length; i++)
         {
+            if (!localesObject.HasProperty(JSValue.CreateString(i.ToString())).BooleanValue)
+                continue;
+
             var locale = localesObject[i];
             if (locale.IsUndefined || locale.IsNull || locale.IsBoolean || locale.IsNumber || locale.IsSymbol)
                 throw JSEngine.NewTypeError("Locale list entries must be strings or objects");
 
-            _ = locale.StringValue;
+            result.AddArrayItem(JSValue.CreateString(locale.StringValue));
         }
+
+        return result;
     }
 
     internal static void ValidateNumberFormatOptions(JSObject options)

@@ -945,4 +945,66 @@ public class CompilerTests
         var result = ctx.Eval("""eval("L: { 42; }")""");
         Assert.Equal(42.0, result.DoubleValue);
     }
+
+    [Fact]
+    public void Duplicate_Params_Allowed_In_Non_Strict_Mode()
+    {
+        using var ctx = new JSContext();
+        // Non-strict: duplicate params should parse successfully
+        var result = ctx.Eval("(function(x,x) { return x; })(1,2)");
+        Assert.Equal(2.0, result.DoubleValue);
+
+        // Function constructor: non-strict duplicate params
+        var result2 = ctx.Eval("new Function('x','x','return x')(1,2)");
+        Assert.Equal(2.0, result2.DoubleValue);
+    }
+
+    [Fact]
+    public void Duplicate_Params_Rejected_In_Strict_Mode()
+    {
+        using var ctx = new JSContext();
+        // Strict mode function body: duplicate params should throw SyntaxError
+        Assert.ThrowsAny<Exception>(() => ctx.Eval("'use strict'; function f(x,x) {}"));
+
+        // Function with 'use strict' directive: duplicate params should throw
+        Assert.ThrowsAny<Exception>(() => ctx.Eval("(function(x,x) { 'use strict'; })"));
+    }
+
+    [Fact]
+    public void RegExp_LastIndex_Is_Own_Data_Property()
+    {
+        using var ctx = new JSContext();
+        // lastIndex should be an own data property
+        var result = ctx.Eval("Object.getOwnPropertyDescriptor(/foo/, 'lastIndex') !== undefined");
+        Assert.True(result.BooleanValue);
+
+        var writable = ctx.Eval("Object.getOwnPropertyDescriptor(/foo/, 'lastIndex').writable");
+        Assert.True(writable.BooleanValue);
+
+        var configurable = ctx.Eval("Object.getOwnPropertyDescriptor(/foo/, 'lastIndex').configurable");
+        Assert.False(configurable.BooleanValue);
+
+        var enumerable = ctx.Eval("Object.getOwnPropertyDescriptor(/foo/, 'lastIndex').enumerable");
+        Assert.False(enumerable.BooleanValue);
+
+        var value = ctx.Eval("Object.getOwnPropertyDescriptor(/foo/, 'lastIndex').value");
+        Assert.Equal(0.0, value.DoubleValue);
+    }
+
+    [Fact]
+    public void RegExp_Whitespace_Matches_Unicode_Zs_Characters()
+    {
+        using var ctx = new JSContext();
+        // \s should match Ogham Space Mark (U+1680)
+        var result = ctx.Eval(@"/^\s$/.test('\u1680')");
+        Assert.True(result.BooleanValue);
+
+        // \s should match Ideographic Space (U+3000)
+        var result2 = ctx.Eval(@"/^\s$/.test('\u3000')");
+        Assert.True(result2.BooleanValue);
+
+        // \S should NOT match Unicode whitespace
+        var result3 = ctx.Eval(@"/^\S$/.test('\u2000')");
+        Assert.False(result3.BooleanValue);
+    }
 }

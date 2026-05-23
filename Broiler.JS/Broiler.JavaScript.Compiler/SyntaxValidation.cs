@@ -147,6 +147,8 @@ internal static class SyntaxValidation
             var functionStrict = IsStrictMode || HasUseStrictDirective(bodyStatements);
             if (functionStrict && ContainsRestrictedBinding(functionExpression.Params))
                 throw new FastParseException(functionExpression.Start, "Invalid parameter name in strict mode");
+            if (functionStrict && ContainsDuplicateParameterNames(functionExpression.Params))
+                throw new FastParseException(functionExpression.Start, "Duplicate parameter name not allowed in this context");
 
             var previous = IsStrictMode;
             IsStrictMode = functionStrict;
@@ -319,5 +321,55 @@ internal static class SyntaxValidation
             return false;
 
         return name.Value.Equals("arguments") || name.Value.Equals("eval");
+    }
+
+    private static bool ContainsDuplicateParameterNames(IFastEnumerable<VariableDeclarator> parameters)
+    {
+        var names = new List<StringSpan>();
+        CollectBindingNames(parameters, names);
+        var seen = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var name in names)
+        {
+            if (!seen.Add(name.Value))
+                return true;
+        }
+        return false;
+    }
+
+    private static void CollectBindingNames(IFastEnumerable<VariableDeclarator> parameters, List<StringSpan> names)
+    {
+        var enumerator = parameters.GetFastEnumerator();
+        while (enumerator.MoveNext(out var parameter))
+            CollectBindingNames(parameter.Identifier, names);
+    }
+
+    private static void CollectBindingNames(AstExpression expression, List<StringSpan> names)
+    {
+        switch (expression)
+        {
+            case AstIdentifier identifier:
+                names.Add(identifier.Name);
+                return;
+            case AstBinaryExpression assignment:
+                CollectBindingNames(assignment.Left, names);
+                return;
+            case AstSpreadElement spread:
+                CollectBindingNames(spread.Argument, names);
+                return;
+            case AstArrayPattern arrayPattern:
+            {
+                var enumerator = arrayPattern.Elements.GetFastEnumerator();
+                while (enumerator.MoveNext(out var element))
+                    CollectBindingNames(element, names);
+                return;
+            }
+            case AstObjectPattern objectPattern:
+            {
+                var enumerator = objectPattern.Properties.GetFastEnumerator();
+                while (enumerator.MoveNext(out var property))
+                    CollectBindingNames(property.Value, names);
+                return;
+            }
+        }
     }
 }

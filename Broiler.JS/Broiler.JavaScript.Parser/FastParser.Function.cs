@@ -41,7 +41,7 @@ partial class FastParser
         stream.Expect(TokenTypes.BracketStart);
         var scope = variableScope.Push(begin, FastNodeType.FunctionExpression);
 
-        if (!Parameters(out var declarators, TokenTypes.BracketEnd, false, FastVariableKind.Let))
+        if (!Parameters(out var declarators, TokenTypes.BracketEnd, false, FastVariableKind.Var))
             throw stream.Unexpected();
 
         if (!stream.CheckAndConsume(TokenTypes.CurlyBracketStart))

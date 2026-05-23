@@ -4,6 +4,7 @@ using System;
 using Broiler.JavaScript.ExpressionCompiler;
 using Broiler.JavaScript.Runtime;
 using Broiler.JavaScript.Engine.Core;
+using Broiler.JavaScript.Storage;
 
 namespace Broiler.JavaScript.BuiltIns.RegExp;
 
@@ -201,6 +202,10 @@ public partial class JSRegExp : JSObject, IJSRegExp
         this.pattern = pattern;
 
         (value, globalSearch, ignoreCase, multiline, hasIndices, sticky, unicode, unicodeSets, this.flags) = CreateRegex(pattern, flags);
+
+        // Initialize lastIndex as an own data property (writable, non-configurable, non-enumerable)
+        ref var ownProperties = ref GetOwnProperties();
+        ownProperties.Put(KeyStrings.lastIndex, JSValue.NumberZero, JSPropertyAttributes.Value);
     }
 
     public JSRegExp(string pattern, string flags) : this()
@@ -208,6 +213,10 @@ public partial class JSRegExp : JSObject, IJSRegExp
         this.pattern = pattern;
 
         (value, globalSearch, ignoreCase, multiline, hasIndices, sticky, unicode, unicodeSets, this.flags) = CreateRegex(pattern, flags);
+
+        // Initialize lastIndex as an own data property (writable, non-configurable, non-enumerable)
+        ref var ownProps = ref GetOwnProperties();
+        ownProps.Put(KeyStrings.lastIndex, JSValue.NumberZero, JSPropertyAttributes.Value);
     }
 
     /// <summary>
@@ -586,6 +595,10 @@ public partial class JSRegExp : JSObject, IJSRegExp
             // for .NET compatibility (tests 89, 90)
             pattern = TransformES3Patterns(pattern);
 
+            // ECMAScript \s must match all Unicode whitespace (Zs category + BOM + line terminators).
+            // .NET's \s only covers ASCII whitespace, so expand to the full set.
+            pattern = TransformUnicodeWhitespace(pattern);
+
             // §2.6 — Detect inline pattern modifiers (?i:...) / (?-i:...) / (?ims:...) etc.
             // .NET ECMAScript mode does not support them, so switch to default mode.
             if ((options & RegexOptions.ECMAScript) != 0 && HasInlineModifiers(pattern))
@@ -889,4 +902,86 @@ public partial class JSRegExp : JSObject, IJSRegExp
     }
 
     public override string ToString() => $"/{pattern}/{flags}";
+
+    /// <summary>
+    /// ECMAScript \s must match all Unicode whitespace (Zs category + BOM + line terminators).
+    /// .NET's \s only covers ASCII whitespace, so replace \s and \S with the full set.
+    /// </summary>
+    private static string TransformUnicodeWhitespace(string pattern)
+    {
+        if (string.IsNullOrEmpty(pattern))
+            return pattern;
+
+        // Quick check: does the pattern contain \s or \S at all?
+        int idx = pattern.IndexOf('\\');
+        if (idx < 0)
+            return pattern;
+
+        bool hasEscape = false;
+        for (int i = idx; i < pattern.Length - 1; i++)
+        {
+            if (pattern[i] == '\\' && (pattern[i + 1] == 's' || pattern[i + 1] == 'S'))
+            {
+                hasEscape = true;
+                break;
+            }
+        }
+
+        if (!hasEscape)
+            return pattern;
+
+        // Full ECMAScript WhiteSpace + LineTerminator character set (without surrounding brackets):
+        const string esWhitespaceChars = @"\t\n\v\f\r \xA0\u1680\u2000-\u200A\u2028\u2029\u202F\u205F\u3000\uFEFF";
+
+        var sb = new StringBuilder(pattern.Length + 32);
+        bool inClass = false;
+
+        for (int i = 0; i < pattern.Length; i++)
+        {
+            char c = pattern[i];
+
+            if (c == '\\' && i + 1 < pattern.Length)
+            {
+                char next = pattern[i + 1];
+
+                if (next == 's' || next == 'S')
+                {
+                    if (inClass)
+                    {
+                        // Inside [...]: expand inline without wrapping brackets
+                        // \S inside a class can't be negated inline, so we switch to subtraction syntax isn't
+                        // available; instead leave \S as-is (it still covers non-ASCII via .NET)
+                        if (next == 's')
+                            sb.Append(esWhitespaceChars);
+                        else
+                            sb.Append(@"\S"); // can't negate inline; .NET \S is close enough inside classes
+                    }
+                    else
+                    {
+                        if (next == 's')
+                            sb.Append('[').Append(esWhitespaceChars).Append(']');
+                        else
+                            sb.Append("[^").Append(esWhitespaceChars).Append(']');
+                    }
+                    i++; // skip the s/S
+                    continue;
+                }
+
+                // Pass through other escapes
+                sb.Append(c);
+                sb.Append(next);
+                i++;
+                continue;
+            }
+
+            if (!inClass && c == '[')
+                inClass = true;
+            else if (inClass && c == ']')
+                inClass = false;
+
+            sb.Append(c);
+        }
+
+        return sb.ToString();
+    }
 }

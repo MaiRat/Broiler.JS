@@ -516,6 +516,31 @@ public class CompilerTests
     }
 
     [Fact]
+    public void Compile_Object_Destructuring_Assignment_Expression_Returns_Rhs_Object()
+    {
+        using var ctx = new JSContext();
+        var result = ctx.Eval("""
+            (function () {
+                var source1 = { default: 42 };
+                var source2 = { break: 7 };
+                var y1 = ({ default: x } = source1);
+                var y2 = ({ bre\u0061k: z } = source2);
+
+                return [
+                    y1 === source1,
+                    x,
+                    y1['default'],
+                    y2 === source2,
+                    z,
+                    y2['break']
+                ].join('|');
+            })()
+            """);
+
+        Assert.Equal("true|42|42|true|7|7", result.ToString());
+    }
+
+    [Fact]
     public void Compile_Strict_Accessor_Bodies_Invoke_With_Strict_Mode()
     {
         using var ctx = new JSContext();

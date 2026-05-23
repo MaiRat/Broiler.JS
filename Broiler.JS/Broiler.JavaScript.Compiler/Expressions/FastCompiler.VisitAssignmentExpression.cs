@@ -114,10 +114,13 @@ partial class FastCompiler
     private YExpression CreateAssignment(AstExpression pattern, YExpression init, bool createVariable = false, bool newScope = false,
         bool suppressAnonymousFunctionNameInference = false, bool initializeVariable = true)
     {
+        using var temp = scope.Top.GetTempVariable(typeof(JSValue));
         var inits = new Sequence<YExpression>();
-        CreateAssignment(inits, pattern, init, createVariable, newScope, suppressAnonymousFunctionNameInference, initializeVariable);
+        inits.Add(YExpression.Assign(temp.Variable, init));
+        CreateAssignment(inits, pattern, temp.Expression, createVariable, newScope, suppressAnonymousFunctionNameInference, initializeVariable);
+        inits.Add(temp.Expression);
 
-        return YExpression.Block(inits);
+        return YExpression.Block(new Sequence<YParameterExpression> { temp.Variable }, inits);
     }
 
     private void CreateAssignment(Sequence<YExpression> inits, AstExpression pattern, YExpression init, bool createVariable = false, bool newScope = false,

@@ -163,6 +163,9 @@ public sealed class DefaultBuiltInRegistry : IBuiltInRegistry
 
         var proto = iteratorCtor.prototype;
 
+        // Iterator.prototype.constructor = Iterator (§2.1.1).
+        proto.FastAddValue(KeyStrings.constructor, iteratorCtor, JSPropertyAttributes.ConfigurableValue);
+
         // Iterator.prototype[Symbol.iterator] returns `this`.
         ref var symbols = ref proto.GetSymbols();
         symbols.Put(JSValue.SymbolIterator.Key) = JSProperty.Property(new JSFunction((in Arguments a) => a.This, "Symbol.iterator"), JSPropertyAttributes.ConfigurableValue);

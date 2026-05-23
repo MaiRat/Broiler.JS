@@ -49,7 +49,6 @@ test/annexB/built-ins/escape/escape-above-astral.js
 test/annexB/built-ins/unescape/four-ignore-bad-u.js
 test/annexB/language/eval-code/direct/func-block-decl-eval-func-init.js
 test/annexB/language/eval-code/direct/func-block-decl-eval-func-skip-early-err-switch.js
-test/annexB/language/eval-code/direct/func-block-decl-eval-func-skip-early-err-try.js
 test/annexB/language/eval-code/direct/func-if-decl-else-decl-a-eval-func-block-scoping.js
 test/annexB/language/eval-code/direct/func-if-decl-else-decl-a-eval-func-existing-fn-no-init.js
 test/annexB/language/eval-code/direct/func-if-decl-else-decl-a-eval-func-existing-fn-update.js
@@ -57,7 +56,6 @@ test/annexB/language/eval-code/direct/func-if-decl-else-decl-a-eval-func-existin
 test/annexB/language/eval-code/direct/func-if-decl-else-decl-a-eval-func-init.js
 test/annexB/language/eval-code/direct/func-if-decl-else-decl-a-eval-func-skip-early-err-block.js
 test/annexB/language/eval-code/direct/func-if-decl-else-decl-a-eval-func-skip-early-err-switch.js
-test/annexB/language/eval-code/direct/func-if-decl-else-decl-a-eval-func-skip-early-err-try.js
 test/annexB/language/eval-code/direct/func-if-decl-else-decl-a-eval-func-skip-early-err.js
 test/annexB/language/eval-code/direct/func-if-decl-else-decl-b-eval-func-block-scoping.js
 test/annexB/language/eval-code/direct/func-if-decl-else-decl-b-eval-func-existing-fn-no-init.js
@@ -66,7 +64,6 @@ test/annexB/language/eval-code/direct/func-if-decl-else-decl-b-eval-func-existin
 test/annexB/language/eval-code/direct/func-if-decl-else-decl-b-eval-func-init.js
 test/annexB/language/eval-code/direct/func-if-decl-else-decl-b-eval-func-skip-early-err-block.js
 test/annexB/language/eval-code/direct/func-if-decl-else-decl-b-eval-func-skip-early-err-switch.js
-test/annexB/language/eval-code/direct/func-if-decl-else-decl-b-eval-func-skip-early-err-try.js
 test/annexB/language/eval-code/direct/func-if-decl-else-decl-b-eval-func-skip-early-err.js
 test/annexB/language/eval-code/direct/func-if-decl-else-stmt-eval-func-block-scoping.js
 test/annexB/language/eval-code/direct/func-if-decl-else-stmt-eval-func-existing-fn-no-init.js
@@ -75,7 +72,6 @@ test/annexB/language/eval-code/direct/func-if-decl-else-stmt-eval-func-existing-
 test/annexB/language/eval-code/direct/func-if-decl-else-stmt-eval-func-init.js
 test/annexB/language/eval-code/direct/func-if-decl-else-stmt-eval-func-skip-early-err-block.js
 test/annexB/language/eval-code/direct/func-if-decl-else-stmt-eval-func-skip-early-err-switch.js
-test/annexB/language/eval-code/direct/func-if-decl-else-stmt-eval-func-skip-early-err-try.js
 test/annexB/language/eval-code/direct/func-if-decl-else-stmt-eval-func-skip-early-err.js
 test/annexB/language/eval-code/direct/func-if-decl-no-else-eval-func-block-scoping.js
 test/annexB/language/eval-code/direct/func-if-decl-no-else-eval-func-existing-fn-no-init.js
@@ -84,7 +80,6 @@ test/annexB/language/eval-code/direct/func-if-decl-no-else-eval-func-existing-va
 test/annexB/language/eval-code/direct/func-if-decl-no-else-eval-func-init.js
 test/annexB/language/eval-code/direct/func-if-decl-no-else-eval-func-skip-early-err-block.js
 test/annexB/language/eval-code/direct/func-if-decl-no-else-eval-func-skip-early-err-switch.js
-test/annexB/language/eval-code/direct/func-if-decl-no-else-eval-func-skip-early-err-try.js
 test/annexB/language/eval-code/direct/func-if-decl-no-else-eval-func-skip-early-err.js
 test/annexB/language/eval-code/direct/func-if-stmt-else-decl-eval-func-block-scoping.js
 test/annexB/language/eval-code/direct/func-if-stmt-else-decl-eval-func-existing-fn-no-init.js
@@ -93,7 +88,6 @@ test/annexB/language/eval-code/direct/func-if-stmt-else-decl-eval-func-existing-
 test/annexB/language/eval-code/direct/func-if-stmt-else-decl-eval-func-init.js
 test/annexB/language/eval-code/direct/func-if-stmt-else-decl-eval-func-skip-early-err-block.js
 test/annexB/language/eval-code/direct/func-if-stmt-else-decl-eval-func-skip-early-err-switch.js
-test/annexB/language/eval-code/direct/func-if-stmt-else-decl-eval-func-skip-early-err-try.js
 test/annexB/language/eval-code/direct/func-if-stmt-else-decl-eval-func-skip-early-err.js
 test/annexB/language/eval-code/direct/func-switch-case-eval-func-block-scoping.js
 test/annexB/language/eval-code/direct/func-switch-case-eval-func-existing-fn-no-init.js
@@ -102,7 +96,6 @@ test/annexB/language/eval-code/direct/func-switch-case-eval-func-existing-var-up
 test/annexB/language/eval-code/direct/func-switch-case-eval-func-init.js
 test/annexB/language/eval-code/direct/func-switch-case-eval-func-skip-early-err-block.js
 test/annexB/language/eval-code/direct/func-switch-case-eval-func-skip-early-err-switch.js
-test/annexB/language/eval-code/direct/func-switch-case-eval-func-skip-early-err-try.js
 test/annexB/language/eval-code/direct/func-switch-case-eval-func-skip-early-err.js
 test/annexB/language/eval-code/direct/func-switch-dflt-eval-func-block-scoping.js
 test/annexB/language/eval-code/direct/func-switch-dflt-eval-func-existing-block-fn-no-init.js
@@ -124,14 +117,12 @@ test/annexB/language/eval-code/direct/func-switch-dflt-eval-func-skip-early-err.
 test/annexB/language/eval-code/direct/func-switch-dflt-eval-func-update.js
 test/annexB/language/eval-code/direct/global-block-decl-eval-global-init.js
 test/annexB/language/eval-code/direct/global-block-decl-eval-global-skip-early-err-switch.js
-test/annexB/language/eval-code/direct/global-block-decl-eval-global-skip-early-err-try.js
 test/annexB/language/eval-code/direct/global-if-decl-else-decl-a-eval-global-block-scoping.js
 test/annexB/language/eval-code/direct/global-if-decl-else-decl-a-eval-global-existing-fn-no-init.js
 test/annexB/language/eval-code/direct/global-if-decl-else-decl-a-eval-global-existing-fn-update.js
 test/annexB/language/eval-code/direct/global-if-decl-else-decl-a-eval-global-init.js
 test/annexB/language/eval-code/direct/global-if-decl-else-decl-a-eval-global-skip-early-err-block.js
 test/annexB/language/eval-code/direct/global-if-decl-else-decl-a-eval-global-skip-early-err-switch.js
-test/annexB/language/eval-code/direct/global-if-decl-else-decl-a-eval-global-skip-early-err-try.js
 test/annexB/language/eval-code/direct/global-if-decl-else-decl-a-eval-global-skip-early-err.js
 test/annexB/language/eval-code/direct/global-if-decl-else-decl-b-eval-global-block-scoping.js
 test/annexB/language/eval-code/direct/global-if-decl-else-decl-b-eval-global-existing-fn-no-init.js
@@ -139,7 +130,6 @@ test/annexB/language/eval-code/direct/global-if-decl-else-decl-b-eval-global-exi
 test/annexB/language/eval-code/direct/global-if-decl-else-decl-b-eval-global-init.js
 test/annexB/language/eval-code/direct/global-if-decl-else-decl-b-eval-global-skip-early-err-block.js
 test/annexB/language/eval-code/direct/global-if-decl-else-decl-b-eval-global-skip-early-err-switch.js
-test/annexB/language/eval-code/direct/global-if-decl-else-decl-b-eval-global-skip-early-err-try.js
 test/annexB/language/eval-code/direct/global-if-decl-else-decl-b-eval-global-skip-early-err.js
 test/annexB/language/eval-code/direct/global-if-decl-else-stmt-eval-global-block-scoping.js
 test/annexB/language/eval-code/direct/global-if-decl-else-stmt-eval-global-existing-fn-no-init.js
@@ -147,7 +137,6 @@ test/annexB/language/eval-code/direct/global-if-decl-else-stmt-eval-global-exist
 test/annexB/language/eval-code/direct/global-if-decl-else-stmt-eval-global-init.js
 test/annexB/language/eval-code/direct/global-if-decl-else-stmt-eval-global-skip-early-err-block.js
 test/annexB/language/eval-code/direct/global-if-decl-else-stmt-eval-global-skip-early-err-switch.js
-test/annexB/language/eval-code/direct/global-if-decl-else-stmt-eval-global-skip-early-err-try.js
 test/annexB/language/eval-code/direct/global-if-decl-else-stmt-eval-global-skip-early-err.js
 test/annexB/language/eval-code/direct/global-if-decl-no-else-eval-global-block-scoping.js
 test/annexB/language/eval-code/direct/global-if-decl-no-else-eval-global-existing-fn-no-init.js
@@ -155,7 +144,6 @@ test/annexB/language/eval-code/direct/global-if-decl-no-else-eval-global-existin
 test/annexB/language/eval-code/direct/global-if-decl-no-else-eval-global-init.js
 test/annexB/language/eval-code/direct/global-if-decl-no-else-eval-global-skip-early-err-block.js
 test/annexB/language/eval-code/direct/global-if-decl-no-else-eval-global-skip-early-err-switch.js
-test/annexB/language/eval-code/direct/global-if-decl-no-else-eval-global-skip-early-err-try.js
 test/annexB/language/eval-code/direct/global-if-decl-no-else-eval-global-skip-early-err.js
 test/annexB/language/eval-code/direct/global-if-stmt-else-decl-eval-global-block-scoping.js
 test/annexB/language/eval-code/direct/global-if-stmt-else-decl-eval-global-existing-fn-no-init.js
@@ -163,7 +151,6 @@ test/annexB/language/eval-code/direct/global-if-stmt-else-decl-eval-global-exist
 test/annexB/language/eval-code/direct/global-if-stmt-else-decl-eval-global-init.js
 test/annexB/language/eval-code/direct/global-if-stmt-else-decl-eval-global-skip-early-err-block.js
 test/annexB/language/eval-code/direct/global-if-stmt-else-decl-eval-global-skip-early-err-switch.js
-test/annexB/language/eval-code/direct/global-if-stmt-else-decl-eval-global-skip-early-err-try.js
 test/annexB/language/eval-code/direct/global-if-stmt-else-decl-eval-global-skip-early-err.js
 test/annexB/language/eval-code/direct/global-switch-case-eval-global-block-scoping.js
 test/annexB/language/eval-code/direct/global-switch-case-eval-global-existing-fn-no-init.js
@@ -171,7 +158,6 @@ test/annexB/language/eval-code/direct/global-switch-case-eval-global-existing-fn
 test/annexB/language/eval-code/direct/global-switch-case-eval-global-init.js
 test/annexB/language/eval-code/direct/global-switch-case-eval-global-skip-early-err-block.js
 test/annexB/language/eval-code/direct/global-switch-case-eval-global-skip-early-err-switch.js
-test/annexB/language/eval-code/direct/global-switch-case-eval-global-skip-early-err-try.js
 test/annexB/language/eval-code/direct/global-switch-case-eval-global-skip-early-err.js
 test/annexB/language/eval-code/direct/global-switch-dflt-eval-global-block-scoping.js
 test/annexB/language/eval-code/direct/global-switch-dflt-eval-global-existing-block-fn-no-init.js
@@ -196,14 +182,12 @@ test/annexB/language/eval-code/direct/global-switch-dflt-eval-global-update.js
 test/annexB/language/eval-code/direct/switch-dflt-decl-nostrict.js
 test/annexB/language/eval-code/indirect/global-block-decl-eval-global-init.js
 test/annexB/language/eval-code/indirect/global-block-decl-eval-global-skip-early-err-switch.js
-test/annexB/language/eval-code/indirect/global-block-decl-eval-global-skip-early-err-try.js
 test/annexB/language/eval-code/indirect/global-if-decl-else-decl-a-eval-global-block-scoping.js
 test/annexB/language/eval-code/indirect/global-if-decl-else-decl-a-eval-global-existing-fn-no-init.js
 test/annexB/language/eval-code/indirect/global-if-decl-else-decl-a-eval-global-existing-fn-update.js
 test/annexB/language/eval-code/indirect/global-if-decl-else-decl-a-eval-global-init.js
 test/annexB/language/eval-code/indirect/global-if-decl-else-decl-a-eval-global-skip-early-err-block.js
 test/annexB/language/eval-code/indirect/global-if-decl-else-decl-a-eval-global-skip-early-err-switch.js
-test/annexB/language/eval-code/indirect/global-if-decl-else-decl-a-eval-global-skip-early-err-try.js
 test/annexB/language/eval-code/indirect/global-if-decl-else-decl-a-eval-global-skip-early-err.js
 test/annexB/language/eval-code/indirect/global-if-decl-else-decl-b-eval-global-block-scoping.js
 test/annexB/language/eval-code/indirect/global-if-decl-else-decl-b-eval-global-existing-fn-no-init.js
@@ -211,7 +195,6 @@ test/annexB/language/eval-code/indirect/global-if-decl-else-decl-b-eval-global-e
 test/annexB/language/eval-code/indirect/global-if-decl-else-decl-b-eval-global-init.js
 test/annexB/language/eval-code/indirect/global-if-decl-else-decl-b-eval-global-skip-early-err-block.js
 test/annexB/language/eval-code/indirect/global-if-decl-else-decl-b-eval-global-skip-early-err-switch.js
-test/annexB/language/eval-code/indirect/global-if-decl-else-decl-b-eval-global-skip-early-err-try.js
 test/annexB/language/eval-code/indirect/global-if-decl-else-decl-b-eval-global-skip-early-err.js
 test/annexB/language/eval-code/indirect/global-if-decl-else-stmt-eval-global-block-scoping.js
 test/annexB/language/eval-code/indirect/global-if-decl-else-stmt-eval-global-existing-fn-no-init.js
@@ -219,7 +202,6 @@ test/annexB/language/eval-code/indirect/global-if-decl-else-stmt-eval-global-exi
 test/annexB/language/eval-code/indirect/global-if-decl-else-stmt-eval-global-init.js
 test/annexB/language/eval-code/indirect/global-if-decl-else-stmt-eval-global-skip-early-err-block.js
 test/annexB/language/eval-code/indirect/global-if-decl-else-stmt-eval-global-skip-early-err-switch.js
-test/annexB/language/eval-code/indirect/global-if-decl-else-stmt-eval-global-skip-early-err-try.js
 test/annexB/language/eval-code/indirect/global-if-decl-else-stmt-eval-global-skip-early-err.js
 test/annexB/language/eval-code/indirect/global-if-decl-no-else-eval-global-block-scoping.js
 test/annexB/language/eval-code/indirect/global-if-decl-no-else-eval-global-existing-fn-no-init.js
@@ -227,7 +209,6 @@ test/annexB/language/eval-code/indirect/global-if-decl-no-else-eval-global-exist
 test/annexB/language/eval-code/indirect/global-if-decl-no-else-eval-global-init.js
 test/annexB/language/eval-code/indirect/global-if-decl-no-else-eval-global-skip-early-err-block.js
 test/annexB/language/eval-code/indirect/global-if-decl-no-else-eval-global-skip-early-err-switch.js
-test/annexB/language/eval-code/indirect/global-if-decl-no-else-eval-global-skip-early-err-try.js
 test/annexB/language/eval-code/indirect/global-if-decl-no-else-eval-global-skip-early-err.js
 test/annexB/language/eval-code/indirect/global-if-stmt-else-decl-eval-global-block-scoping.js
 test/annexB/language/eval-code/indirect/global-if-stmt-else-decl-eval-global-existing-fn-no-init.js
@@ -235,7 +216,6 @@ test/annexB/language/eval-code/indirect/global-if-stmt-else-decl-eval-global-exi
 test/annexB/language/eval-code/indirect/global-if-stmt-else-decl-eval-global-init.js
 test/annexB/language/eval-code/indirect/global-if-stmt-else-decl-eval-global-skip-early-err-block.js
 test/annexB/language/eval-code/indirect/global-if-stmt-else-decl-eval-global-skip-early-err-switch.js
-test/annexB/language/eval-code/indirect/global-if-stmt-else-decl-eval-global-skip-early-err-try.js
 test/annexB/language/eval-code/indirect/global-if-stmt-else-decl-eval-global-skip-early-err.js
 test/annexB/language/eval-code/indirect/global-switch-case-eval-global-block-scoping.js
 test/annexB/language/eval-code/indirect/global-switch-case-eval-global-existing-fn-no-init.js
@@ -243,7 +223,6 @@ test/annexB/language/eval-code/indirect/global-switch-case-eval-global-existing-
 test/annexB/language/eval-code/indirect/global-switch-case-eval-global-init.js
 test/annexB/language/eval-code/indirect/global-switch-case-eval-global-skip-early-err-block.js
 test/annexB/language/eval-code/indirect/global-switch-case-eval-global-skip-early-err-switch.js
-test/annexB/language/eval-code/indirect/global-switch-case-eval-global-skip-early-err-try.js
 test/annexB/language/eval-code/indirect/global-switch-case-eval-global-skip-early-err.js
 test/annexB/language/eval-code/indirect/global-switch-dflt-eval-global-block-scoping.js
 test/annexB/language/eval-code/indirect/global-switch-dflt-eval-global-existing-block-fn-no-init.js
@@ -277,7 +256,6 @@ test/annexB/language/function-code/block-decl-func-init.js
 test/annexB/language/function-code/block-decl-func-no-skip-try.js
 test/annexB/language/function-code/block-decl-func-skip-arguments.js
 test/annexB/language/function-code/block-decl-func-skip-early-err-switch.js
-test/annexB/language/function-code/block-decl-func-skip-early-err-try.js
 test/annexB/language/function-code/block-decl-nostrict.js
 test/annexB/language/function-code/function-redeclaration-block.js
 test/annexB/language/function-code/function-redeclaration-switch.js
@@ -288,7 +266,6 @@ test/annexB/language/function-code/if-decl-else-decl-a-func-no-skip-try.js
 test/annexB/language/function-code/if-decl-else-decl-a-func-skip-dft-param.js
 test/annexB/language/function-code/if-decl-else-decl-a-func-skip-early-err-block.js
 test/annexB/language/function-code/if-decl-else-decl-a-func-skip-early-err-switch.js
-test/annexB/language/function-code/if-decl-else-decl-a-func-skip-early-err-try.js
 test/annexB/language/function-code/if-decl-else-decl-a-func-skip-early-err.js
 test/annexB/language/function-code/if-decl-else-decl-a-func-skip-param.js
 test/annexB/language/function-code/if-decl-else-decl-b-func-existing-fn-no-init.js
@@ -298,7 +275,6 @@ test/annexB/language/function-code/if-decl-else-decl-b-func-no-skip-try.js
 test/annexB/language/function-code/if-decl-else-decl-b-func-skip-dft-param.js
 test/annexB/language/function-code/if-decl-else-decl-b-func-skip-early-err-block.js
 test/annexB/language/function-code/if-decl-else-decl-b-func-skip-early-err-switch.js
-test/annexB/language/function-code/if-decl-else-decl-b-func-skip-early-err-try.js
 test/annexB/language/function-code/if-decl-else-decl-b-func-skip-early-err.js
 test/annexB/language/function-code/if-decl-else-decl-b-func-skip-param.js
 test/annexB/language/function-code/if-decl-else-stmt-func-existing-fn-no-init.js
@@ -308,7 +284,6 @@ test/annexB/language/function-code/if-decl-else-stmt-func-no-skip-try.js
 test/annexB/language/function-code/if-decl-else-stmt-func-skip-dft-param.js
 test/annexB/language/function-code/if-decl-else-stmt-func-skip-early-err-block.js
 test/annexB/language/function-code/if-decl-else-stmt-func-skip-early-err-switch.js
-test/annexB/language/function-code/if-decl-else-stmt-func-skip-early-err-try.js
 test/annexB/language/function-code/if-decl-else-stmt-func-skip-early-err.js
 test/annexB/language/function-code/if-decl-else-stmt-func-skip-param.js
 test/annexB/language/function-code/if-decl-no-else-func-existing-fn-no-init.js
@@ -318,7 +293,6 @@ test/annexB/language/function-code/if-decl-no-else-func-no-skip-try.js
 test/annexB/language/function-code/if-decl-no-else-func-skip-dft-param.js
 test/annexB/language/function-code/if-decl-no-else-func-skip-early-err-block.js
 test/annexB/language/function-code/if-decl-no-else-func-skip-early-err-switch.js
-test/annexB/language/function-code/if-decl-no-else-func-skip-early-err-try.js
 test/annexB/language/function-code/if-decl-no-else-func-skip-early-err.js
 test/annexB/language/function-code/if-decl-no-else-func-skip-param.js
 test/annexB/language/function-code/if-stmt-else-decl-func-existing-fn-no-init.js
@@ -328,7 +302,6 @@ test/annexB/language/function-code/if-stmt-else-decl-func-no-skip-try.js
 test/annexB/language/function-code/if-stmt-else-decl-func-skip-dft-param.js
 test/annexB/language/function-code/if-stmt-else-decl-func-skip-early-err-block.js
 test/annexB/language/function-code/if-stmt-else-decl-func-skip-early-err-switch.js
-test/annexB/language/function-code/if-stmt-else-decl-func-skip-early-err-try.js
 test/annexB/language/function-code/if-stmt-else-decl-func-skip-early-err.js
 test/annexB/language/function-code/if-stmt-else-decl-func-skip-param.js
 test/annexB/language/function-code/switch-case-func-existing-fn-no-init.js
@@ -338,7 +311,6 @@ test/annexB/language/function-code/switch-case-func-no-skip-try.js
 test/annexB/language/function-code/switch-case-func-skip-dft-param.js
 test/annexB/language/function-code/switch-case-func-skip-early-err-block.js
 test/annexB/language/function-code/switch-case-func-skip-early-err-switch.js
-test/annexB/language/function-code/switch-case-func-skip-early-err-try.js
 test/annexB/language/function-code/switch-case-func-skip-early-err.js
 test/annexB/language/function-code/switch-case-func-skip-param.js
 test/annexB/language/function-code/switch-dflt-decl-nostrict.js
@@ -362,14 +334,12 @@ test/annexB/language/function-code/switch-dflt-func-skip-early-err.js
 test/annexB/language/function-code/switch-dflt-func-skip-param.js
 test/annexB/language/function-code/switch-dflt-func-update.js
 test/annexB/language/global-code/block-decl-global-skip-early-err-switch.js
-test/annexB/language/global-code/block-decl-global-skip-early-err-try.js
 test/annexB/language/global-code/if-decl-else-decl-a-global-block-scoping.js
 test/annexB/language/global-code/if-decl-else-decl-a-global-existing-fn-no-init.js
 test/annexB/language/global-code/if-decl-else-decl-a-global-existing-fn-update.js
 test/annexB/language/global-code/if-decl-else-decl-a-global-existing-var-update.js
 test/annexB/language/global-code/if-decl-else-decl-a-global-skip-early-err-block.js
 test/annexB/language/global-code/if-decl-else-decl-a-global-skip-early-err-switch.js
-test/annexB/language/global-code/if-decl-else-decl-a-global-skip-early-err-try.js
 test/annexB/language/global-code/if-decl-else-decl-a-global-skip-early-err.js
 test/annexB/language/global-code/if-decl-else-decl-b-global-block-scoping.js
 test/annexB/language/global-code/if-decl-else-decl-b-global-existing-fn-no-init.js
@@ -377,7 +347,6 @@ test/annexB/language/global-code/if-decl-else-decl-b-global-existing-fn-update.j
 test/annexB/language/global-code/if-decl-else-decl-b-global-existing-var-update.js
 test/annexB/language/global-code/if-decl-else-decl-b-global-skip-early-err-block.js
 test/annexB/language/global-code/if-decl-else-decl-b-global-skip-early-err-switch.js
-test/annexB/language/global-code/if-decl-else-decl-b-global-skip-early-err-try.js
 test/annexB/language/global-code/if-decl-else-decl-b-global-skip-early-err.js
 test/annexB/language/global-code/if-decl-else-stmt-global-block-scoping.js
 test/annexB/language/global-code/if-decl-else-stmt-global-existing-fn-no-init.js
@@ -385,7 +354,6 @@ test/annexB/language/global-code/if-decl-else-stmt-global-existing-fn-update.js
 test/annexB/language/global-code/if-decl-else-stmt-global-existing-var-update.js
 test/annexB/language/global-code/if-decl-else-stmt-global-skip-early-err-block.js
 test/annexB/language/global-code/if-decl-else-stmt-global-skip-early-err-switch.js
-test/annexB/language/global-code/if-decl-else-stmt-global-skip-early-err-try.js
 test/annexB/language/global-code/if-decl-else-stmt-global-skip-early-err.js
 test/annexB/language/global-code/if-decl-no-else-global-block-scoping.js
 test/annexB/language/global-code/if-decl-no-else-global-existing-fn-no-init.js
@@ -393,7 +361,6 @@ test/annexB/language/global-code/if-decl-no-else-global-existing-fn-update.js
 test/annexB/language/global-code/if-decl-no-else-global-existing-var-update.js
 test/annexB/language/global-code/if-decl-no-else-global-skip-early-err-block.js
 test/annexB/language/global-code/if-decl-no-else-global-skip-early-err-switch.js
-test/annexB/language/global-code/if-decl-no-else-global-skip-early-err-try.js
 test/annexB/language/global-code/if-decl-no-else-global-skip-early-err.js
 test/annexB/language/global-code/if-stmt-else-decl-global-block-scoping.js
 test/annexB/language/global-code/if-stmt-else-decl-global-existing-fn-no-init.js
@@ -401,7 +368,6 @@ test/annexB/language/global-code/if-stmt-else-decl-global-existing-fn-update.js
 test/annexB/language/global-code/if-stmt-else-decl-global-existing-var-update.js
 test/annexB/language/global-code/if-stmt-else-decl-global-skip-early-err-block.js
 test/annexB/language/global-code/if-stmt-else-decl-global-skip-early-err-switch.js
-test/annexB/language/global-code/if-stmt-else-decl-global-skip-early-err-try.js
 test/annexB/language/global-code/if-stmt-else-decl-global-skip-early-err.js
 test/annexB/language/global-code/switch-case-global-block-scoping.js
 test/annexB/language/global-code/switch-case-global-existing-fn-no-init.js
@@ -409,7 +375,6 @@ test/annexB/language/global-code/switch-case-global-existing-fn-update.js
 test/annexB/language/global-code/switch-case-global-existing-var-update.js
 test/annexB/language/global-code/switch-case-global-skip-early-err-block.js
 test/annexB/language/global-code/switch-case-global-skip-early-err-switch.js
-test/annexB/language/global-code/switch-case-global-skip-early-err-try.js
 test/annexB/language/global-code/switch-case-global-skip-early-err.js
 test/annexB/language/global-code/switch-dflt-global-block-scoping.js
 test/annexB/language/global-code/switch-dflt-global-existing-block-fn-no-init.js

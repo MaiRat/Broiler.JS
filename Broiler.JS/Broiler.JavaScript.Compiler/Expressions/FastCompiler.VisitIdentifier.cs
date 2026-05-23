@@ -7,10 +7,50 @@ partial class FastCompiler
 {
     protected override YExpression VisitIdentifier(AstIdentifier identifier) => VisitIdentifier(identifier, true);
 
+    private static bool IsScopeInsideWithBoundary(FastFunctionScope declarationScope, FastFunctionScope boundary)
+    {
+        if (ReferenceEquals(declarationScope, boundary))
+            return false;
+
+        for (var current = declarationScope.Parent; current != null; current = current.Parent)
+        {
+            if (ReferenceEquals(current, boundary))
+                return true;
+        }
+
+        return false;
+    }
+
+    private bool TryGetStaticIdentifierVariable(AstIdentifier identifier, out FastFunctionScope.VariableScope variable)
+    {
+        variable = null;
+        if (withBoundaries.Count == 0)
+        {
+            variable = scope.Top.GetVariable(identifier.Name, true);
+            return true;
+        }
+
+        var boundary = withBoundaries.Peek();
+        for (var current = scope.Top; current != null; current = current.Parent)
+        {
+            if (!current.TryGetOwnVariable(identifier.Name, out var ownVariable))
+                continue;
+
+            if (IsScopeInsideWithBoundary(current, boundary))
+            {
+                variable = ownVariable;
+                return true;
+            }
+
+            return false;
+        }
+
+        return false;
+    }
+
     private YExpression VisitIdentifierReference(AstIdentifier identifier)
     {
-        var variable = scope.Top.GetVariable(identifier.Name, true);
-        if (variable != null)
+        if (TryGetStaticIdentifierVariable(identifier, out var variable) && variable != null)
             return variable.Expression;
 
         return JSContextBuilder.Index(KeyOfName(identifier.Name));
@@ -31,8 +71,7 @@ partial class FastCompiler
             return vs.Expression;
         }
 
-        var variable = scope.Top.GetVariable(identifier.Name, true);
-        if (variable != null)
+        if (TryGetStaticIdentifierVariable(identifier, out var variable) && variable != null)
             return variable.Expression;
 
         return throwIfMissing

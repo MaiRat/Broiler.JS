@@ -26,6 +26,7 @@ public partial class FastCompiler : AstMapVisitor<YExpression>
     private readonly FastPool pool;
 
     readonly LinkedStack<FastFunctionScope> scope = new();
+    private readonly Stack<FastFunctionScope> withBoundaries = new();
     private readonly string location;
     private readonly bool isDirectEvalCompilation;
 

@@ -59,7 +59,10 @@ partial class FastCompiler
                         if (id.Name == "this")
                             return JSBooleanBuilder.True;
 
-                        var variable = scope.Top.GetVariable(id.Name);
+                        var hasStaticVariable = TryGetStaticIdentifierVariable(id, out var variable);
+                        if (!hasStaticVariable || variable == null)
+                            return JSContextBuilder.DeleteIdentifier(KeyOfName(id.Name));
+
                         if (variable != null && !variable.IsDeletable)
                         {
                             var canDeleteCapturedDirectEvalBinding = isDirectEvalCompilation

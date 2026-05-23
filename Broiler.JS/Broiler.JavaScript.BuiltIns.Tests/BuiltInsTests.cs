@@ -4243,6 +4243,28 @@ public class BuiltInsTests
     }
 
     [Fact]
+    public void With_Statement_Unqualified_Identifiers_Resolve_And_Assign_Against_The_With_Object()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = new JSContext();
+
+        var result = ctx.Eval("""
+            (function () {
+                var p1 = 'x1';
+                var target = { p1: 1 };
+
+                with (target) {
+                    var before = p1;
+                    p1 = 2;
+                    return before + '|' + p1 + '|' + target.p1 + '|' + this.p1;
+                }
+            })();
+            """);
+
+        Assert.Equal("1|2|2|x1", result.ToString());
+    }
+
+    [Fact]
     public void Bare_Function_Calls_And_Implicit_Global_Assignments_Use_NonStrict_Global_Semantics()
     {
         EnsureBuiltInsLoaded();

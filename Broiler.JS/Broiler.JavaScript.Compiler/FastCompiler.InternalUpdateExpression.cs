@@ -22,8 +22,7 @@ partial class FastCompiler
 
         if (updateExpression.Argument is AstIdentifier identifier)
         {
-            var variable = scope.Top.GetVariable(identifier.Name);
-            if (variable == null)
+            if (!TryGetStaticIdentifierVariable(identifier, out var variable) || variable == null)
             {
                 using var current = scope.Top.GetTempVariable(typeof(JSValue));
                 using var previous = updateExpression.Prefix ? null : scope.Top.GetTempVariable(typeof(JSValue));

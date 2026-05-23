@@ -8449,6 +8449,116 @@ public class BuiltInsTests
         Assert.Equal("RangeError|function", result.ToString());
     }
 
+    [Fact]
+    public void Iterator_Prototype_Constructor_Is_Function()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = new JSContext();
+        var result = ctx.Eval("""
+            (function () {
+                return [
+                    typeof Iterator.prototype.constructor,
+                    Iterator.prototype.constructor === Iterator
+                ].join('|');
+            })();
+            """);
+
+        Assert.Equal("function|true", result.ToString());
+    }
+
+    [Fact]
+    public void Intl_ListFormat_Prototype_Methods_Exist()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = new JSContext();
+        var result = ctx.Eval("""
+            (function () {
+                return [
+                    typeof Intl.ListFormat.prototype.format,
+                    typeof Intl.ListFormat.prototype.formatToParts,
+                    typeof Intl.ListFormat.prototype.resolvedOptions
+                ].join('|');
+            })();
+            """);
+
+        Assert.Equal("function|function|function", result.ToString());
+    }
+
+    [Fact]
+    public void Intl_Locale_Prototype_Methods_Exist()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = new JSContext();
+        var result = ctx.Eval("""
+            (function () {
+                return [
+                    typeof Intl.Locale.prototype.maximize,
+                    typeof Intl.Locale.prototype.minimize,
+                    typeof Intl.Locale.prototype.getCalendars,
+                    typeof Intl.Locale.prototype.getCollations,
+                    typeof Intl.Locale.prototype.getHourCycles,
+                    typeof Intl.Locale.prototype.getNumberingSystems,
+                    typeof Intl.Locale.prototype.getTextInfo,
+                    typeof Intl.Locale.prototype.getTimeZones,
+                    typeof Intl.Locale.prototype.getWeekInfo
+                ].join('|');
+            })();
+            """);
+
+        Assert.Equal("function|function|function|function|function|function|function|function|function", result.ToString());
+    }
+
+    [Fact]
+    public void Intl_RelativeTimeFormat_SupportedLocalesOf_And_FormatToParts_Exist()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = new JSContext();
+        var result = ctx.Eval("""
+            (function () {
+                return [
+                    typeof Intl.RelativeTimeFormat.supportedLocalesOf,
+                    typeof Intl.RelativeTimeFormat.prototype.formatToParts
+                ].join('|');
+            })();
+            """);
+
+        Assert.Equal("function|function", result.ToString());
+    }
+
+    [Fact]
+    public void Intl_NumberFormat_FormatRange_Methods_Exist()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = new JSContext();
+        var result = ctx.Eval("""
+            (function () {
+                return [
+                    typeof Intl.NumberFormat.prototype.formatRange,
+                    typeof Intl.NumberFormat.prototype.formatRangeToParts
+                ].join('|');
+            })();
+            """);
+
+        Assert.Equal("function|function", result.ToString());
+    }
+
+    [Fact]
+    public void Intl_PluralRules_SelectRange_Exists()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = new JSContext();
+        var result = ctx.Eval("""
+            (function () {
+                return [
+                    typeof Intl.PluralRules.prototype.selectRange,
+                    typeof Intl.PluralRules.supportedLocalesOf
+                ].join('|');
+            })();
+            """);
+
+        Assert.Equal("function|function", result.ToString());
+    }
+
     private static void EnsureBuiltInsLoaded()
     {
         // Load CLR assembly so JSEngine.ClrInterop is properly configured

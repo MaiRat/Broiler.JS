@@ -79,7 +79,7 @@ public static class JSIntl
         intl.FastAddValue(DurationFormatKey, CreateDurationFormatConstructor(), JSPropertyAttributes.ConfigurableValue);
         intl.FastAddValue(ListFormatKey, CreateListFormatConstructor(), JSPropertyAttributes.ConfigurableValue);
         intl.FastAddValue(LocaleKey, CreateLocaleConstructor(), JSPropertyAttributes.ConfigurableValue);
-        intl.FastAddValue(PluralRulesKey, CreateSimpleConstructor("PluralRules", 0), JSPropertyAttributes.ConfigurableValue);
+        intl.FastAddValue(PluralRulesKey, CreatePluralRulesConstructor(), JSPropertyAttributes.ConfigurableValue);
         intl.FastAddValue(SegmenterKey, CreateSegmenterConstructor(), JSPropertyAttributes.ConfigurableValue);
         intl.FastAddValue(GetCanonicalLocalesKey, CreateGetCanonicalLocalesFunction(), JSPropertyAttributes.ConfigurableValue);
         intl.FastAddValue(SupportedValuesOfKey,
@@ -99,6 +99,27 @@ public static class JSIntl
 
             return new JSObject();
         }, name, $"function {name}() {{ [native code] }}", length: length);
+
+    private static JSFunction CreatePluralRulesConstructor()
+    {
+        var constructor = new JSFunction((in Arguments a) =>
+        {
+            ValidateConstructorArguments("PluralRules", in a);
+            return new JSObject();
+        }, "PluralRules", "function PluralRules() { [native code] }", length: 0);
+        constructor.FastAddValue(SupportedLocalesOfKey, CreateSupportedLocalesOfFunction(), JSPropertyAttributes.ConfigurableValue);
+        constructor.prototype.FastAddValue(KeyStrings.GetOrCreate("selectRange"),
+            new JSFunction(static (in Arguments a) =>
+            {
+                if (a.This is not JSObject)
+                    throw JSEngine.NewTypeError("Intl.PluralRules.prototype.selectRange called on incompatible receiver");
+                _ = (a[0] ?? JSUndefined.Value).DoubleValue;
+                _ = (a.GetAt(1) ?? JSUndefined.Value).DoubleValue;
+                return JSValue.CreateString("other");
+            }, "selectRange", "function selectRange() { [native code] }", createPrototype: false, length: 2),
+            JSPropertyAttributes.ConfigurableValue);
+        return constructor;
+    }
 
     private static JSFunction CreateSupportedLocalesOfFunction()
         => new(static (in Arguments a) => JSValue.CreateArray(), "supportedLocalesOf", "function supportedLocalesOf() { [native code] }", length: 1, createPrototype: false);
@@ -138,15 +159,54 @@ public static class JSIntl
             return new JSIntlListFormat();
         }, "ListFormat", "function ListFormat() { [native code] }", length: 0);
         constructor.FastAddValue(SupportedLocalesOfKey, CreateSupportedLocalesOfFunction(), JSPropertyAttributes.ConfigurableValue);
+        constructor.prototype.FastAddValue(FormatKey,
+            new JSFunction(JSIntlListFormat.FormatPrototype, "format", "function format() { [native code] }", createPrototype: false, length: 1),
+            JSPropertyAttributes.ConfigurableValue);
+        constructor.prototype.FastAddValue(FormatToPartsKey,
+            new JSFunction(JSIntlListFormat.FormatToPartsPrototype, "formatToParts", "function formatToParts() { [native code] }", createPrototype: false, length: 1),
+            JSPropertyAttributes.ConfigurableValue);
+        constructor.prototype.FastAddValue(KeyStrings.GetOrCreate("resolvedOptions"),
+            new JSFunction(JSIntlListFormat.ResolvedOptionsPrototype, "resolvedOptions", "function resolvedOptions() { [native code] }", createPrototype: false, length: 0),
+            JSPropertyAttributes.ConfigurableValue);
         return constructor;
     }
 
     private static JSFunction CreateLocaleConstructor()
-        => new(static (in Arguments a) =>
+    {
+        var constructor = new JSFunction(static (in Arguments a) =>
         {
             ValidateLocaleConstructorArguments(in a);
             return new JSIntlLocale();
         }, "Locale", "function Locale() { [native code] }", length: 1);
+        constructor.prototype.FastAddValue(KeyStrings.GetOrCreate("maximize"),
+            new JSFunction(JSIntlLocale.MaximizePrototype, "maximize", "function maximize() { [native code] }", createPrototype: false, length: 0),
+            JSPropertyAttributes.ConfigurableValue);
+        constructor.prototype.FastAddValue(KeyStrings.GetOrCreate("minimize"),
+            new JSFunction(JSIntlLocale.MinimizePrototype, "minimize", "function minimize() { [native code] }", createPrototype: false, length: 0),
+            JSPropertyAttributes.ConfigurableValue);
+        constructor.prototype.FastAddValue(KeyStrings.GetOrCreate("getCalendars"),
+            new JSFunction(JSIntlLocale.GetCalendarsPrototype, "getCalendars", "function getCalendars() { [native code] }", createPrototype: false, length: 0),
+            JSPropertyAttributes.ConfigurableValue);
+        constructor.prototype.FastAddValue(KeyStrings.GetOrCreate("getCollations"),
+            new JSFunction(JSIntlLocale.GetCollationsPrototype, "getCollations", "function getCollations() { [native code] }", createPrototype: false, length: 0),
+            JSPropertyAttributes.ConfigurableValue);
+        constructor.prototype.FastAddValue(KeyStrings.GetOrCreate("getHourCycles"),
+            new JSFunction(JSIntlLocale.GetHourCyclesPrototype, "getHourCycles", "function getHourCycles() { [native code] }", createPrototype: false, length: 0),
+            JSPropertyAttributes.ConfigurableValue);
+        constructor.prototype.FastAddValue(KeyStrings.GetOrCreate("getNumberingSystems"),
+            new JSFunction(JSIntlLocale.GetNumberingSystemsPrototype, "getNumberingSystems", "function getNumberingSystems() { [native code] }", createPrototype: false, length: 0),
+            JSPropertyAttributes.ConfigurableValue);
+        constructor.prototype.FastAddValue(KeyStrings.GetOrCreate("getTextInfo"),
+            new JSFunction(JSIntlLocale.GetTextInfoPrototype, "getTextInfo", "function getTextInfo() { [native code] }", createPrototype: false, length: 0),
+            JSPropertyAttributes.ConfigurableValue);
+        constructor.prototype.FastAddValue(KeyStrings.GetOrCreate("getTimeZones"),
+            new JSFunction(JSIntlLocale.GetTimeZonesPrototype, "getTimeZones", "function getTimeZones() { [native code] }", createPrototype: false, length: 0),
+            JSPropertyAttributes.ConfigurableValue);
+        constructor.prototype.FastAddValue(KeyStrings.GetOrCreate("getWeekInfo"),
+            new JSFunction(JSIntlLocale.GetWeekInfoPrototype, "getWeekInfo", "function getWeekInfo() { [native code] }", createPrototype: false, length: 0),
+            JSPropertyAttributes.ConfigurableValue);
+        return constructor;
+    }
 
     private static JSFunction CreateSegmenterConstructor()
         => new((in Arguments a) =>
@@ -196,8 +256,12 @@ public static class JSIntl
             "RelativeTimeFormat",
             "function RelativeTimeFormat() { [native code] }",
             length: 0);
+        constructor.FastAddValue(SupportedLocalesOfKey, CreateSupportedLocalesOfFunction(), JSPropertyAttributes.ConfigurableValue);
         constructor.prototype.FastAddValue(FormatKey,
             new JSFunction(JSIntlRelativeTimeFormat.FormatPrototype, "format", "function format() { [native code] }", createPrototype: false, length: 2),
+            JSPropertyAttributes.ConfigurableValue);
+        constructor.prototype.FastAddValue(FormatToPartsKey,
+            new JSFunction(JSIntlRelativeTimeFormat.FormatToPartsPrototype, "formatToParts", "function formatToParts() { [native code] }", createPrototype: false, length: 2),
             JSPropertyAttributes.ConfigurableValue);
         return constructor;
     }
@@ -228,6 +292,12 @@ public static class JSIntl
                 null,
                 JSPropertyAttributes.ConfigurableProperty);
         }
+        constructor.prototype.FastAddValue(FormatRangeKey,
+            new JSFunction(JSIntlNumberFormat.FormatRangePrototype, "formatRange", "function formatRange() { [native code] }", createPrototype: false, length: 2),
+            JSPropertyAttributes.ConfigurableValue);
+        constructor.prototype.FastAddValue(FormatRangeToPartsKey,
+            new JSFunction(JSIntlNumberFormat.FormatRangeToPartsPrototype, "formatRangeToParts", "function formatRangeToParts() { [native code] }", createPrototype: false, length: 2),
+            JSPropertyAttributes.ConfigurableValue);
         return constructor;
     }
 
@@ -445,6 +515,29 @@ public class JSIntlRelativeTimeFormat : JSObject
             ? @this.Format(in a)
             : throw JSEngine.NewTypeError("Intl.RelativeTimeFormat.prototype.format called on incompatible receiver");
 
+    public static JSValue FormatToPartsPrototype(in Arguments a)
+    {
+        if (a.This is not JSIntlRelativeTimeFormat)
+            throw JSEngine.NewTypeError("Intl.RelativeTimeFormat.prototype.formatToParts called on incompatible receiver");
+
+        var value = a[0] ?? JSUndefined.Value;
+        _ = value.DoubleValue;
+        var unit = a.GetAt(1);
+        if (unit.IsUndefined)
+            throw JSEngine.NewRangeError("Invalid unit argument");
+        var unitStr = unit.StringValue;
+        var validUnits = new HashSet<string>
+        {
+            "year", "years", "quarter", "quarters", "month", "months",
+            "week", "weeks", "day", "days", "hour", "hours",
+            "minute", "minutes", "second", "seconds"
+        };
+        if (!validUnits.Contains(unitStr))
+            throw JSEngine.NewRangeError($"Invalid unit argument: {unitStr}");
+
+        return JSValue.CreateArray();
+    }
+
     public JSIntlRelativeTimeFormat(in Arguments a) : this()
     {
         JSIntl.ValidateConstructorArguments("RelativeTimeFormat", in a);
@@ -507,9 +600,96 @@ public sealed class JSIntlDurationFormat(JSObject _ = null) : JSObject
     }
 }
 
-public sealed class JSIntlListFormat : JSObject;
+public sealed class JSIntlListFormat : JSObject
+{
+    public static JSValue FormatPrototype(in Arguments a)
+    {
+        if (a.This is not JSIntlListFormat)
+            throw JSEngine.NewTypeError("Intl.ListFormat.prototype.format called on incompatible receiver");
 
-public sealed class JSIntlLocale : JSObject;
+        return JSValue.CreateString(string.Empty);
+    }
+
+    public static JSValue FormatToPartsPrototype(in Arguments a)
+    {
+        if (a.This is not JSIntlListFormat)
+            throw JSEngine.NewTypeError("Intl.ListFormat.prototype.formatToParts called on incompatible receiver");
+
+        return JSValue.CreateArray();
+    }
+
+    public static JSValue ResolvedOptionsPrototype(in Arguments a)
+    {
+        if (a.This is not JSIntlListFormat)
+            throw JSEngine.NewTypeError("Intl.ListFormat.prototype.resolvedOptions called on incompatible receiver");
+
+        return new JSObject();
+    }
+}
+
+public sealed class JSIntlLocale : JSObject
+{
+    private static JSValue RequireLocale(in Arguments a, string method)
+    {
+        if (a.This is not JSIntlLocale)
+            throw JSEngine.NewTypeError($"Intl.Locale.prototype.{method} called on incompatible receiver");
+        return JSUndefined.Value;
+    }
+
+    public static JSValue MaximizePrototype(in Arguments a)
+    {
+        RequireLocale(in a, "maximize");
+        return new JSIntlLocale();
+    }
+
+    public static JSValue MinimizePrototype(in Arguments a)
+    {
+        RequireLocale(in a, "minimize");
+        return new JSIntlLocale();
+    }
+
+    public static JSValue GetCalendarsPrototype(in Arguments a)
+    {
+        RequireLocale(in a, "getCalendars");
+        return JSValue.CreateArray();
+    }
+
+    public static JSValue GetCollationsPrototype(in Arguments a)
+    {
+        RequireLocale(in a, "getCollations");
+        return JSValue.CreateArray();
+    }
+
+    public static JSValue GetHourCyclesPrototype(in Arguments a)
+    {
+        RequireLocale(in a, "getHourCycles");
+        return JSValue.CreateArray();
+    }
+
+    public static JSValue GetNumberingSystemsPrototype(in Arguments a)
+    {
+        RequireLocale(in a, "getNumberingSystems");
+        return JSValue.CreateArray();
+    }
+
+    public static JSValue GetTextInfoPrototype(in Arguments a)
+    {
+        RequireLocale(in a, "getTextInfo");
+        return new JSObject();
+    }
+
+    public static JSValue GetTimeZonesPrototype(in Arguments a)
+    {
+        RequireLocale(in a, "getTimeZones");
+        return JSValue.CreateArray();
+    }
+
+    public static JSValue GetWeekInfoPrototype(in Arguments a)
+    {
+        RequireLocale(in a, "getWeekInfo");
+        return new JSObject();
+    }
+}
 
 public class JSIntlNumberFormat : JSObject
 {
@@ -521,6 +701,26 @@ public class JSIntlNumberFormat : JSObject
     private JSIntlNumberFormat() : base(CurrentPrototype()) { }
 
     public JSValue Format(in Arguments a) => JSValue.CreateString((a[0] ?? JSUndefined.Value).ToString());
+
+    public static JSValue FormatRangePrototype(in Arguments a)
+    {
+        if (a.This is not JSIntlNumberFormat)
+            throw JSEngine.NewTypeError("Intl.NumberFormat.prototype.formatRange called on incompatible receiver");
+
+        var start = (a[0] ?? JSUndefined.Value).DoubleValue;
+        var end = (a.GetAt(1) ?? JSUndefined.Value).DoubleValue;
+        return JSValue.CreateString($"{start}–{end}");
+    }
+
+    public static JSValue FormatRangeToPartsPrototype(in Arguments a)
+    {
+        if (a.This is not JSIntlNumberFormat)
+            throw JSEngine.NewTypeError("Intl.NumberFormat.prototype.formatRangeToParts called on incompatible receiver");
+
+        _ = (a[0] ?? JSUndefined.Value).DoubleValue;
+        _ = (a.GetAt(1) ?? JSUndefined.Value).DoubleValue;
+        return JSValue.CreateArray();
+    }
 
     private static JSObject CurrentPrototype()
         => (JSEngine.CurrentContext as JSObject)?[KeyStrings.GetOrCreate("Intl")] is JSObject intl

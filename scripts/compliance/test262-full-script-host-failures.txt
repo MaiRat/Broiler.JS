@@ -31,7 +31,6 @@ test/annexB/built-ins/RegExp/legacy-accessors/rightContext/this-not-regexp-const
 test/annexB/built-ins/RegExp/legacy-accessors/rightContext/this-subclass-constructor.js
 test/annexB/built-ins/RegExp/named-groups/non-unicode-malformed-lookbehind.js
 test/annexB/built-ins/RegExp/named-groups/non-unicode-malformed.js
-test/annexB/built-ins/RegExp/prototype/Symbol.split/Symbol.match-getter-recompiles-source.js
 test/annexB/built-ins/RegExp/prototype/compile/duplicate-named-capturing-groups-syntax.js
 test/annexB/built-ins/RegExp/prototype/compile/pattern-string-invalid-u.js
 test/annexB/built-ins/RegExp/prototype/compile/pattern-string-u.js
@@ -2401,7 +2400,6 @@ test/built-ins/Proxy/set/trap-is-missing-receiver-multiple-calls-index.js
 test/built-ins/Proxy/set/trap-is-missing-receiver-multiple-calls.js
 test/built-ins/Proxy/set/trap-is-missing-target-is-proxy.js
 test/built-ins/Proxy/set/trap-is-null-receiver.js
-test/built-ins/Proxy/set/trap-is-null-target-is-proxy.js
 test/built-ins/Proxy/setPrototypeOf/toboolean-trap-result-false.js
 test/built-ins/Reflect/Symbol.toStringTag.js
 test/built-ins/Reflect/apply/arguments-list-is-not-array-like-but-still-valid.js
@@ -2431,7 +2429,6 @@ test/built-ins/RegExp/S15.10.4.1_A6_T1.js
 test/built-ins/RegExp/S15.10.4.1_A8_T9.js
 test/built-ins/RegExp/S15.10.7_A2_T1.js
 test/built-ins/RegExp/S15.10.7_A2_T2.js
-test/built-ins/RegExp/call_with_regexp_match_falsy.js
 test/built-ins/RegExp/dotall/with-dotall-unicode.js
 test/built-ins/RegExp/dotall/with-dotall.js
 test/built-ins/RegExp/dotall/without-dotall-unicode.js
@@ -2442,7 +2439,6 @@ test/built-ins/RegExp/early-err-modifiers-code-point-repeat-i-2.js
 test/built-ins/RegExp/early-err-modifiers-other-code-point-uppercase-I.js
 test/built-ins/RegExp/early-err-modifiers-should-not-case-fold-i.js
 test/built-ins/RegExp/early-err-modifiers-should-not-case-fold-m.js
-test/built-ins/RegExp/early-err-modifiers-should-not-case-fold-s.js
 test/built-ins/RegExp/lookBehind/back-references-to-captures.js
 test/built-ins/RegExp/lookBehind/mutual-recursive.js
 test/built-ins/RegExp/lookahead-quantifier-match-groups.js
@@ -3042,10 +3038,8 @@ test/built-ins/RegExp/syntax-err-arithmetic-modifiers-reverse-code-point-repeat-
 test/built-ins/RegExp/syntax-err-arithmetic-modifiers-reverse-other-code-point-uppercase-I.js
 test/built-ins/RegExp/syntax-err-arithmetic-modifiers-reverse-should-not-case-fold-i.js
 test/built-ins/RegExp/syntax-err-arithmetic-modifiers-reverse-should-not-case-fold-m.js
-test/built-ins/RegExp/syntax-err-arithmetic-modifiers-reverse-should-not-case-fold-s.js
 test/built-ins/RegExp/syntax-err-arithmetic-modifiers-should-not-case-fold-i.js
 test/built-ins/RegExp/syntax-err-arithmetic-modifiers-should-not-case-fold-m.js
-test/built-ins/RegExp/syntax-err-arithmetic-modifiers-should-not-case-fold-s.js
 test/built-ins/RegExp/unicodeSets/generated/character-class-difference-character-property-escape.js
 test/built-ins/RegExp/unicodeSets/generated/character-class-difference-character.js
 test/built-ins/RegExp/unicodeSets/generated/character-class-difference-property-of-strings-escape.js
@@ -3277,7 +3271,6 @@ test/built-ins/ShadowRealm/prototype/importValue/throws-if-exportname-not-string
 test/built-ins/ShadowRealm/prototype/importValue/validates-realm-object.js
 test/built-ins/ShadowRealm/prototype/proto.js
 test/built-ins/String/S15.5.2.1_A3.js
-test/built-ins/String/S15.5.5.1_A4_T1.js
 test/built-ins/String/S15.5.5_A2_T2.js
 test/built-ins/String/fromCodePoint/argument-is-not-integer.js
 test/built-ins/String/numeric-properties.js
@@ -10784,7 +10777,6 @@ test/staging/sm/RegExp/regress-yarr-regexp.js
 test/staging/sm/RegExp/replace-trace.js
 test/staging/sm/RegExp/replace-twoBytes.js
 test/staging/sm/RegExp/source.js
-test/staging/sm/RegExp/split-prop-access.js
 test/staging/sm/RegExp/split-trace.js
 test/staging/sm/RegExp/toString.js
 test/staging/sm/RegExp/unicode-back-reference.js
@@ -10799,8 +10791,6 @@ test/staging/sm/RegExp/unicode-class-range.js
 test/staging/sm/RegExp/unicode-class-raw.js
 test/staging/sm/RegExp/unicode-disallow-extended.js
 test/staging/sm/RegExp/unicode-everything.js
-test/staging/sm/RegExp/unicode-ignoreCase-ascii.js
-test/staging/sm/RegExp/unicode-ignoreCase-escape.js
 test/staging/sm/RegExp/unicode-ignoreCase-word-boundary.js
 test/staging/sm/RegExp/unicode-ignoreCase.js
 test/staging/sm/RegExp/unicode-lead-trail.js
@@ -11129,7 +11119,6 @@ test/staging/sm/regress/regress-593256.js
 test/staging/sm/regress/regress-597945-1.js
 test/staging/sm/regress/regress-610026.js
 test/staging/sm/regress/regress-617405-2.js
-test/staging/sm/regress/regress-699682.js
 test/staging/sm/statements/for-in-with-declaration.js
 test/staging/sm/statements/for-inof-finally.js
 test/staging/sm/statements/for-inof-loop-const-declaration.js
@@ -11142,7 +11131,6 @@ test/staging/sm/statements/try-completion.js
 test/staging/sm/strict/10.4.3.js
 test/staging/sm/strict/13.1.js
 test/staging/sm/strict/15.4.5.1.js
-test/staging/sm/strict/15.5.5.1.js
 test/staging/sm/strict/8.12.5.js
 test/staging/sm/strict/8.12.7-2.js
 test/staging/sm/strict/B.1.2.js

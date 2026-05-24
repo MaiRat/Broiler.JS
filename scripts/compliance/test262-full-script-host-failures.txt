@@ -2107,8 +2107,6 @@ test/built-ins/Object/keys/proxy-non-enumerable-prop-invariant-3.js
 test/built-ins/Object/keys/return-order.js
 test/built-ins/Object/preventExtensions/symbol-object-contains-symbol-properties-non-strict.js
 test/built-ins/Object/prop-desc.js
-test/built-ins/Object/prototype/__defineGetter__/define-non-extensible.js
-test/built-ins/Object/prototype/__defineSetter__/define-non-extensible.js
 test/built-ins/Object/prototype/__defineSetter__/setter-non-callable.js
 test/built-ins/Object/prototype/__defineSetter__/this-non-obj.js
 test/built-ins/Object/prototype/__lookupGetter__/this-non-obj.js
@@ -2353,7 +2351,6 @@ test/built-ins/Promise/withResolvers/resolvers.js
 test/built-ins/Promise/withResolvers/result.js
 test/built-ins/Proxy/construct/trap-is-null-target-is-proxy.js
 test/built-ins/Proxy/construct/trap-is-undefined-target-is-proxy.js
-test/built-ins/Proxy/defineProperty/trap-is-missing-target-is-proxy.js
 test/built-ins/Proxy/enumerate/removed-does-not-trigger.js
 test/built-ins/Proxy/get/trap-is-missing-target-is-proxy.js
 test/built-ins/Proxy/get/trap-is-null-target-is-proxy.js
@@ -4450,7 +4447,6 @@ test/harness/decimalToHexString.js
 test/harness/deepEqual-mapset.js
 test/harness/deepEqual-primitives-bigint.js
 test/harness/deepEqual-primitives.js
-test/harness/isConstructor.js
 test/intl402/Array/prototype/toLocaleString/calls-toLocaleString-number-elements.js
 test/intl402/Array/prototype/toLocaleString/invoke-element-tolocalestring.js
 test/intl402/BigInt/prototype/toLocaleString/de-DE.js
@@ -4734,7 +4730,6 @@ test/intl402/DurationFormat/prototype/toStringTag/toString.js
 test/intl402/DurationFormat/prototype/toStringTag/toStringTag.js
 test/intl402/DurationFormat/supportedLocalesOf/basic.js
 test/intl402/DurationFormat/supportedLocalesOf/locales-invalid.js
-test/intl402/DurationFormat/supportedLocalesOf/locales-specific.js
 test/intl402/Intl/getCanonicalLocales/Locale-object.js
 test/intl402/Intl/getCanonicalLocales/canonicalized-tags.js
 test/intl402/Intl/getCanonicalLocales/complex-language-subtag-replacement.js
@@ -4788,7 +4783,6 @@ test/intl402/ListFormat/constructor/supportedLocalesOf/locales-invalid.js
 test/intl402/ListFormat/constructor/supportedLocalesOf/options-localeMatcher-invalid.js
 test/intl402/ListFormat/constructor/supportedLocalesOf/options-null.js
 test/intl402/ListFormat/constructor/supportedLocalesOf/options-toobject.js
-test/intl402/ListFormat/constructor/supportedLocalesOf/result-type.js
 test/intl402/ListFormat/prototype/format/en-us-default.js
 test/intl402/ListFormat/prototype/format/en-us-disjunction.js
 test/intl402/ListFormat/prototype/format/en-us-narrow.js
@@ -5154,7 +5148,6 @@ test/intl402/RelativeTimeFormat/constructor/supportedLocalesOf/locales-invalid.j
 test/intl402/RelativeTimeFormat/constructor/supportedLocalesOf/options-localeMatcher-invalid.js
 test/intl402/RelativeTimeFormat/constructor/supportedLocalesOf/options-null.js
 test/intl402/RelativeTimeFormat/constructor/supportedLocalesOf/options-toobject.js
-test/intl402/RelativeTimeFormat/constructor/supportedLocalesOf/result-type.js
 test/intl402/RelativeTimeFormat/prototype/format/en-us-numbering-systems.js
 test/intl402/RelativeTimeFormat/prototype/format/en-us-numeric-always.js
 test/intl402/RelativeTimeFormat/prototype/format/en-us-numeric-auto.js
@@ -9047,8 +9040,6 @@ test/language/statements/class/subclass/derived-class-return-override-with-symbo
 test/language/statements/class/subclass/derived-class-return-override-with-this.js
 test/language/statements/class/subclass/derived-class-return-override-with-undefined.js
 test/language/statements/class/subclass/private-class-field-on-nonextensible-return-override.js
-test/language/statements/class/subclass/superclass-async-generator-function.js
-test/language/statements/class/subclass/superclass-generator-function.js
 test/language/statements/class/super/in-constructor-superproperty-evaluation.js
 test/language/statements/class/super/in-constructor.js
 test/language/statements/class/syntax/class-body-has-direct-super-class-heritage.js
@@ -11064,7 +11055,6 @@ test/staging/sm/object/getOwnPropertyDescriptor.js
 test/staging/sm/object/getOwnPropertySymbols.js
 test/staging/sm/object/getPrototypeOf.js
 test/staging/sm/object/keys.js
-test/staging/sm/object/method-non-constructor.js
 test/staging/sm/object/object-toString-01.js
 test/staging/sm/object/property-descriptor-order.js
 test/staging/sm/object/propertyIsEnumerable-proxy.js

@@ -261,6 +261,55 @@ public class CompilerTests
     }
 
     [Fact]
+    public void Compile_NonStrict_ArgumentsObject_Maps_NonConfigurable_Parameters()
+    {
+        using var ctx = new JSContext();
+        var result = ctx.Eval("""
+            (function (a) {
+                Object.defineProperty(arguments, "0", { configurable: false });
+                a = 2;
+                return [a, arguments[0], Object.getOwnPropertyDescriptor(arguments, "0").value].join("|");
+            })(1);
+            """);
+
+        Assert.Equal("2|2|2", result.ToString());
+    }
+
+    [Fact]
+    public void Compile_NonStrict_ArgumentsObject_Preserves_Current_Value_When_Becoming_NonWritable()
+    {
+        using var ctx = new JSContext();
+        var result = ctx.Eval("""
+            (function (a) {
+                Object.defineProperty(arguments, "0", { configurable: false });
+                a = 2;
+                Object.defineProperty(arguments, "0", { writable: false });
+                var before = [a, arguments[0], Object.getOwnPropertyDescriptor(arguments, "0").value].join("|");
+                a = 3;
+                return before + "|" + [a, arguments[0], Object.getOwnPropertyDescriptor(arguments, "0").value].join("|");
+            })(1);
+            """);
+
+        Assert.Equal("2|2|2|3|2|2", result.ToString());
+    }
+
+    [Fact]
+    public void Compile_NonStrict_ArgumentsObject_Delete_False_Keeps_Mapping()
+    {
+        using var ctx = new JSContext();
+        var result = ctx.Eval("""
+            (function (a) {
+                Object.defineProperty(arguments, "0", { configurable: false });
+                var deleted = delete arguments[0];
+                a = 2;
+                return [deleted, a, arguments[0], Object.getOwnPropertyDescriptor(arguments, "0").value].join("|");
+            })(1);
+            """);
+
+        Assert.Equal("false|2|2|2", result.ToString());
+    }
+
+    [Fact]
     public void JSContext_LoadsClrInteropWithoutExplicitClrReference()
     {
         using var ctx = new JSContext();

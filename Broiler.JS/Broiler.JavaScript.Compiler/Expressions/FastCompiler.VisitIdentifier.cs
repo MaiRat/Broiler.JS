@@ -1,5 +1,7 @@
+using System.Collections.Generic;
 using Broiler.JavaScript.ExpressionCompiler.Expressions;
 using Broiler.JavaScript.LinqExpressions.LinqExpressions;
+using Broiler.JavaScript.Runtime;
 
 namespace Broiler.JavaScript.Compiler;
 
@@ -67,7 +69,42 @@ partial class FastCompiler
         if (identifier.Name.Equals("arguments"))
         {
             var functionScope = scope.Top.RootScope;
-            var vs = functionScope.CreateVariable("arguments", JSArgumentsBuilder.New(functionScope.ArgumentsExpression));
+            var argumentsObject = JSArgumentsBuilder.New(functionScope.ArgumentsExpression);
+            if (!IsStrictMode
+                && functionScope.Function != null
+                && HasSimpleParameterList(functionScope.Function.Params))
+            {
+                var parameters = new List<VariableDeclarator>();
+                var parameterEnumerator = functionScope.Function.Params.GetFastEnumerator();
+                while (parameterEnumerator.MoveNext(out var parameter))
+                    parameters.Add(parameter);
+
+                var parameterCount = parameters.Count;
+                var mappedParameters = new YExpression[parameterCount];
+                var seenNames = new HashSet<string>();
+
+                for (var i = parameterCount - 1; i >= 0; i--)
+                {
+                    if (parameters[i].Identifier is not AstIdentifier parameterIdentifier)
+                    {
+                        mappedParameters[i] = YExpression.Constant(null, typeof(JSVariable));
+                        continue;
+                    }
+
+                    var parameterName = parameterIdentifier.Name.Value;
+                    if (!seenNames.Add(parameterName))
+                    {
+                        mappedParameters[i] = YExpression.Constant(null, typeof(JSVariable));
+                        continue;
+                    }
+
+                    mappedParameters[i] = functionScope.GetVariable(parameterIdentifier.Name).Variable;
+                }
+
+                argumentsObject = JSArgumentsBuilder.NewMapped(functionScope.ArgumentsExpression, YExpression.NewArrayInit(typeof(JSVariable), mappedParameters));
+            }
+
+            var vs = functionScope.CreateVariable("arguments", argumentsObject);
             return vs.Expression;
         }
 

@@ -10,6 +10,7 @@ public static class JSArgumentsBuilder
 {
     private static Type _type;
     private static ConstructorInfo _New;
+    private static ConstructorInfo _NewMapped;
 
     /// <summary>
     /// Initializes the builder with the concrete JSArguments type.
@@ -19,7 +20,10 @@ public static class JSArgumentsBuilder
     {
         _type = argumentsType;
         _New = argumentsType.GetConstructor([typeof(Arguments).MakeByRefType()]);
+        _NewMapped = argumentsType.GetConstructor([typeof(Arguments).MakeByRefType(), typeof(JSVariable[])]);
     }
 
     public static Expression New(Expression args) => Expression.New(_New, args);
+
+    public static Expression NewMapped(Expression args, Expression mappedParameters) => Expression.New(_NewMapped, args, mappedParameters);
 }

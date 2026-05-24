@@ -11157,7 +11157,6 @@ test/staging/sm/strict/8.12.5.js
 test/staging/sm/strict/8.12.7-2.js
 test/staging/sm/strict/B.1.2.js
 test/staging/sm/strict/deprecated-octal-noctal-tokens.js
-test/staging/sm/strict/directive-prologue-01.js
 test/staging/sm/strict/eval-variable-environment.js
 test/staging/sm/strict/primitive-assignment.js
 test/staging/sm/strict/primitive-this-getter.js

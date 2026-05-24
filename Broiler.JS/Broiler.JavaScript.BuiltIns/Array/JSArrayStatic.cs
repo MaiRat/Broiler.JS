@@ -3,6 +3,7 @@ using Broiler.JavaScript.BuiltIns.Error;
 using Broiler.JavaScript.BuiltIns.Promise;
 using Broiler.JavaScript.BuiltIns.Proxy;
 using System;
+using System.Collections.Generic;
 using Broiler.JavaScript.BuiltIns.Number;
 using Broiler.JavaScript.Runtime;
 using Broiler.JavaScript.BuiltIns.Function;
@@ -16,26 +17,46 @@ public partial class JSArray
     [JSExport("from", Length = 1)]
     public static JSValue StaticFrom(in Arguments a)
     {
-        var r = new JSArray();
         var (f, map, mapThis) = a.Get3();
         var t = a.This;
         var en = f.GetElementEnumerator();
-        uint length = 0;
-        ref var elements = ref r.GetElements();
+        var values = new List<JSValue>();
 
         if (map is JSFunction fx)
         {
             var cb = fx.f;
             while (en.MoveNext(out var hasValue, out var item, out var index))
-                elements.Put(length++, cb(new Arguments(mapThis, item, new JSNumber(index))));
+            {
+                if (!hasValue)
+                    continue;
+
+                values.Add(cb(new Arguments(mapThis, item, new JSNumber(index))));
+            }
         }
         else
         {
             while (en.MoveNext(out var hasValue, out var item, out var index))
-                elements.Put(length++, item);
+            {
+                if (!hasValue)
+                    continue;
+
+                values.Add(item);
+            }
         }
 
-        r._length = length;
+        var length = (uint)values.Count;
+        var r = JSConstructorOperations.IsConstructor(t) && t is JSObject constructor
+            ? constructor.CreateInstance(new Arguments(JSUndefined.Value, JSValue.CreateNumber(length)))
+            : new JSArray();
+
+        for (var i = 0; i < values.Count; i++)
+            r[(uint)i] = values[i];
+
+        if (r is JSArray array)
+            array._length = length;
+        else
+            r[KeyStrings.length] = JSValue.CreateNumber(length);
+
         return r;
     }
 

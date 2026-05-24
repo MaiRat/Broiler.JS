@@ -19,6 +19,9 @@ public partial class JSReflect : JSObject
     private static bool IsCallable(JSValue value)
         => value is JSObject && value.TypeOf() == JSConstants.Function;
 
+    private static bool IsConstructor(JSValue value)
+        => JSConstructorOperations.IsConstructor(value);
+
     [JSExport(Length = 3)]
     public static JSValue Apply(in Arguments a)
     {
@@ -35,10 +38,10 @@ public partial class JSReflect : JSObject
         var (target, arguments, newTarget) = a.Get3();
         newTarget = newTarget.IsUndefined ? target : newTarget;
 
-        if (!IsCallable(target) || target is not JSObject targetObject)
+        if (!IsConstructor(target) || target is not JSObject targetObject)
             throw JSEngine.NewTypeError("target is not a constructor");
 
-        if (!IsCallable(newTarget)
+        if (!IsConstructor(newTarget)
             || newTarget is not JSObject newTargetObject)
         {
             throw JSEngine.NewTypeError("newTarget is not a constructor");

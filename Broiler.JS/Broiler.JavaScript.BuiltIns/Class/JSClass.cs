@@ -30,14 +30,7 @@ public class JSClass : JSFunction
         throw JSEngine.NewTypeError("Class extends value does not have a valid prototype property");
     }
 
-    private static bool IsConstructableSuperclass(JSValue value) => value switch
-    {
-        JSFunction function when function.BoundTargetFunction != null && !function.BoundTargetFunction.IsUndefined
-            => IsConstructableSuperclass(function.BoundTargetFunction),
-        JSFunction function => function.prototype != null,
-        JSProxy proxy => proxy.IsConstructable,
-        _ => false
-    };
+    private static bool IsConstructableSuperclass(JSValue value) => JSConstructorOperations.IsConstructor(value);
 
     public JSClass(JSFunctionDelegate fx, JSValue super, string name = null, string code = null)
         : base(fx ?? (super as JSFunction)?.Delegate ?? empty, name, code)

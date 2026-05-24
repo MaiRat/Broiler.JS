@@ -15,7 +15,7 @@ public partial class JSPromise
         => ReferenceEquals(constructor, (JSEngine.Current as JSObject)?[KeyStrings.Promise]);
 
     private static bool IsConstructor(JSValue value)
-        => value is JSFunction function && function.prototype != null;
+        => JSConstructorOperations.IsConstructor(value);
 
     private static JSValue CreatePromiseFromConstructor(JSValue constructor, Action<JSValue, JSValue> executor)
     {

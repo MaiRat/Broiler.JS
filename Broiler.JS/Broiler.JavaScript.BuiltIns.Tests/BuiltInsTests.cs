@@ -2693,6 +2693,54 @@ public class BuiltInsTests
     }
 
     [Fact]
+    public void Reflect_Construct_And_Promise_Capability_Functions_Respect_Constructibility()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = new JSContext();
+        var result = ctx.Eval("""
+            (function () {
+                function thrownCtor(fn) {
+                    try {
+                        fn();
+                        return 'no-throw';
+                    } catch (e) {
+                        return e.constructor.name;
+                    }
+                }
+
+                function isConstructor(fn) {
+                    try {
+                        Reflect.construct(function () {}, [], fn);
+                        return true;
+                    } catch (e) {
+                        return false;
+                    }
+                }
+
+                var resolveFunction;
+                var rejectFunction;
+                new Promise(function (resolve, reject) {
+                    resolveFunction = resolve;
+                    rejectFunction = reject;
+                });
+
+                return [
+                    Object.prototype.hasOwnProperty.call(resolveFunction, 'prototype'),
+                    Object.prototype.hasOwnProperty.call(rejectFunction, 'prototype'),
+                    isConstructor(function () {}),
+                    isConstructor(() => {}),
+                    isConstructor(resolveFunction),
+                    isConstructor(rejectFunction),
+                    thrownCtor(function () { new resolveFunction(); }),
+                    thrownCtor(function () { new rejectFunction(); })
+                ].join('|');
+            })();
+            """);
+
+        Assert.Equal("false|false|true|false|false|false|TypeError|TypeError", result.ToString());
+    }
+
+    [Fact]
     public void Promise_Reactions_Run_After_Synchronous_Code()
     {
         EnsureBuiltInsLoaded();
@@ -3140,6 +3188,47 @@ public class BuiltInsTests
             }
         })();");
         Assert.Equal("true", result.ToString());
+    }
+
+    [Fact]
+    public void Array_From_Uses_Constructable_This_And_Falls_Back_For_NonConstructors()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = new JSContext();
+        var result = ctx.Eval("""
+            (function () {
+                var date = Array.from.call(Date, ['A', 'B']);
+                var obj = Array.from.call(Object, []);
+
+                function C(arg) {
+                    this.arg = arg;
+                }
+
+                var custom = Array.from.call(C, { length: 1, 0: 'zero' });
+                var fallback = Array.from.call(() => ({}), [3, 4, 5]);
+
+                return [
+                    Array.isArray(date),
+                    Object.prototype.toString.call(date),
+                    Object.getPrototypeOf(date) === Date.prototype,
+                    date.length,
+                    date[0],
+                    date[1],
+                    Array.isArray(obj),
+                    Object.getPrototypeOf(obj) === Object.prototype,
+                    Object.getOwnPropertyNames(obj).join(','),
+                    obj.length,
+                    custom instanceof C,
+                    custom.arg,
+                    custom.length,
+                    custom[0],
+                    Array.isArray(fallback),
+                    fallback.join(',')
+                ].join('|');
+            })();
+            """);
+
+        Assert.Equal("false|[object Date]|true|2|A|B|false|true|length|0|true|1|1|zero|true|3,4,5", result.ToString());
     }
 
     [Fact]

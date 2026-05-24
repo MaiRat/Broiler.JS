@@ -505,6 +505,7 @@ internal static class BuiltInsAssemblyInitializer
         PatchProxyConstructor(context);
         PatchSpeciesConstructors(context);
         PatchSymbolPrototype(context);
+        PatchDatePrototype(context);
         PatchRegExpPrototype(context);
         PatchArrayPrototype(context);
         PatchTypedArrayBuiltIns(context);
@@ -849,6 +850,15 @@ internal static class BuiltInsAssemblyInitializer
 
             throw JSEngine.NewTypeError("Symbol.prototype.description requires a symbol receiver");
         });
+    }
+
+    private static void PatchDatePrototype(JSContext context)
+    {
+        if (context[KeyStrings.Date] is not JSFunction dateCtor)
+            return;
+
+        EnsureAccessorProperty(dateCtor.prototype, JSSymbol.toStringTag, "[Symbol.toStringTag]", static (in Arguments a)
+            => JSValue.CreateString("Date"));
     }
 
     private static void PatchRegExpPrototype(JSContext context)

@@ -1,4 +1,5 @@
-﻿using Broiler.JavaScript.BuiltIns.Function;
+﻿using System;
+using Broiler.JavaScript.BuiltIns.Function;
 using Broiler.JavaScript.Engine.Core;
 using Broiler.JavaScript.Engine.Extensions;
 using Broiler.JavaScript.Runtime;
@@ -19,10 +20,10 @@ public readonly struct TypedArrayParameters
     public static TypedArrayParameters From(in Arguments a, int bytesPerElements)
     {
         var (f, map, mapThis) = a.Get3();
-        return new TypedArrayParameters(f, map, mapThis, bytesPerElements, (a.This as JSFunction).prototype);
+        return new TypedArrayParameters(f, map, mapThis, bytesPerElements, GetConstructorPrototype(a.This));
     }
 
-    public static TypedArrayParameters Of(in Arguments a, int bytesPerElements) => new(a.Length, bytesPerElements, (a.This as JSFunction).prototype);
+    public static TypedArrayParameters Of(in Arguments a, int bytesPerElements) => new(a.Length, bytesPerElements, GetConstructorPrototype(a.This));
 
     private TypedArrayParameters(int length, int bytesPerElements, JSObject prototype)
     {
@@ -79,13 +80,6 @@ public readonly struct TypedArrayParameters
             return;
         }
         var (a1, a2, a3) = a.Get3();
-        if (a1.IsNumber)
-        {
-            buffer = null;
-            byteOffset = 0;
-            length = a1.IntValue;
-            return;
-        }
         if (a1 is JSArrayBuffer arrayBuffer)
         {
             buffer = arrayBuffer;
@@ -93,6 +87,34 @@ public readonly struct TypedArrayParameters
             length = a3.AsInt32OrDefault(arrayBuffer.Length);
             return;
         }
+
+        if (!a1.IsObject)
+        {
+            buffer = null;
+            byteOffset = 0;
+            length = ToTypedArrayLength(a1);
+            return;
+        }
         copyFrom = a1;
+    }
+
+    private static JSObject GetConstructorPrototype(JSValue constructor)
+    {
+        if (constructor is IJSFunction { Prototype: JSObject prototype })
+            return prototype;
+
+        throw JSEngine.NewTypeError("TypedArray constructor is not a constructor");
+    }
+
+    private static int ToTypedArrayLength(JSValue value)
+    {
+        var numberLength = value.DoubleValue;
+        if (double.IsNaN(numberLength) || numberLength <= 0)
+            return 0;
+
+        if (double.IsInfinity(numberLength) || numberLength > int.MaxValue)
+            throw JSEngine.NewRangeError("Invalid typed array length");
+
+        return (int)Math.Floor(numberLength);
     }
 }

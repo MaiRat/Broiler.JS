@@ -1,6 +1,8 @@
 using System;
 using System.Numerics;
 using Broiler.JavaScript.BuiltIns.BigInt;
+using Broiler.JavaScript.BuiltIns.Boolean;
+using Broiler.JavaScript.Engine.Core;
 using Broiler.JavaScript.ExpressionCompiler;
 using Broiler.JavaScript.Runtime;
 
@@ -30,24 +32,44 @@ public partial class JSBigUint64Array : JSTypedArray
         if (index >= length)
             return false;
 
-        var ulongValue = value is JSBigInt bigint
-            ? (ulong)bigint.value
-            : (ulong)value.BigIntValue;
+        var ulongValue = (ulong)ToBigIntValue(value).value;
 
         System.Array.Copy(BitConverter.GetBytes(ulongValue), 0, buffer.buffer, byteOffset + index * 8, 8);
         return true;
     }
 
     [JSExport(Length = 1)]
-    public static JSValue From(in Arguments a) => new JSBigUint64Array(TypedArrayParameters.From(in a, BYTES_PER_ELENENT));
+    public static JSValue From(in Arguments a)
+    {
+        var temp = new JSBigUint64Array(TypedArrayParameters.From(in a, BYTES_PER_ELENENT));
+        var result = CreateTypedArrayFromConstructor(a.This, temp.Length);
+        for (uint i = 0; i < temp.Length; i++)
+            result[i] = temp[i];
+
+        return result;
+    }
 
     [JSExport]
     public static JSValue Of(in Arguments a)
     {
-        var result = new JSBigUint64Array(TypedArrayParameters.Of(in a, BYTES_PER_ELENENT));
+        var result = CreateTypedArrayFromConstructor(a.This, a.Length);
         for (int i = 0; i < a.Length; i++)
             result[(uint)i] = a[i];
 
         return result;
+    }
+
+    private static JSBigInt ToBigIntValue(JSValue value)
+    {
+        if (value is JSBigInt bigint)
+            return bigint;
+
+        if (value is JSBoolean boolean)
+            return new JSBigInt(boolean.BooleanValue ? BigInteger.One : BigInteger.Zero);
+
+        if (value.IsNullOrUndefined || value.IsNumber || value.IsSymbol)
+            throw JSEngine.NewTypeError("Cannot convert value to BigInt");
+
+        return (JSBigInt)JSBigInt.Constructor(new Arguments(JSUndefined.Value, value));
     }
 }

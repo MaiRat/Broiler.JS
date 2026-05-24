@@ -117,7 +117,7 @@ partial class JSTypedArray
 
         if (callback is not JSFunction fn)
             throw JSEngine.NewTypeError($"{callback} is not a function in Array.prototype.filter");
-        var r = new JSArray();
+        var values = new List<JSValue>();
         var en = GetElementEnumerator();
         while (en.MoveNext(out var hasValue, out var item, out var index))
         {
@@ -125,10 +125,15 @@ partial class JSTypedArray
             var itemParams = new Arguments(thisArg, item, new JSNumber(index), this);
             if (fn.f(itemParams).BooleanValue)
             {
-                r.Add(item);
+                values.Add(item);
             }
         }
-        return r;
+
+        var result = CreateTypedArrayFromConstructor(GetSpeciesConstructor(this), values.Count);
+        for (uint i = 0; i < values.Count; i++)
+            result[i] = values[(int)i];
+
+        return result;
     }
 
     [JSExport("toSorted", Length = 1)]
@@ -273,7 +278,7 @@ partial class JSTypedArray
     {
 
         var first = a.Get1();
-        var sep = first.IsUndefined ? "," : first.ToString();
+        var sep = first.IsUndefined ? "," : first.StringValue;
         var sb = new StringBuilder();
         bool isFirst = true;
         var en = GetElementEnumerator();
@@ -337,20 +342,23 @@ partial class JSTypedArray
         var (callback, thisArg) = a.Get2();
         if (callback is not JSFunction fn)
             throw JSEngine.NewTypeError($"{callback} is not a function in Array.prototype.find");
-        var r = new JSArray();
-        ref var rElements = ref r.CreateElements();
+        var values = new List<JSValue>();
         var en = GetElementEnumerator();
         while (en.MoveNext(out var hasValue, out var item, out var index))
         {
             if (!hasValue)
             {
-                r._length++;
                 continue;
             }
             var itemArgs = new Arguments(thisArg, item, new JSNumber(index), this);
-            rElements.Put(r._length++, fn.f(itemArgs));
+            values.Add(fn.f(itemArgs));
         }
-        return r;
+
+        var result = CreateTypedArrayFromConstructor(GetSpeciesConstructor(this), values.Count);
+        for (uint i = 0; i < values.Count; i++)
+            result[i] = values[(int)i];
+
+        return result;
     }
 
     [JSExport("reduce", Length = 1)]
@@ -425,13 +433,13 @@ partial class JSTypedArray
     public JSValue Set(in Arguments a)
     {
         var (source, offset) = a.Get2();
+        var relativeStart = offset.AsInt32OrDefault();
         int length = Length;
         if (length == 0)
         {
             return JSNumber.MinusOne;
         }
 
-        var relativeStart = offset.AsInt32OrDefault();
         if (relativeStart < 0)
             throw JSEngine.NewRangeError("Offset is out of bounds");
         var targetArrayLength = source.Length + relativeStart;

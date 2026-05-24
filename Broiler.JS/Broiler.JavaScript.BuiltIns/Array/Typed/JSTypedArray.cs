@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text;
 using Broiler.JavaScript.BuiltIns.Boolean;
 using Broiler.JavaScript.BuiltIns.Generator;
 using Broiler.JavaScript.ExpressionCompiler;
 using Broiler.JavaScript.BuiltIns.Number;
+using Broiler.JavaScript.BuiltIns.Symbol;
 using Broiler.JavaScript.Runtime;
 using Broiler.JavaScript.Engine.Extensions;
 using Broiler.JavaScript.Engine.Core;
@@ -165,6 +167,64 @@ public partial class JSTypedArray: JSObject
         }
     }
 
+    internal static JSTypedArray CreateTypedArrayFromConstructor(JSValue constructor, int length)
+    {
+        var created = constructor.CreateInstance(new JSNumber(length));
+        if (created is not JSTypedArray typedArray)
+            throw JSEngine.NewTypeError("TypedArray constructor did not return a TypedArray");
+
+        if (typedArray.Length < length)
+            throw JSEngine.NewTypeError("TypedArray constructor returned a too-small TypedArray");
+
+        return typedArray;
+    }
+
+    internal static JSValue GetSpeciesConstructor(JSTypedArray source)
+    {
+        var constructor = source[KeyStrings.constructor];
+        if (!constructor.IsObject)
+            return constructor;
+
+        var species = constructor[(IJSSymbol)JSSymbol.species];
+        if (species.IsNullOrUndefined)
+            return constructor;
+
+        if (species is not IJSFunction)
+            throw JSEngine.NewTypeError("TypedArray species constructor is not a constructor");
+
+        return species;
+    }
+
+    private static bool TryGetCanonicalNumericIndex(in KeyString key, out double numericIndex)
+    {
+        var text = key.Value.Value;
+        if (text == "-0")
+        {
+            numericIndex = -0.0;
+            return true;
+        }
+
+        if (!double.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out numericIndex))
+            return false;
+
+        return new JSNumber(numericIndex).ToString() == text;
+    }
+
+    private bool IsValidIntegerIndex(double numericIndex)
+    {
+        if (double.IsNaN(numericIndex)
+            || double.IsInfinity(numericIndex)
+            || Math.Truncate(numericIndex) != numericIndex)
+        {
+            return false;
+        }
+
+        if (numericIndex == 0 && double.IsNegativeInfinity(1 / numericIndex))
+            return false;
+
+        return numericIndex >= 0 && numericIndex < length;
+    }
+
     public override JSValue GetOwnPropertyDescriptor(JSValue name)
     {
         var key = name.ToKey(false);
@@ -196,6 +256,22 @@ public partial class JSTypedArray: JSObject
         }
         return base.GetOwnPropertyDescriptor(name);
     }
+
+    public override JSValue DefineProperty(uint key, JSObject pd)
+    {
+        if (key >= length)
+            return JSBoolean.False;
+
+        return base.DefineProperty(key, pd);
+    }
+
+    public override JSValue DefineProperty(in KeyString name, JSObject pd)
+    {
+        if (TryGetCanonicalNumericIndex(name, out var numericIndex))
+            return IsValidIntegerIndex(numericIndex) ? base.DefineProperty((uint)numericIndex, pd) : JSBoolean.False;
+
+        return base.DefineProperty(name, pd);
+    }
     public override bool BooleanValue => true;
     public override double DoubleValue => double.NaN;
     public override bool Equals(JSValue value) => ReferenceEquals(this, value);
@@ -203,6 +279,16 @@ public partial class JSTypedArray: JSObject
     public override JSValue InvokeFunction(in Arguments a) => throw JSEngine.NewTypeError($"{this} is not a function");
 
     public override bool StrictEquals(JSValue value) => ReferenceEquals(this, value);
+
+    public override JSValue Delete(in KeyString key)
+    {
+        if (TryGetCanonicalNumericIndex(key, out var numericIndex))
+            return IsValidIntegerIndex(numericIndex) ? JSBoolean.False : JSBoolean.True;
+
+        return base.Delete(key);
+    }
+
+    public override JSValue Delete(uint key) => key < length ? JSBoolean.False : JSBoolean.True;
 
     public override string ToString()
     {

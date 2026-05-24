@@ -5824,6 +5824,89 @@ public class BuiltInsTests
     }
 
     [Fact]
+    public void BigInt_TypedArray_TypeError_Regressions_Match_Test262()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = new JSContext();
+
+        var result = ctx.Eval("""
+            (function () {
+                function thrownCtor(fn) {
+                    try {
+                        fn();
+                        return 'no-throw';
+                    } catch (e) {
+                        return e && e.constructor ? e.constructor.name : typeof e;
+                    }
+                }
+
+                return [
+                    thrownCtor(function () { new BigInt64Array(Symbol('1')); }),
+                    thrownCtor(function () { new BigInt64Array(0).join(Symbol('')); }),
+                    thrownCtor(function () {
+                        var sample = new BigInt64Array(2);
+                        sample.constructor = {};
+                        sample.constructor[Symbol.species] = Array;
+                        sample.filter(function () { return true; });
+                    }),
+                    thrownCtor(function () {
+                        var sample = new BigInt64Array(2);
+                        sample.constructor = {};
+                        sample.constructor[Symbol.species] = function () { return new BigInt64Array(); };
+                        sample.map(function () { return 0n; });
+                    }),
+                    thrownCtor(function () {
+                        var sample = new BigInt64Array(0);
+                        sample.set(sample, Symbol('1'));
+                    }),
+                    thrownCtor(function () { BigInt64Array.from.call({ m() {} }.m, []); }),
+                    thrownCtor(function () { BigInt64Array.from.call(function () {}, []); }),
+                    thrownCtor(function () { BigInt64Array.of.call(function () {}, 42n); }),
+                    thrownCtor(function () {
+                        var source = [];
+                        source.length = 2;
+                        source[1] = 42n;
+                        BigInt64Array.from(source);
+                    }),
+                    thrownCtor(function () {
+                        var sample = new BigInt64Array([0n]);
+                        var desc = Object.getOwnPropertyDescriptor(sample, '0');
+                        Object.defineProperty(sample, '1', desc);
+                    }),
+                    (function () {
+                        var sample = new BigInt64Array(1);
+                        return [
+                            delete sample['-0'],
+                            thrownCtor(function () {
+                                (function () {
+                                    'use strict';
+                                    delete sample[-0];
+                                })();
+                            })
+                        ].join(',');
+                    })(),
+                    thrownCtor(function () {
+                        var sample = new BigInt64Array(1);
+                        sample[0] = 1;
+                    }),
+                    thrownCtor(function () {
+                        var sample = new BigInt64Array(1);
+                        sample[0] = undefined;
+                    }),
+                    thrownCtor(function () {
+                        var sample = new BigInt64Array(1);
+                        sample[0] = null;
+                    })
+                ].join('|');
+            })();
+            """);
+
+        Assert.Equal(
+            "TypeError|TypeError|TypeError|TypeError|TypeError|TypeError|TypeError|TypeError|TypeError|TypeError|true,TypeError|TypeError|TypeError|TypeError",
+            result.ToString());
+    }
+
+    [Fact]
     public void RegExp_Prototype_Compile_TypeError_Scenarios_Match_Test262_Expectations()
     {
         EnsureBuiltInsLoaded();

@@ -63,6 +63,12 @@ internal static class SyntaxValidation
                 return true;
             }
 
+            if (token.Type == TokenTypes.String
+                && ContainsLegacyOctalEscapeInString(token.Span.Value))
+            {
+                return true;
+            }
+
             stream.Consume();
         }
 
@@ -79,6 +85,44 @@ internal static class SyntaxValidation
             return false;
 
         return second is >= '0' and <= '7';
+    }
+
+    /// <summary>
+    /// Checks whether the raw source text of a string literal token contains
+    /// a legacy octal escape sequence such as <c>\1</c>, <c>\00</c> or <c>\010</c>.
+    /// The bare <c>\0</c> (null escape) followed by a non-octal digit is allowed.
+    /// </summary>
+    internal static bool ContainsLegacyOctalEscapeInString(string rawSource)
+    {
+        if (string.IsNullOrEmpty(rawSource) || rawSource.Length < 3)
+            return false;
+
+        // Scan between the opening and closing quote characters.
+        for (var i = 1; i < rawSource.Length - 1; i++)
+        {
+            if (rawSource[i] != '\\')
+                continue;
+
+            i++; // advance past backslash
+            if (i >= rawSource.Length - 1)
+                break;
+
+            var ch = rawSource[i];
+
+            // \1 through \7 are always legacy octal escapes
+            if (ch >= '1' && ch <= '7')
+                return true;
+
+            // \0 followed by an octal digit (0-7) is a legacy octal escape
+            if (ch == '0'
+                && i + 1 < rawSource.Length - 1
+                && rawSource[i + 1] >= '0' && rawSource[i + 1] <= '7')
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private static bool HasDirectEvalLexicalConflict(IFastEnumerable<AstStatement> statements, IEnumerable<string> directEvalLexicalBindings)
@@ -276,6 +320,32 @@ internal static class SyntaxValidation
             }
 
             return base.VisitUnaryExpression(unaryExpression);
+        }
+
+        protected override AstNode VisitBinaryExpression(AstBinaryExpression binaryExpression)
+        {
+            if (IsStrictMode
+                && binaryExpression.Operator > TokenTypes.BeginAssignTokens
+                && binaryExpression.Operator < TokenTypes.EndAssignTokens
+                && binaryExpression.Left is AstIdentifier assignTarget
+                && IsRestrictedName(assignTarget.Name))
+            {
+                throw new FastParseException(assignTarget.Start, "Assignment to eval or arguments is not allowed in strict mode");
+            }
+
+            return base.VisitBinaryExpression(binaryExpression);
+        }
+
+        protected override AstNode VisitLiteral(AstLiteral literal)
+        {
+            if (IsStrictMode
+                && literal.TokenType == TokenTypes.String
+                && ContainsLegacyOctalEscapeInString(literal.Start.Span.Value))
+            {
+                throw new FastParseException(literal.Start, "Octal escape sequences are not allowed in strict mode");
+            }
+
+            return base.VisitLiteral(literal);
         }
 
         protected override AstNode VisitWithStatement(AstWithStatement withStatement)

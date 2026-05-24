@@ -100,6 +100,12 @@ partial class FastCompiler
                 onFound();
             }
 
+            if (literal.TokenType == TokenTypes.String
+                && SyntaxValidation.ContainsLegacyOctalEscapeInString(literal.Start.Span.Value))
+            {
+                onFound();
+            }
+
             return literal;
         }
     }

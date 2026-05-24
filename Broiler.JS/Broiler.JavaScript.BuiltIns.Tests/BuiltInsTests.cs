@@ -6307,6 +6307,38 @@ public class BuiltInsTests
     }
 
     [Fact]
+    public void Strict_Mode_Rejects_Legacy_Octal_Escape_In_Strings()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = new JSContext();
+
+        var result = ctx.Eval("""
+            (function () {
+              function tryParse(code) {
+                try { Function(code); return 'ok'; }
+                catch (e) { return e instanceof SyntaxError ? 'SyntaxError' : 'other'; }
+              }
+
+              return [
+                // Legacy octal escapes must be rejected in strict mode
+                tryParse("'use strict'; \"\\1\""),
+                tryParse("'use strict'; \"\\00\""),
+                tryParse("'use strict'; \"\\010\""),
+                // Null escape (\0 not followed by octal digit) is fine
+                tryParse("'use strict'; \"\\0\""),
+                // Normal strings are fine
+                tryParse("'use strict'; \"hello\""),
+                // Non-strict mode allows octal escapes
+                tryParse("\"\\010\""),
+                tryParse("\"\\1\"")
+              ].join('|');
+            })();
+            """);
+
+        Assert.Equal("SyntaxError|SyntaxError|SyntaxError|ok|ok|ok|ok", result.ToString());
+    }
+
+    [Fact]
     public void ForIn_Skips_Array_Holes_After_Shift()
     {
         EnsureBuiltInsLoaded();

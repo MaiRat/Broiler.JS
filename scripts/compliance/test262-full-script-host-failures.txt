@@ -2837,7 +2837,6 @@ test/built-ins/RegExp/property-escapes/special-property-value-Script_Extensions-
 test/built-ins/RegExp/prototype/S15.10.5.1_A3.js
 test/built-ins/RegExp/prototype/S15.10.5.1_A4.js
 test/built-ins/RegExp/prototype/Symbol.match/builtin-infer-unicode.js
-test/built-ins/RegExp/prototype/Symbol.match/builtin-success-u-return-val-groups.js
 test/built-ins/RegExp/prototype/Symbol.match/exec-invocation.js
 test/built-ins/RegExp/prototype/Symbol.match/flags-tostring-error.js
 test/built-ins/RegExp/prototype/Symbol.match/get-flags-err.js
@@ -2861,7 +2860,6 @@ test/built-ins/RegExp/prototype/Symbol.replace/result-coerce-index-undefined.js
 test/built-ins/RegExp/prototype/Symbol.replace/u-advance-after-empty.js
 test/built-ins/RegExp/prototype/Symbol.search/u-lastindex-advance.js
 test/built-ins/RegExp/prototype/Symbol.split/coerce-flags-err.js
-test/built-ins/RegExp/prototype/Symbol.split/u-lastindex-adv-thru-match.js
 test/built-ins/RegExp/prototype/dotAll/this-val-regexp-prototype.js
 test/built-ins/RegExp/prototype/exec/S15.10.6.2_A1_T10.js
 test/built-ins/RegExp/prototype/exec/S15.10.6.2_A1_T11.js
@@ -2882,9 +2880,7 @@ test/built-ins/RegExp/prototype/exec/S15.10.6.2_A1_T6.js
 test/built-ins/RegExp/prototype/exec/duplicate-named-groups-properties.js
 test/built-ins/RegExp/prototype/exec/duplicate-named-indices-groups-properties.js
 test/built-ins/RegExp/prototype/exec/regexp-builtin-exec-v-u-flag.js
-test/built-ins/RegExp/prototype/exec/u-captured-value.js
 test/built-ins/RegExp/prototype/exec/u-lastindex-adv.js
-test/built-ins/RegExp/prototype/exec/u-lastindex-value.js
 test/built-ins/RegExp/prototype/flags/coercion-dotall.js
 test/built-ins/RegExp/prototype/flags/coercion-global.js
 test/built-ins/RegExp/prototype/flags/coercion-hasIndices.js
@@ -5408,7 +5404,6 @@ test/language/expressions/assignment/dstr/obj-rest-to-property.js
 test/language/expressions/assignment/dstr/obj-rest-val-null.js
 test/language/expressions/assignment/dstr/obj-rest-val-undefined.js
 test/language/expressions/assignment/dstr/obj-rest-valid-object.js
-test/language/expressions/assignment/fn-name-cover.js
 test/language/expressions/assignment/fn-name-lhs-cover.js
 test/language/expressions/assignment/line-terminator.js
 test/language/expressions/assignment/target-super-computed-reference-null.js
@@ -6819,7 +6814,6 @@ test/language/expressions/generators/has-instance.js
 test/language/expressions/generators/named-strict-error-reassign-fn-name-in-body-in-eval.js
 test/language/expressions/generators/named-yield-identifier-non-strict.js
 test/language/expressions/generators/named-yield-identifier-spread-non-strict.js
-test/language/expressions/generators/no-name.js
 test/language/expressions/generators/prototype-own-properties.js
 test/language/expressions/generators/prototype-value.js
 test/language/expressions/generators/scope-param-elem-var-close.js
@@ -7193,14 +7187,11 @@ test/language/expressions/super/prop-expr-uninitialized-this-putvalue-compound-a
 test/language/expressions/super/prop-expr-uninitialized-this-putvalue-increment.js
 test/language/expressions/super/prop-expr-uninitialized-this-putvalue.js
 test/language/expressions/super/prop-poisoned-underscore-proto.js
-test/language/expressions/tagged-template/cache-different-functions-same-site.js
 test/language/expressions/tagged-template/cache-eval-inner-function.js
 test/language/expressions/tagged-template/cache-same-site-top-level.js
-test/language/expressions/tagged-template/cache-same-site.js
 test/language/expressions/tagged-template/invalid-escape-sequences.js
 test/language/expressions/tagged-template/tco-call.js
 test/language/expressions/tagged-template/tco-member.js
-test/language/expressions/tagged-template/template-object-template-map.js
 test/language/expressions/tagged-template/template-object.js
 test/language/expressions/tco-pos.js
 test/language/expressions/template-literal/literal-expr-abrupt.js
@@ -7436,9 +7427,7 @@ test/language/literals/regexp/S7.8.5_A2.5_T6.js
 test/language/literals/regexp/u-astral.js
 test/language/literals/regexp/u-case-mapping.js
 test/language/literals/regexp/u-surrogate-pairs-atom-char-class.js
-test/language/literals/regexp/u-surrogate-pairs-atom-dot.js
 test/language/literals/regexp/u-surrogate-pairs-atom-escape-char-class.js
-test/language/literals/regexp/u-surrogate-pairs-atom-escape-decimal.js
 test/language/literals/regexp/u-surrogate-pairs.js
 test/language/literals/regexp/u-unicode-esc.js
 test/language/literals/string/legacy-octal-escape-sequence.js
@@ -8892,7 +8881,6 @@ test/language/statements/const/dstr/obj-ptrn-prop-eval-err.js
 test/language/statements/const/dstr/obj-ptrn-rest-getter.js
 test/language/statements/const/dstr/obj-ptrn-rest-skip-non-enumerable.js
 test/language/statements/const/dstr/obj-ptrn-rest-val-obj.js
-test/language/statements/const/fn-name-cover.js
 test/language/statements/const/global-closure-get-before-initialization.js
 test/language/statements/const/static-init-await-binding-valid.js
 test/language/statements/const/syntax/const-invalid-assignment-next-expression-for.js
@@ -10137,7 +10125,6 @@ test/language/statements/let/dstr/obj-ptrn-prop-eval-err.js
 test/language/statements/let/dstr/obj-ptrn-rest-getter.js
 test/language/statements/let/dstr/obj-ptrn-rest-skip-non-enumerable.js
 test/language/statements/let/dstr/obj-ptrn-rest-val-obj.js
-test/language/statements/let/fn-name-cover.js
 test/language/statements/let/global-closure-get-before-initialization.js
 test/language/statements/let/global-closure-set-before-initialization.js
 test/language/statements/let/static-init-await-binding-valid.js
@@ -10220,7 +10207,6 @@ test/language/statements/variable/dstr/obj-ptrn-prop-eval-err.js
 test/language/statements/variable/dstr/obj-ptrn-rest-getter.js
 test/language/statements/variable/dstr/obj-ptrn-rest-skip-non-enumerable.js
 test/language/statements/variable/dstr/obj-ptrn-rest-val-obj.js
-test/language/statements/variable/fn-name-cover.js
 test/language/statements/variable/static-init-await-binding-valid.js
 test/language/statements/while/tco-body.js
 test/language/statements/with/12.10-0-3.js

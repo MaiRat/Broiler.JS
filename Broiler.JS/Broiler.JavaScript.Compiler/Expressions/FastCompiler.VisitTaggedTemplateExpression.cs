@@ -80,7 +80,7 @@ partial class FastCompiler
                     if (l.TokenType == TokenTypes.String)
                         name = KeyOfName(l.Start.CookedText);
                     else if (l.TokenType == TokenTypes.Number)
-                        name = YExpression.Constant((uint)l.NumericValue);
+                        name = GetLiteralPropertyKey(l);
                     else
                         throw new NotImplementedException();
                     break;

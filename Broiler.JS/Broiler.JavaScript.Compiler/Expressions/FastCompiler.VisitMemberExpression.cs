@@ -47,7 +47,7 @@ partial class FastCompiler
                         if (number >= 0 && number < uint.MaxValue && (number % 1) == 0)
                             return JSValueBuilder.Index(target, super, (uint)l.NumericValue, memberExpression.Coalesce);
 
-                        return JSValueBuilder.Index(target, super, KeyOfName(l.NumericValue.ToString()), memberExpression.Coalesce);
+                        return JSValueBuilder.Index(target, super, VisitLiteral(l), memberExpression.Coalesce);
 
                     default:
                         throw new NotImplementedException();

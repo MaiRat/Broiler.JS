@@ -13,12 +13,8 @@ namespace Broiler.JavaScript.Compiler;
 
 partial class FastCompiler
 {
-    private static string FormatLiteralPropertyName(AstLiteral literal)
+    private static string FormatNumericPropertyName(double value)
     {
-        if (literal.TokenType == TokenTypes.String)
-            return literal.StringValue;
-
-        var value = literal.NumericValue;
         if (double.IsNaN(value))
             return nameof(double.NaN);
 
@@ -28,7 +24,37 @@ partial class FastCompiler
         if (value > 0 && (uint)value == value)
             return ((uint)value).ToString();
 
-        return value.ToString();
+        return JSValue.NumberToECMAString(value);
+    }
+
+    private static string FormatLiteralPropertyName(AstLiteral literal)
+    {
+        if (literal.TokenType == TokenTypes.String)
+            return literal.StringValue;
+
+        return FormatNumericPropertyName(literal.NumericValue);
+    }
+
+    private YExpression GetLiteralPropertyKey(AstLiteral literal)
+    {
+        if (literal.TokenType == TokenTypes.String)
+        {
+            if (NumberParser.TryGetArrayIndex(literal.StringValue, out var ui))
+                return YExpression.Constant(ui);
+
+            return KeyOfName(literal.StringValue);
+        }
+
+        if (literal.TokenType == TokenTypes.Number)
+        {
+            var value = literal.NumericValue;
+            if (value == 0 || (value > 0 && value <= uint.MaxValue && value % 1 == 0))
+                return YExpression.Constant((uint)value);
+
+            return VisitLiteral(literal);
+        }
+
+        throw new NotSupportedException();
     }
 
     private static string GetPropertyFunctionName(AstClassProperty property, string prefix = null)
@@ -71,16 +97,7 @@ partial class FastCompiler
             case (FastNodeType.Literal, AstLiteral l):
                 if (computed)
                     return VisitLiteral(l);
-
-                if (l.TokenType == TokenTypes.String)
-                {
-                    if (NumberParser.TryGetArrayIndex(l.StringValue, out var ui))
-                        return YExpression.Constant(ui);
-
-                    return KeyOfName(l.StringValue);
-                }
-
-                return VisitLiteral(l);
+                return GetLiteralPropertyKey(l);
 
             default:
                 return Visit(exp);

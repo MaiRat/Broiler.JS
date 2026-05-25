@@ -88,15 +88,16 @@ public sealed partial class JSNumber : JSPrimitive
         if (n > 0 && ((uint)n) == n)
             return (uint)n;
 
+        var text = JSValue.NumberToECMAString(n);
         if (!create)
         {
-            if (KeyStrings.TryGet(n.ToString(), out var k))
+            if (KeyStrings.TryGet(text, out var k))
                 return k;
 
-            return KeyStrings.GetOrCreate(n.ToString());
+            return KeyStrings.GetOrCreate(text);
         }
 
-        return KeyStrings.GetOrCreate(n.ToString());
+        return KeyStrings.GetOrCreate(text);
     }
 
     public JSNumber(double value) : base() => this.value = value;

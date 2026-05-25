@@ -10371,7 +10371,6 @@ test/staging/sm/Function/function-toString-builtin-name.js
 test/staging/sm/Function/function-toString-builtin.js
 test/staging/sm/Function/implicit-this-in-parameter-expression.js
 test/staging/sm/Function/invalid-parameter-list.js
-test/staging/sm/Function/parameter-redeclaration.js
 test/staging/sm/Function/redefine-arguments-length.js
 test/staging/sm/Function/rest-parameter-names.js
 test/staging/sm/Function/return-finally.js
@@ -10554,7 +10553,6 @@ test/staging/sm/RegExp/unicode-class-empty.js
 test/staging/sm/RegExp/unicode-class-ignoreCase.js
 test/staging/sm/RegExp/unicode-class-lead-trail.js
 test/staging/sm/RegExp/unicode-class-negated.js
-test/staging/sm/RegExp/unicode-class-range.js
 test/staging/sm/RegExp/unicode-class-raw.js
 test/staging/sm/RegExp/unicode-disallow-extended.js
 test/staging/sm/RegExp/unicode-everything.js
@@ -10874,7 +10872,6 @@ test/staging/sm/regress/regress-593256.js
 test/staging/sm/regress/regress-597945-1.js
 test/staging/sm/regress/regress-610026.js
 test/staging/sm/regress/regress-617405-2.js
-test/staging/sm/statements/for-in-with-declaration.js
 test/staging/sm/statements/for-inof-finally.js
 test/staging/sm/statements/for-inof-loop-const-declaration.js
 test/staging/sm/statements/for-inof-name-iteration-expression-contains-index-string.js
@@ -10895,7 +10892,6 @@ test/staging/sm/strict/primitive-this-getter.js
 test/staging/sm/strict/regress-599159.js
 test/staging/sm/strict/strict-function-statements.js
 test/staging/sm/syntax/class-error.js
-test/staging/sm/syntax/declaration-forbidden-in-label.js
 test/staging/sm/syntax/escaped-let-static-identifier.js
 test/staging/sm/syntax/keyword-unescaped-requirement.js
 test/staging/sm/syntax/let-as-label.js

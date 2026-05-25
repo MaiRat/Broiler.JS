@@ -427,6 +427,40 @@ public class CompilerTests
     }
 
     [Fact]
+    public void Compile_Object_Accessor_Literal_Names_Are_Canonicalized_And_Inferred()
+    {
+        using var ctx = new JSContext();
+        var result = ctx.Eval("""
+            (function () {
+                var obj = {
+                    get "string"() { return 1; },
+                    set "string"(value) {},
+                    get 0b10() { return 2; },
+                    get "\u0073tatic"() { return 3; },
+                    set "\u0073tatic"(value) {},
+                    get 1e2() { return 4; }
+                };
+
+                var stringDesc = Object.getOwnPropertyDescriptor(obj, "string");
+                var numericDesc = Object.getOwnPropertyDescriptor(obj, 2);
+                var escapedDesc = Object.getOwnPropertyDescriptor(obj, "static");
+                var staticNumericDesc = Object.getOwnPropertyDescriptor(obj, 100);
+
+                return [
+                    stringDesc.get.name,
+                    stringDesc.set.name,
+                    numericDesc === undefined ? "missing" : numericDesc.get.name,
+                    escapedDesc.get.name,
+                    escapedDesc.set.name,
+                    staticNumericDesc === undefined ? "missing" : staticNumericDesc.get.name
+                ].join('|');
+            })()
+            """);
+
+        Assert.Equal("get string|set string|get 2|get static|set static|get 100", result.ToString());
+    }
+
+    [Fact]
     public void Compile_DestructuringDefaults_DoNotInfer_Function_Names_Through_Cover_Grammar()
     {
         using var ctx = new JSContext();

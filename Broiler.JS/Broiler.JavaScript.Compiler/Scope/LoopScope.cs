@@ -1,4 +1,5 @@
-﻿using Broiler.JavaScript.ExpressionCompiler.Core;
+﻿using System.Collections.Generic;
+using Broiler.JavaScript.ExpressionCompiler.Core;
 using Broiler.JavaScript.ExpressionCompiler.Expressions;
 
 namespace Broiler.JavaScript.Compiler;
@@ -29,5 +30,16 @@ public class LoopScope(YLabelTarget breakTarget, YLabelTarget continueTarget, bo
             start = start.Parent;
         }
         return null;
+    }
+
+    public IEnumerable<YParameterExpression> GetCompletionVariables()
+    {
+        var start = this;
+        while (start != null)
+        {
+            if (start.CompletionVariable != null)
+                yield return start.CompletionVariable;
+            start = start.Parent;
+        }
     }
 }

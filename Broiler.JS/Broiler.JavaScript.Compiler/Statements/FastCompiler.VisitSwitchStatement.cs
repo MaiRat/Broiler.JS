@@ -7,6 +7,7 @@ using System.Linq;
 using Broiler.JavaScript.ExpressionCompiler.Expressions;
 using Broiler.JavaScript.LinqExpressions.LinqExpressions;
 using Broiler.JavaScript.LinqExpressions.Utils;
+using Broiler.JavaScript.Runtime;
 
 namespace Broiler.JavaScript.Compiler;
 
@@ -33,8 +34,11 @@ partial class FastCompiler
             Sequence<YExpression> defBody = null;
             var @continue = this.scope.Top.Loop?.Top?.Continue;
             var @break = YExpression.Label();
-            var ls = new LoopScope(@break, @continue, true);
+            var completionVar = YExpression.Variable(typeof(JSValue), "#cv");
+            var outerCompletionVars = GetCompletionVariables();
+            var ls = new LoopScope(@break, @continue, true) { CompletionVariable = completionVar };
             var cases = new Sequence<SwitchInfo>(switchStatement.Cases.Count + 2);
+            using var completion = completionScopes.Push(completionVar);
             using var bt = this.scope.Top.Loop.Push(ls);
             SwitchInfo lastCase = new(scope);
             var casesEn = switchStatement.Cases.GetFastEnumerator();
@@ -53,7 +57,7 @@ partial class FastCompiler
                             break;
 
                         case AstStatement stmt:
-                            body.Add(VisitStatement(stmt));
+                            body.Add(TrackCompletion(VisitStatement(stmt)));
                             break;
 
                         default:
@@ -244,8 +248,14 @@ partial class FastCompiler
             }
 
             var r = YExpression.Block(
-                YExpression.Switch(testTarget, d.ToJSValue() ?? JSUndefinedBuilder.Value, equalsMethod, [.. cases.Select(x =>
-                YExpression.SwitchCase(YExpression.Block(x.Body).ToJSValue(), x.Tests))]), YExpression.Label(@break));
+                new Sequence<YParameterExpression> { completionVar },
+                YExpression.Assign(completionVar, JSUndefinedBuilder.Value),
+                YExpression.TryFinally(
+                    YExpression.Switch(testTarget, d.ToJSValue() ?? JSUndefinedBuilder.Value, equalsMethod, [.. cases.Select(x =>
+                    YExpression.SwitchCase(YExpression.Block(x.Body).ToJSValue(), x.Tests))]),
+                    PropagateCompletion(completionVar, outerCompletionVars)),
+                YExpression.Label(@break),
+                completionVar);
             return r;
         }
         finally

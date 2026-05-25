@@ -34,13 +34,15 @@ partial class FastCompiler
                     var breakTarget = YExpression.Label();
                     var label = labeledStatement.Label.Span.Value;
                     var completionVar = YExpression.Variable(typeof(JSValue), "#cv");
+                    var outerCompletionVars = GetCompletionVariables();
                     var loopScope = new LoopScope(breakTarget, null, false, label) { CompletionVariable = completionVar };
+                    using var completion = completionScopes.Push(completionVar);
                     using var s = scope.Top.Loop.Push(loopScope);
-                    var body = VisitStatement(labeledStatement.Body);
+                    var body = TrackCompletion(VisitStatement(labeledStatement.Body));
                     return YExpression.Block(
                         new Sequence<YParameterExpression> { completionVar },
                         YExpression.Assign(completionVar, JSUndefinedBuilder.Value),
-                        body,
+                        YExpression.TryFinally(body, PropagateCompletion(completionVar, outerCompletionVars)),
                         YExpression.Label(breakTarget),
                         completionVar);
                 }

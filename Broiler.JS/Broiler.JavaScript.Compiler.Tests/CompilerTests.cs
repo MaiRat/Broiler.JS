@@ -1011,6 +1011,35 @@ public class CompilerTests
     }
 
     [Fact]
+    public void Compile_Statement_Completion_Preserves_Loop_Values()
+    {
+        using var ctx = new JSContext();
+
+        Assert.Equal(3.0, ctx.Eval("""eval("2; do { 3; } while (false)")""").DoubleValue);
+        Assert.Equal(3.0, ctx.Eval("""eval("2; while (true) { 3; break; }")""").DoubleValue);
+        Assert.Equal(6.0, ctx.Eval("""eval("5; outer: do { while (true) { 6; continue outer; } } while (false)")""").DoubleValue);
+        Assert.True(ctx.Eval("""eval("2; for (; false; ) { 3; }")""").IsUndefined);
+        Assert.Equal(3.0, ctx.Eval("""eval("2; for (; ; ) { 3; break; }")""").DoubleValue);
+        Assert.Equal(3.0, ctx.Eval("""eval("2; for (var k in { a: 1 }) { 3; }")""").DoubleValue);
+        Assert.Equal(3.0, ctx.Eval("""eval("2; for (var v of [1]) { 3; }")""").DoubleValue);
+    }
+
+    [Fact]
+    public void Compile_Statement_Completion_Preserves_Nested_Statement_Values()
+    {
+        using var ctx = new JSContext();
+
+        Assert.Equal(3.0, ctx.Eval("""eval("1; do { 2; if (true) { 3; break; } 4; } while (false)")""").DoubleValue);
+        Assert.True(ctx.Eval("""eval("5; do { 6; if (true) { break; } 7; } while (false)")""").IsUndefined);
+
+        Assert.Equal(3.0, ctx.Eval("""eval("2; switch ('a') { case 'a': { 3; break; } default: }")""").DoubleValue);
+        Assert.Equal(6.0, ctx.Eval("""eval("5; do { switch ('a') { case 'a': { 6; continue; } default: } } while (false)")""").DoubleValue);
+
+        Assert.Equal(3.0, ctx.Eval("""eval("1; do { 2; with({}) { 3; break; } 4; } while (false)")""").DoubleValue);
+        Assert.True(ctx.Eval("""eval("5; do { 6; with({}) { break; } 7; } while (false)")""").IsUndefined);
+    }
+
+    [Fact]
     public void Duplicate_Params_Allowed_In_Non_Strict_Mode()
     {
         using var ctx = new JSContext();

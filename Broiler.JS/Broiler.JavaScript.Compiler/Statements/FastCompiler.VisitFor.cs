@@ -14,6 +14,8 @@ partial class FastCompiler
     {
         var breakTarget = YExpression.Label();
         var continueTarget = YExpression.Label();
+        var completionVar = YExpression.Variable(typeof(JSValue), "#cv");
+        var outerCompletionVars = GetCompletionVariables();
         // this will create a variable if needed...
         // desugar takes care of let so do not worry
         YExpression? identifier = forInStatement.Init.Type switch
@@ -22,20 +24,24 @@ partial class FastCompiler
             _ => throw new FastParseException(forInStatement.Start, $"Unexpcted"),
         };
 
-        using var s = scope.Top.Loop.Push(new LoopScope(breakTarget, continueTarget, false, label));
+        using var completion = completionScopes.Push(completionVar);
+        using var s = scope.Top.Loop.Push(new LoopScope(breakTarget, continueTarget, false, label) { CompletionVariable = completionVar });
         var en = YExpression.Variable(typeof(IElementEnumerator));
-        var pList = en.AsSequence();
-        var body = VisitStatement(forInStatement.Body);
+        var pList = new Sequence<YParameterExpression> { en, completionVar };
+        var body = TrackCompletion(VisitStatement(forInStatement.Body));
         var bodyList = YExpression.Block(YExpression.IfThen(YExpression.Not(IElementEnumeratorBuilder.MoveNext(en, identifier)), YExpression.Goto(s.Break)), body);
         var right = VisitExpression(forInStatement.Target);
+        var loop = YExpression.Loop(bodyList, s.Break, s.Continue);
 
-        return YExpression.Block(pList, YExpression.Assign(en, JSValueBuilder.GetAllKeys(right)), YExpression.Loop(bodyList, s.Break, s.Continue));
+        return YExpression.Block(pList, YExpression.Assign(completionVar, JSUndefinedBuilder.Value), YExpression.Assign(en, JSValueBuilder.GetAllKeys(right)), YExpression.TryFinally(loop, PropagateCompletion(completionVar, outerCompletionVars)), completionVar);
     }
 
     protected override YExpression VisitForOfStatement(AstForOfStatement forOfStatement, string? label = null)
     {
         var breakTarget = YExpression.Label();
         var continueTarget = YExpression.Label();
+        var completionVar = YExpression.Variable(typeof(JSValue), "#cv");
+        var outerCompletionVars = GetCompletionVariables();
         // this will create a variable if needed...
         // desugar takes care of let so do not worry
 
@@ -45,9 +51,10 @@ partial class FastCompiler
             _ => throw new FastParseException(forOfStatement.Start, $"Unexpcted"),
         };
 
-        using var s = scope.Top.Loop.Push(new LoopScope(breakTarget, continueTarget, false, label));
+        using var completion = completionScopes.Push(completionVar);
+        using var s = scope.Top.Loop.Push(new LoopScope(breakTarget, continueTarget, false, label) { CompletionVariable = completionVar });
         var en = YExpression.Variable(typeof(IElementEnumerator));
-        var body = VisitStatement(forOfStatement.Body);
+        var body = TrackCompletion(VisitStatement(forOfStatement.Body));
         var right = VisitExpression(forOfStatement.Target);
         var enumerator = forOfStatement.IsAwait ? IElementEnumeratorBuilder.GetAsync(right) : IElementEnumeratorBuilder.Get(right);
 
@@ -56,7 +63,7 @@ partial class FastCompiler
         var returnableVar = YExpression.Variable(typeof(IReturnableEnumerator));
         var iterDoneVar = YExpression.Variable(typeof(bool));
 
-        var pList = new Sequence<YParameterExpression> { en, returnableVar, iterDoneVar };
+        var pList = new Sequence<YParameterExpression> { en, returnableVar, iterDoneVar, completionVar };
 
         var bodyListItems = new Sequence<YExpression>
         {
@@ -90,10 +97,12 @@ partial class FastCompiler
         var tryFinally = YExpression.TryFinally(loop, closeIterator);
 
         var r = YExpression.Block(pList,
+            YExpression.Assign(completionVar, JSUndefinedBuilder.Value),
             YExpression.Assign(en, enumerator),
             YExpression.Assign(returnableVar, YExpression.TypeAs(en, typeof(IReturnableEnumerator))),
             YExpression.Assign(iterDoneVar, YExpression.Constant(false)),
-            tryFinally);
+            YExpression.TryFinally(tryFinally, PropagateCompletion(completionVar, outerCompletionVars)),
+            completionVar);
 
         return r;
     }
@@ -102,6 +111,8 @@ partial class FastCompiler
     {
         var breakTarget = YExpression.Label();
         var continueTarget = YExpression.Label();
+        var completionVar = YExpression.Variable(typeof(JSValue), "#cv");
+        var outerCompletionVars = GetCompletionVariables();
         // this will create a variable if needed...
         // desugar takes care of let so do not worry
         YExpression init = Visit(forStatement.Init);
@@ -116,8 +127,9 @@ partial class FastCompiler
             innerBody.Add(test);
         }
 
-        using var s = scope.Top.Loop.Push(new LoopScope(breakTarget, continueTarget, false, label));
-        var body = VisitStatement(forStatement.Body);
+        using var completion = completionScopes.Push(completionVar);
+        using var s = scope.Top.Loop.Push(new LoopScope(breakTarget, continueTarget, false, label) { CompletionVariable = completionVar });
+        var body = TrackCompletion(VisitStatement(forStatement.Body));
 
         innerBody.Add(body);
         innerBody.Add(YExpression.Label(continueTarget));
@@ -127,11 +139,22 @@ partial class FastCompiler
 
         if (init == null)
         {
-            var r1 = YExpression.Loop(YExpression.Block(innerBody), breakTarget);
+            var loop = YExpression.Loop(YExpression.Block(innerBody), breakTarget);
+            var r1 = YExpression.Block(
+                new Sequence<YParameterExpression> { completionVar },
+                YExpression.Assign(completionVar, JSUndefinedBuilder.Value),
+                YExpression.TryFinally(loop, PropagateCompletion(completionVar, outerCompletionVars)),
+                completionVar);
             return r1;
         }
 
-        var r = YExpression.Block(init, YExpression.Loop(YExpression.Block(innerBody), breakTarget));
+        var bodyLoop = YExpression.Loop(YExpression.Block(innerBody), breakTarget);
+        var r = YExpression.Block(
+            new Sequence<YParameterExpression> { completionVar },
+            YExpression.Assign(completionVar, JSUndefinedBuilder.Value),
+            init,
+            YExpression.TryFinally(bodyLoop, PropagateCompletion(completionVar, outerCompletionVars)),
+            completionVar);
         return r;
     }
 }

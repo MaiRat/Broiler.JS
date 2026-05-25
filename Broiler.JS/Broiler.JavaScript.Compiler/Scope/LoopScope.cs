@@ -18,16 +18,4 @@ public class LoopScope(YLabelTarget breakTarget, YLabelTarget continueTarget, bo
             start = start.Parent;
         return start;
     }
-
-    public YParameterExpression FindCompletionVariable()
-    {
-        var start = this;
-        while (start != null)
-        {
-            if (start.CompletionVariable != null)
-                return start.CompletionVariable;
-            start = start.Parent;
-        }
-        return null;
-    }
 }

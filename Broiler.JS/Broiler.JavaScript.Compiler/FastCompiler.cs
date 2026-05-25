@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using Broiler.JavaScript.ExpressionCompiler.Expressions;
 using Broiler.JavaScript.ExpressionCompiler.Core;
@@ -26,6 +27,7 @@ public partial class FastCompiler : AstMapVisitor<YExpression>
     private readonly FastPool pool;
 
     readonly LinkedStack<FastFunctionScope> scope = new();
+    readonly ScopedStack<YParameterExpression> completionScopes = new();
     private readonly Stack<FastFunctionScope> withBoundaries = new();
     private readonly string location;
     private readonly bool isDirectEvalCompilation;
@@ -178,6 +180,49 @@ public partial class FastCompiler : AstMapVisitor<YExpression>
             YExpression.TryFinally(body, YExpression.Call(strictScope, DisposeMethod)));
     }
 
+    private YExpression TrackCompletion(YExpression result)
+    {
+        if (result == null || !typeof(JSValue).IsAssignableFrom(result.Type))
+            return result;
+
+        var completionVars = GetCompletionVariables();
+        if (completionVars == null || completionVars.Length == 0)
+            return result;
+
+        if (completionVars.Length == 1)
+            return YExpression.Block(YExpression.Assign(completionVars[0], result), completionVars[0]);
+
+        using var temp = scope.Top.GetTempVariable(typeof(JSValue));
+        var statements = new Sequence<YExpression> { YExpression.Assign(temp.Variable, result) };
+        foreach (var completionVar in completionVars)
+            statements.Add(YExpression.Assign(completionVar, temp.Variable));
+        statements.Add(temp.Variable);
+        return YExpression.Block(new Sequence<YParameterExpression> { temp.Variable }, statements);
+    }
+
+    private YParameterExpression[] GetCompletionVariables()
+    {
+        var items = new List<YParameterExpression>();
+        var current = completionScopes.Top;
+        while (current != null)
+        {
+            items.Add(current.Item);
+            current = current.Parent;
+        }
+        return [.. items];
+    }
+
+    private static YExpression PropagateCompletion(YParameterExpression completionVar, YParameterExpression[] outerCompletionVars)
+    {
+        if (outerCompletionVars == null || outerCompletionVars.Length == 0)
+            return YExpression.Empty;
+
+        var statements = new Sequence<YExpression>(outerCompletionVars.Length);
+        foreach (var outerCompletionVar in outerCompletionVars)
+            statements.Add(YExpression.Assign(outerCompletionVar, completionVar));
+        return YExpression.Block(statements);
+    }
+
     private YExpression VisitExpression(AstExpression exp) => Visit(exp);
 
     private YExpression VisitStatement(AstStatement exp) => Visit(exp);
@@ -202,13 +247,7 @@ public partial class FastCompiler : AstMapVisitor<YExpression>
 
     protected override YExpression VisitExpressionStatement(AstExpressionStatement expressionStatement)
     {
-        var result = Visit(expressionStatement.Expression);
-
-        var completionVar = scope.Top.Loop.Top?.FindCompletionVariable();
-        if (completionVar != null)
-        {
-            result = YExpression.Block(YExpression.Assign(completionVar, result), completionVar);
-        }
+        var result = TrackCompletion(Visit(expressionStatement.Expression));
 
         if (IsStrictMode
             || scope.Top == scope.Top.RootScope

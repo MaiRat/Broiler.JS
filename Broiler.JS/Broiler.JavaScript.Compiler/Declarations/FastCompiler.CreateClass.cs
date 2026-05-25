@@ -31,7 +31,7 @@ partial class FastCompiler
         return value.ToString();
     }
 
-    private static string GetClassMemberFunctionName(AstClassProperty property, string prefix = null)
+    private static string GetPropertyFunctionName(AstClassProperty property, string prefix = null)
     {
         if (property.Computed)
             return null;
@@ -158,14 +158,14 @@ partial class FastCompiler
                     if (property.IsStatic)
                     {
                         var fx = CreateFunction(property.Init as AstFunctionExpression, superVar, forceStrictMode: true,
-                            inferredFunctionName: GetClassMemberFunctionName(property, "get"), createPrototype: false);
+                            inferredFunctionName: GetPropertyFunctionName(property, "get"), createPrototype: false);
                         staticElements.Add(JSObjectBuilder.AddGetter(name, fx, JSPropertyAttributes.ConfigurableProperty));
                         break;
                     }
                     else
                     {
                         var fx = CreateFunction(property.Init as AstFunctionExpression, superPrototypeVar, forceStrictMode: true,
-                            inferredFunctionName: GetClassMemberFunctionName(property, "get"), createPrototype: false);
+                            inferredFunctionName: GetPropertyFunctionName(property, "get"), createPrototype: false);
                         prototypeElements.Add(JSObjectBuilder.AddGetter(name, fx, JSPropertyAttributes.ConfigurableProperty));
                     }
                     break;
@@ -175,13 +175,13 @@ partial class FastCompiler
                     if (property.IsStatic)
                     {
                         var fx = CreateFunction(property.Init as AstFunctionExpression, superVar, forceStrictMode: true,
-                            inferredFunctionName: GetClassMemberFunctionName(property, "set"), createPrototype: false);
+                            inferredFunctionName: GetPropertyFunctionName(property, "set"), createPrototype: false);
                         staticElements.Add(JSObjectBuilder.AddSetter(name, fx, JSPropertyAttributes.ConfigurableProperty));
                     }
                     else
                     {
                         var fx = CreateFunction(property.Init as AstFunctionExpression, superPrototypeVar, forceStrictMode: true,
-                            inferredFunctionName: GetClassMemberFunctionName(property, "set"), createPrototype: false);
+                            inferredFunctionName: GetPropertyFunctionName(property, "set"), createPrototype: false);
                         prototypeElements.Add(JSObjectBuilder.AddSetter(name, fx, JSPropertyAttributes.ConfigurableProperty));
                     }
                     break;

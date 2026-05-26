@@ -83,6 +83,55 @@ public static class LogReportFormatter
         return JsonSerializer.Serialize(CreateMostCommonProblemReport(fileSummaries, outputFormat: "json"), JsonOptions);
     }
 
+    public static string FormatHighestImpactProblem(IEnumerable<LogFileSummary> fileSummaries)
+    {
+        var report = CreateHighestImpactProblemReport(fileSummaries, outputFormat: "text");
+        var builder = new StringBuilder();
+
+        if (report.Problem is null)
+        {
+            return "### Description\nHighest-impact exception detected in recent logs.\n\n- No parsed exceptions were found.";
+        }
+
+        builder.AppendLine("### Description");
+        builder.AppendLine("Highest-impact exception detected in recent logs.");
+        builder.AppendLine();
+        builder.AppendLine($"- **Exception type:** {report.Problem.Type}");
+        builder.AppendLine($"- **Line number:** {FormatLineNumber(report.Problem.Example.LineNumber)}");
+        builder.AppendLine($"- **Context:** {report.Problem.Context}");
+        builder.AppendLine($"- **Message:** {report.Problem.Message}");
+        builder.AppendLine(
+            $"- **Impact score:** {report.Problem.ImpactScore.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)} "
+            + $"(spans {report.Problem.DistinctPathBucketCount} distinct path bucket(s), {report.Problem.Count} occurrence(s))");
+        builder.AppendLine("- **Sample filenames/paths:**");
+
+        var samplePaths = report.Problem.Occurrences
+            .Select(occurrence => occurrence.Path)
+            .Where(path => !string.IsNullOrWhiteSpace(path))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .Take(20)
+            .ToArray();
+
+        if (samplePaths.Length == 0)
+        {
+            builder.AppendLine("  - (no sample files available)");
+        }
+        else
+        {
+            foreach (var samplePath in samplePaths)
+            {
+                builder.AppendLine($"  - {samplePath}");
+            }
+        }
+
+        return builder.ToString().TrimEnd();
+    }
+
+    public static string FormatHighestImpactProblemJson(IEnumerable<LogFileSummary> fileSummaries)
+    {
+        return JsonSerializer.Serialize(CreateHighestImpactProblemReport(fileSummaries, outputFormat: "json"), JsonOptions);
+    }
+
     public static string FormatFilteredExceptions(
         IEnumerable<LogFileSummary> fileSummaries,
         string? typeFilter,
@@ -227,6 +276,21 @@ public static class LogReportFormatter
         {
             OutputFormat = outputFormat,
             Problem = LogSummaryBuilder.FindMostCommonProblem(summaries.SelectMany(summary => summary.LogRun.Results))
+        };
+    }
+
+    internal static HighestImpactProblemReport CreateHighestImpactProblemReport(
+        IEnumerable<LogFileSummary> fileSummaries,
+        string outputFormat)
+    {
+        var summaries = fileSummaries.ToArray();
+        var bucketDepth = summaries.Length > 0 ? summaries[0].BucketDepth : 4;
+        return new HighestImpactProblemReport
+        {
+            OutputFormat = outputFormat,
+            Problem = LogSummaryBuilder.FindHighestImpactProblem(
+                summaries.SelectMany(summary => summary.LogRun.Results),
+                bucketDepth)
         };
     }
 

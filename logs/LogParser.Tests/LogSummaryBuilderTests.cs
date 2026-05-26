@@ -673,6 +673,246 @@ public class LogSummaryBuilderTests
     }
 
     [Fact]
+    public void FindHighestImpactProblem_PrefersHigherAreaWeightOverRawCount()
+    {
+        // 3 annexB hits vs 2 language hits: language wins because area weight 3.0 * 2 = 6 > 1.0 * 3 = 3.
+        using var fixture = TempLogFile.Create("""
+        {
+          "suiteRef": "fixture-highest-impact",
+          "broilerDll": "fixture/BroilerJS.dll",
+          "executed": 5,
+          "passed": 0,
+          "failed": 5,
+          "skipped": 0,
+          "results": [
+            {
+              "path": "test/annexB/built-ins/RegExp/a.js",
+              "status": "failed",
+              "stderr": "Unhandled exception. System.AnnexBException: Annex problem\nat AnnexHandler in /repo/Annex.cs:line 10\n"
+            },
+            {
+              "path": "test/annexB/built-ins/RegExp/b.js",
+              "status": "failed",
+              "stderr": "Unhandled exception. System.AnnexBException: Annex problem\nat AnnexHandler in /repo/Annex.cs:line 10\n"
+            },
+            {
+              "path": "test/annexB/built-ins/RegExp/c.js",
+              "status": "failed",
+              "stderr": "Unhandled exception. System.AnnexBException: Annex problem\nat AnnexHandler in /repo/Annex.cs:line 10\n"
+            },
+            {
+              "path": "test/language/expressions/assignment/a.js",
+              "status": "failed",
+              "stderr": "Unhandled exception. System.CoreException: Core problem\nat CoreHandler in /repo/Core.cs:line 20\n"
+            },
+            {
+              "path": "test/language/statements/for/b.js",
+              "status": "failed",
+              "stderr": "Unhandled exception. System.CoreException: Core problem\nat CoreHandler in /repo/Core.cs:line 20\n"
+            }
+          ]
+        }
+        """);
+
+        var summary = LogSummaryBuilder.ParseAndSummarize(fixture.Path);
+        var mostCommon = LogSummaryBuilder.FindMostCommonProblem(summary.LogRun.Results);
+        var highestImpact = LogSummaryBuilder.FindHighestImpactProblem(summary.LogRun.Results, summary.BucketDepth);
+
+        // Sanity: existing frequency-based selector still picks the annexB cluster.
+        Assert.NotNull(mostCommon);
+        Assert.Equal("System.AnnexBException", mostCommon.Type);
+
+        // Impact-based selector promotes the language cluster despite a lower count.
+        Assert.NotNull(highestImpact);
+        Assert.Equal("System.CoreException", highestImpact.Type);
+        Assert.Equal("CoreHandler", highestImpact.Context);
+        Assert.Equal("Core problem", highestImpact.Message);
+        Assert.Equal(2, highestImpact.Count);
+        Assert.Equal(2, highestImpact.DistinctPathBucketCount);
+        Assert.Equal(3.0 * 2.0 * 2, highestImpact.ImpactScore);
+        Assert.Equal(
+            ["test/language/expressions/assignment/a.js", "test/language/statements/for/b.js"],
+            highestImpact.Occurrences.Select(occurrence => occurrence.Path).ToArray());
+    }
+
+    [Fact]
+    public void FindHighestImpactProblem_PrefersBreadthAcrossDistinctPathBuckets()
+    {
+        // Two built-in failures: one concentrated in a single bucket, another spread across two.
+        using var fixture = TempLogFile.Create("""
+        {
+          "suiteRef": "fixture-highest-impact-breadth",
+          "broilerDll": "fixture/BroilerJS.dll",
+          "executed": 4,
+          "passed": 0,
+          "failed": 4,
+          "skipped": 0,
+          "results": [
+            {
+              "path": "test/built-ins/Array/from/a.js",
+              "status": "failed",
+              "stderr": "Unhandled exception. System.NarrowException: Narrow problem\nat NarrowHandler in /repo/Narrow.cs:line 5\n"
+            },
+            {
+              "path": "test/built-ins/Array/from/b.js",
+              "status": "failed",
+              "stderr": "Unhandled exception. System.NarrowException: Narrow problem\nat NarrowHandler in /repo/Narrow.cs:line 5\n"
+            },
+            {
+              "path": "test/built-ins/Map/get/a.js",
+              "status": "failed",
+              "stderr": "Unhandled exception. System.WideException: Wide problem\nat WideHandler in /repo/Wide.cs:line 6\n"
+            },
+            {
+              "path": "test/built-ins/Set/add/a.js",
+              "status": "failed",
+              "stderr": "Unhandled exception. System.WideException: Wide problem\nat WideHandler in /repo/Wide.cs:line 6\n"
+            }
+          ]
+        }
+        """);
+
+        var summary = LogSummaryBuilder.ParseAndSummarize(fixture.Path);
+        var highestImpact = LogSummaryBuilder.FindHighestImpactProblem(summary.LogRun.Results, summary.BucketDepth);
+
+        Assert.NotNull(highestImpact);
+        Assert.Equal("System.WideException", highestImpact.Type);
+        Assert.Equal(2, highestImpact.DistinctPathBucketCount);
+        // 2 occurrences * 2.0 area weight * 2 distinct buckets = 8.
+        Assert.Equal(8.0, highestImpact.ImpactScore);
+    }
+
+    [Fact]
+    public void FindHighestImpactProblem_ReturnsNullWhenNoExceptionsParsed()
+    {
+        using var fixture = TempLogFile.Create("""
+        {
+          "suiteRef": "fixture-no-exceptions",
+          "broilerDll": "fixture/BroilerJS.dll",
+          "executed": 1,
+          "passed": 1,
+          "failed": 0,
+          "skipped": 0,
+          "results": [
+            { "path": "test/passing.js", "status": "passed" }
+          ]
+        }
+        """);
+
+        var summary = LogSummaryBuilder.ParseAndSummarize(fixture.Path);
+
+        Assert.Null(LogSummaryBuilder.FindHighestImpactProblem(summary.LogRun.Results, summary.BucketDepth));
+    }
+
+    [Fact]
+    public void FormatHighestImpactProblem_EmitsImpactSummary()
+    {
+        using var fixture = TempLogFile.Create("""
+        {
+          "suiteRef": "fixture-highest-impact-format",
+          "broilerDll": "fixture/BroilerJS.dll",
+          "executed": 2,
+          "passed": 0,
+          "failed": 2,
+          "skipped": 0,
+          "results": [
+            {
+              "path": "test/language/expressions/call/a.js",
+              "status": "failed",
+              "stderr": "Unhandled exception. System.CoreException: Core problem\nat CoreHandler in /repo/Core.cs:line 7\n"
+            },
+            {
+              "path": "test/language/statements/return/b.js",
+              "status": "failed",
+              "stderr": "Unhandled exception. System.CoreException: Core problem\nat CoreHandler in /repo/Core.cs:line 7\n"
+            }
+          ]
+        }
+        """);
+
+        var formatted = LogReportFormatter.FormatHighestImpactProblem(
+        [
+            LogSummaryBuilder.ParseAndSummarize(fixture.Path)
+        ]);
+
+        Assert.Contains("Highest-impact exception detected in recent logs.", formatted, StringComparison.Ordinal);
+        Assert.Contains("**Exception type:** System.CoreException", formatted, StringComparison.Ordinal);
+        Assert.Contains("**Context:** CoreHandler", formatted, StringComparison.Ordinal);
+        Assert.Contains("**Message:** Core problem", formatted, StringComparison.Ordinal);
+        Assert.Contains("**Impact score:** 12.00", formatted, StringComparison.Ordinal);
+        Assert.Contains("test/language/expressions/call/a.js", formatted, StringComparison.Ordinal);
+        Assert.Contains("test/language/statements/return/b.js", formatted, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void FormatHighestImpactProblemJson_SerializesImpactScoreAndBreadth()
+    {
+        using var fixture = TempLogFile.Create("""
+        {
+          "suiteRef": "fixture-highest-impact-json",
+          "broilerDll": "fixture/BroilerJS.dll",
+          "executed": 2,
+          "passed": 0,
+          "failed": 2,
+          "skipped": 0,
+          "results": [
+            {
+              "path": "test/language/expressions/call/a.js",
+              "status": "failed",
+              "stderr": "Unhandled exception. System.CoreException: Core problem\nat CoreHandler in /repo/Core.cs:line 7\n"
+            },
+            {
+              "path": "test/language/statements/return/b.js",
+              "status": "failed",
+              "stderr": "Unhandled exception. System.CoreException: Core problem\nat CoreHandler in /repo/Core.cs:line 7\n"
+            }
+          ]
+        }
+        """);
+
+        var json = LogReportFormatter.FormatHighestImpactProblemJson(
+        [
+            LogSummaryBuilder.ParseAndSummarize(fixture.Path)
+        ]);
+
+        Assert.Contains("\"outputFormat\": \"json\"", json, StringComparison.Ordinal);
+        Assert.Contains("\"type\": \"System.CoreException\"", json, StringComparison.Ordinal);
+        Assert.Contains("\"impactScore\": 12", json, StringComparison.Ordinal);
+        Assert.Contains("\"distinctPathBucketCount\": 2", json, StringComparison.Ordinal);
+        Assert.Contains("\"count\": 2", json, StringComparison.Ordinal);
+    }
+
+    [Theory]
+    [InlineData("--highest-impact-problem", "sample.json")]
+    [InlineData("--highest-impact", "sample.json")]
+    public void ParseOptions_ReadsHighestImpactProblemFlag(string flag, string input)
+    {
+        var options = Program.ParseOptions([flag, input]);
+
+        Assert.True(options.HighestImpactProblem);
+        Assert.False(options.MostCommonProblem);
+    }
+
+    [Fact]
+    public void ParseOptions_RejectsCombiningHighestImpactWithFilters()
+    {
+        var exception = Assert.Throws<ArgumentException>(() =>
+            Program.ParseOptions(["--highest-impact-problem", "--type", "System.Exception", "sample.json"]));
+
+        Assert.Contains("--highest-impact-problem", exception.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void ParseOptions_RejectsCombiningHighestImpactWithMostCommon()
+    {
+        var exception = Assert.Throws<ArgumentException>(() =>
+            Program.ParseOptions(["--highest-impact-problem", "--most-common-problem", "sample.json"]));
+
+        Assert.Contains("--highest-impact-problem", exception.Message, StringComparison.Ordinal);
+        Assert.Contains("--most-common-problem", exception.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void ParseAndSummarize_IgnoresExceptionTypesContainingNonSpaceWhitespace()
     {
         var path = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid():N}.json");

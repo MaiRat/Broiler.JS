@@ -265,6 +265,176 @@ public static class LogSummaryBuilder
         };
     }
 
+    /// <summary>
+    /// Path-area weight used to estimate the relative impact of a failure on
+    /// the overall test surface.  The weights are intentionally simple proxy
+    /// signals — higher weight means the area is closer to core language or
+    /// built-in semantics, so a failure there is treated as more impactful
+    /// than the same failure in an annex or staging area.
+    /// </summary>
+    /// <remarks>
+    /// Weights:
+    /// <list type="bullet">
+    /// <item><description><c>test/language/</c> → 3.0 (core language semantics)</description></item>
+    /// <item><description><c>test/built-ins/</c> → 2.0 (built-in objects)</description></item>
+    /// <item><description><c>test/intl/</c> → 2.0 (built-in internationalization)</description></item>
+    /// <item><description><c>test/harness/</c> → 1.5 (harness scaffolding)</description></item>
+    /// <item><description><c>test/staging/</c> → 1.5 (in-flight proposals)</description></item>
+    /// <item><description><c>test/annexB/</c> → 1.0 (legacy/optional features)</description></item>
+    /// <item><description>everything else → 1.0</description></item>
+    /// </list>
+    /// </remarks>
+    public static double GetAreaWeight(string? path)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            return 1.0;
+        }
+
+        var normalized = path.Replace('\\', '/');
+        if (normalized.StartsWith("test/language/", StringComparison.OrdinalIgnoreCase))
+        {
+            return 3.0;
+        }
+
+        if (normalized.StartsWith("test/built-ins/", StringComparison.OrdinalIgnoreCase)
+            || normalized.StartsWith("test/intl/", StringComparison.OrdinalIgnoreCase)
+            || normalized.StartsWith("test/intl402/", StringComparison.OrdinalIgnoreCase))
+        {
+            return 2.0;
+        }
+
+        if (normalized.StartsWith("test/harness/", StringComparison.OrdinalIgnoreCase)
+            || normalized.StartsWith("test/staging/", StringComparison.OrdinalIgnoreCase))
+        {
+            return 1.5;
+        }
+
+        return 1.0;
+    }
+
+    /// <summary>
+    /// Returns the highest-impact problem after grouping parsed exceptions by
+    /// (type, context) and (within that) by message, scoring each group by
+    /// <see cref="GetAreaWeight"/> summed across occurrences and multiplied by
+    /// the number of distinct path buckets the group spans.
+    /// </summary>
+    /// <remarks>
+    /// The impact score for a group is computed as
+    /// <c>sum(GetAreaWeight(path)) * max(1, distinctPathBucketCount)</c>.
+    /// Higher-weight test areas and broader spread across the test suite both
+    /// increase the score, so a failure that hits many core-language paths
+    /// outranks a more frequent failure concentrated in a single legacy
+    /// directory.  Ties are broken by raw count (desc), then type / context /
+    /// message (asc) to keep the selection deterministic.
+    /// </remarks>
+    public static HighestImpactProblemMatch? FindHighestImpactProblem(
+        IEnumerable<LogEntry> entries,
+        int bucketDepth = 4)
+    {
+        var allEntries = entries.ToArray();
+        var exceptionItems = allEntries
+            .Where(entry => entry.Exception is not null)
+            .Select(entry => new LoggedException
+            {
+                Path = entry.Path,
+                Type = entry.Exception!.Type,
+                Message = entry.Exception.Message,
+                Context = entry.Exception.Context,
+                LineNumber = entry.Exception.LineNumber,
+                LogLine = entry.Exception.LogLine
+            })
+            .ToArray();
+
+        if (exceptionItems.Length == 0)
+        {
+            return null;
+        }
+
+        var bestTypeContext = exceptionItems
+            .GroupBy(item => (
+                Type: item.Type,
+                Context: item.Context ?? UnknownContext),
+                TypeContextComparer.Instance)
+            .Select(group => new
+            {
+                group.Key.Type,
+                group.Key.Context,
+                Score = ComputeImpactScore(group, bucketDepth, out var distinctBuckets),
+                DistinctBuckets = distinctBuckets,
+                Items = group.ToArray()
+            })
+            .OrderByDescending(candidate => candidate.Score)
+            .ThenByDescending(candidate => candidate.Items.Length)
+            .ThenBy(candidate => candidate.Type, StringComparer.OrdinalIgnoreCase)
+            .ThenBy(candidate => candidate.Context, StringComparer.OrdinalIgnoreCase)
+            .First();
+
+        var bestMessage = bestTypeContext.Items
+            .GroupBy(item => item.Message, StringComparer.OrdinalIgnoreCase)
+            .Select(group => new
+            {
+                Message = group.Key,
+                Score = ComputeImpactScore(group, bucketDepth, out _),
+                Items = group
+                    .OrderBy(item => item.Path, StringComparer.OrdinalIgnoreCase)
+                    .ThenBy(item => item.LineNumber ?? int.MaxValue)
+                    .ThenBy(item => item.LogLine, StringComparer.OrdinalIgnoreCase)
+                    .ToArray()
+            })
+            .OrderByDescending(candidate => candidate.Score)
+            .ThenByDescending(candidate => candidate.Items.Length)
+            .ThenBy(candidate => candidate.Message, StringComparer.OrdinalIgnoreCase)
+            .First();
+
+        return new HighestImpactProblemMatch
+        {
+            Type = bestTypeContext.Type,
+            Context = bestTypeContext.Context,
+            Message = bestMessage.Message,
+            Count = bestMessage.Items.Length,
+            OccurrenceRate = allEntries.Length == 0 ? 0 : bestMessage.Items.Length / (double)allEntries.Length,
+            ImpactScore = bestTypeContext.Score,
+            DistinctPathBucketCount = bestTypeContext.DistinctBuckets,
+            Example = bestMessage.Items[0],
+            Occurrences = bestMessage.Items
+        };
+    }
+
+    private static double ComputeImpactScore(
+        IEnumerable<LoggedException> exceptions,
+        int bucketDepth,
+        out int distinctBucketCount)
+    {
+        var materialized = exceptions as IReadOnlyCollection<LoggedException> ?? exceptions.ToArray();
+        var weightSum = materialized.Sum(item => GetAreaWeight(item.Path));
+        distinctBucketCount = materialized
+            .Select(item => GetPathBucket(item.Path ?? string.Empty, bucketDepth))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .Count();
+
+        var breadth = Math.Max(1, distinctBucketCount);
+        return weightSum * breadth;
+    }
+
+    private sealed class TypeContextComparer : IEqualityComparer<(string Type, string Context)>
+    {
+        public static readonly TypeContextComparer Instance = new();
+
+        public bool Equals((string Type, string Context) x, (string Type, string Context) y)
+        {
+            return StringComparer.OrdinalIgnoreCase.Equals(x.Type, y.Type)
+                && StringComparer.OrdinalIgnoreCase.Equals(x.Context, y.Context);
+        }
+
+        public int GetHashCode((string Type, string Context) obj)
+        {
+            return HashCode.Combine(
+                StringComparer.OrdinalIgnoreCase.GetHashCode(obj.Type),
+                StringComparer.OrdinalIgnoreCase.GetHashCode(obj.Context));
+        }
+    }
+
     private static LogGroupSummary SummarizeGroup(IGrouping<string, LogEntry> group, int notableEntryLimit)
     {
         var entries = group.ToArray();

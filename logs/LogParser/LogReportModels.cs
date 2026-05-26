@@ -43,6 +43,33 @@ public sealed class MostCommonProblemMatch
 }
 
 /// <summary>
+/// Structured report emitted when the highest-impact problem option is active.
+/// </summary>
+public sealed class HighestImpactProblemReport
+{
+    public required string OutputFormat { get; init; }
+    public HighestImpactProblemMatch? Problem { get; init; }
+}
+
+/// <summary>
+/// The highest-impact problem after grouping by type, context, and message and
+/// scoring each group by test-area weight and breadth across distinct path
+/// buckets rather than raw frequency.
+/// </summary>
+public sealed class HighestImpactProblemMatch
+{
+    public required string Type { get; init; }
+    public required string Context { get; init; }
+    public required string Message { get; init; }
+    public required int Count { get; init; }
+    public required double OccurrenceRate { get; init; }
+    public required double ImpactScore { get; init; }
+    public required int DistinctPathBucketCount { get; init; }
+    public required LoggedException Example { get; init; }
+    public required IReadOnlyList<LoggedException> Occurrences { get; init; }
+}
+
+/// <summary>
 /// Structured summary for a parsed file or directory.
 /// </summary>
 public sealed class LogReportSummary

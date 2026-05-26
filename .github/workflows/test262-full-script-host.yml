@@ -557,16 +557,16 @@ jobs:
           issue_body_path="$LOGPARSER_OUTPUT_DIR/issue.md"
           issue_json_path="$LOGPARSER_OUTPUT_DIR/issue.json"
 
-          # --most-common-problem narrows the report to the highest-frequency
+          # --highest-impact-problem narrows the report to the highest-impact
           # type/context/message combination so the emitted markdown can be
           # posted directly as a focused GitHub issue body.
           dotnet run --project logs/LogParser -- \
             "$LOGPARSER_LOGS_DIR" \
-            --most-common-problem > "$issue_body_path"
+            --highest-impact-problem > "$issue_body_path"
 
           dotnet run --project logs/LogParser -- \
             "$LOGPARSER_LOGS_DIR" \
-            --most-common-problem \
+            --highest-impact-problem \
             --output json > "$issue_json_path"
 
           ISSUE_JSON_PATH="$issue_json_path" python <<'PY'

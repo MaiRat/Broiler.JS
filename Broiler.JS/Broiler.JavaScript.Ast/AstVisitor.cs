@@ -396,7 +396,7 @@ public abstract class AstReduce : AstMapVisitor<AstNode>
         if (Modified(spreadElement.Argument, out var argument))
             return new AstSpreadElement(spreadElement.Start, spreadElement.End, argument);
 
-        return argument;
+        return spreadElement;
     }
 
     protected override AstNode VisitSwitchStatement(AstSwitchStatement switchStatement)

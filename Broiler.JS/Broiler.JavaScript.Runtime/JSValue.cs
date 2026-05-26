@@ -882,14 +882,25 @@ public abstract partial class JSValue : IDynamicMetaObjectProvider, IPropertyAcc
     /// <returns></returns>
     public virtual bool SameValueZero(JSValue value) => StrictEquals(value);
 
+    private static void ThrowIfSymbolRelationalOperand(JSValue left, JSValue right)
+    {
+        if (!left.IsSymbol && !right.IsSymbol)
+            return;
+
+        throw NewTypeError?.Invoke("Cannot convert a Symbol value to a number.")
+            ?? new InvalidOperationException("JSValue.NewTypeError delegate is not initialized. Ensure the BuiltIns assembly module initializer has run.");
+    }
+
     public virtual bool Less(JSValue value)
     {
+        ThrowIfSymbolRelationalOperand(this, value);
+
         if (IsUndefined || value.IsUndefined)
             return false;
 
         if (!CanBeNumber && !value.CanBeNumber)
         {
-            if (ToString().Less(value.ToString()))
+            if (StringValue.Less(value.StringValue))
                 return true;
         }
         else
@@ -903,12 +914,14 @@ public abstract partial class JSValue : IDynamicMetaObjectProvider, IPropertyAcc
 
     public virtual bool LessOrEqual(JSValue value)
     {
+        ThrowIfSymbolRelationalOperand(this, value);
+
         if (IsUndefined || value.IsUndefined)
             return false;
 
         if (!CanBeNumber && !value.CanBeNumber)
         {
-            if (ToString().LessOrEqual(value.ToString()))
+            if (StringValue.LessOrEqual(value.StringValue))
                 return true;
         }
         else
@@ -922,12 +935,14 @@ public abstract partial class JSValue : IDynamicMetaObjectProvider, IPropertyAcc
 
     public virtual bool Greater(JSValue value)
     {
+        ThrowIfSymbolRelationalOperand(this, value);
+
         if (IsUndefined || value.IsUndefined)
             return false;
 
         if (!CanBeNumber && !value.CanBeNumber)
         {
-            if (ToString().Greater(value.ToString()))
+            if (StringValue.Greater(value.StringValue))
                 return true;
         }
         else
@@ -941,12 +956,14 @@ public abstract partial class JSValue : IDynamicMetaObjectProvider, IPropertyAcc
 
     public virtual bool GreaterOrEqual(JSValue value)
     {
+        ThrowIfSymbolRelationalOperand(this, value);
+
         if (IsUndefined || value.IsUndefined)
             return false;
 
         if (!CanBeNumber && !value.CanBeNumber)
         {
-            if (ToString().Greater(value.ToString()))
+            if (StringValue.GreaterOrEqual(value.StringValue))
                 return true;
         }
         else

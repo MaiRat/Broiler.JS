@@ -89,50 +89,16 @@ public partial class JSObject
     public override JSValue InvokeFunction(in Arguments a) => throw NewTypeError($"{this} is not a function");
 
     public override bool Less(JSValue value)
-    {
-        switch (value)
-        {
-            case JSValue strValue when strValue.IsString:
-                if (ToString().CompareTo(strValue.ToString()) < 0)
-                    return true;
-                break;
-        }
-
-        return false;
-    }
+        => ToPrimitiveDefault().Less(value);
 
     public override bool LessOrEqual(JSValue value)
-    {
-        if (ReferenceEquals(this, value))
-            return true;
-
-        return value switch
-        {
-            JSValue strValue when strValue.IsString && ToString().CompareTo(strValue.ToString()) <= 0 => true,
-            _ => false,
-        };
-    }
+        => ToPrimitiveDefault().LessOrEqual(value);
 
     public override bool Greater(JSValue value)
-    {
-        return value switch
-        {
-            JSValue strValue when strValue.IsString && ToString().CompareTo(strValue.ToString()) > 0 => true,
-            _ => false,
-        };
-    }
+        => ToPrimitiveDefault().Greater(value);
 
     public override bool GreaterOrEqual(JSValue value)
-    {
-        if (ReferenceEquals(this, value))
-            return true;
-
-        return value switch
-        {
-            JSValue strValue when strValue.IsString && ToString().CompareTo(strValue.ToString()) >= 0 => true,
-            _ => false,
-        };
-    }
+        => ToPrimitiveDefault().GreaterOrEqual(value);
     public override bool ConvertTo(Type type, out object value)
     {
         if (TryGetClrEnumeratorFunc?.Invoke(this, type, out value) ?? false)

@@ -110,14 +110,14 @@ public partial class JSString
             }
         }
 
-        var searchString = searchValue.IsUndefined ? "undefined" : searchValue.ToString();
+        var searchString = searchValue.IsUndefined ? "undefined" : searchValue.StringValue;
         var functionalReplace = replaceValue.IsFunction;
-        var replacementText = functionalReplace ? null : replaceValue.ToString();
+        var replacementText = functionalReplace ? null : replaceValue.StringValue;
         var source = JSValue.CreateString(@this);
 
         string GetReplacement(int position)
             => functionalReplace
-                ? replaceValue.InvokeFunction(new Arguments(JSUndefined.Value, JSValue.CreateString(searchString), JSValue.CreateNumber(position), source)).ToString()
+                ? replaceValue.InvokeFunction(new Arguments(JSUndefined.Value, JSValue.CreateString(searchString), JSValue.CreateNumber(position), source)).StringValue
                 : replacementText!;
 
         if (searchString.Length == 0)

@@ -4385,6 +4385,103 @@ public class BuiltInsTests
     }
 
     [Fact]
+    public void ReplaceAll_Throws_TypeError_For_Symbol_String_Coercions()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = new JSContext();
+
+        var result = ctx.Eval("""
+            (function () {
+                function thrownCtor(fn) {
+                    try {
+                        fn();
+                        return 'no-throw';
+                    } catch (e) {
+                        return e.constructor.name;
+                    }
+                }
+
+                function symbolResult() {
+                    return {
+                        toString() {
+                            return Symbol();
+                        }
+                    };
+                }
+
+                return [
+                    thrownCtor(function () { 'a'.replaceAll(Symbol(), 'b'); }),
+                    thrownCtor(function () { 'a'.replaceAll('a', Symbol()); }),
+                    thrownCtor(function () { 'a'.replaceAll('a', symbolResult); })
+                ].join('|');
+            })();
+            """);
+
+        Assert.Equal("TypeError|TypeError|TypeError", result.ToString());
+    }
+
+    [Fact]
+    public void Symbol_Relational_Comparisons_Throw_TypeError()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = new JSContext();
+
+        var result = ctx.Eval("""
+            (function () {
+                function thrownCtor(fn) {
+                    try {
+                        fn();
+                        return 'no-throw';
+                    } catch (e) {
+                        return e.constructor.name;
+                    }
+                }
+
+                return [
+                    thrownCtor(function () { return Symbol() < 0; }),
+                    thrownCtor(function () { return Symbol() <= 0; }),
+                    thrownCtor(function () { return Symbol() > 0; }),
+                    thrownCtor(function () { return Symbol() >= 0; }),
+                    thrownCtor(function () { return Object(Symbol()) < 'x'; })
+                ].join('|');
+            })();
+            """);
+
+        Assert.Equal("TypeError|TypeError|TypeError|TypeError|TypeError", result.ToString());
+    }
+
+    [Fact]
+    public void RegExp_Test_And_Exec_Throw_When_LastIndex_Is_Not_Writable()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = new JSContext();
+
+        var result = ctx.Eval("""
+            (function () {
+                function thrownCtor(fn) {
+                    try {
+                        fn();
+                        return 'no-throw';
+                    } catch (e) {
+                        return e.constructor.name;
+                    }
+                }
+
+                var regex = /0/g;
+                Object.freeze(regex);
+
+                return [
+                    thrownCtor(function () { regex.test('abc000'); }),
+                    thrownCtor(function () { regex.exec('abc000'); }),
+                    Object.getOwnPropertyDescriptor(regex, 'lastIndex').value
+                ].join('|');
+            })();
+            """);
+
+        Assert.Equal("TypeError|TypeError|0", result.ToString());
+    }
+
+    [Fact]
     public void Test262_Abrupt_Completions_For_Date_Error_Object_And_Promise_BuiltIns_Are_Preserved()
     {
         EnsureBuiltInsLoaded();

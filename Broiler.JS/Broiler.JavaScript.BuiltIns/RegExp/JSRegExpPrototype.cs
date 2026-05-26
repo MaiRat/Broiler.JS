@@ -25,7 +25,9 @@ public partial class JSRegExp
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void SetObservableLastIndex(int value)
     {
-        this[KeyStrings.lastIndex] = JSValue.CreateNumber(value);
+        if (!SetValue(KeyStrings.lastIndex, JSValue.CreateNumber(value), this, true))
+            return;
+
         lastIndex = value;
     }
 
@@ -71,7 +73,7 @@ public partial class JSRegExp
 
         pattern = nextPattern;
         (value, globalSearch, ignoreCase, multiline, hasIndices, sticky, unicode, unicodeSets, flags) = CreateRegex(nextPattern, nextFlags);
-        this[KeyStrings.lastIndex] = JSValue.NumberZero;
+        SetObservableLastIndex(0);
         return this;
     }
 

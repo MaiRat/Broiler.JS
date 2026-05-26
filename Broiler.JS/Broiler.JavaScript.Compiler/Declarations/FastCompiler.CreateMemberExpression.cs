@@ -37,7 +37,7 @@ partial class FastCompiler
                         if (l.NumericValue >= 0 && (l.NumericValue % 1 == 0))
                             return JSValueBuilder.Index(target, (uint)l.NumericValue);
 
-                        break;
+                        return JSValueBuilder.Index(target, VisitLiteral(l));
                 }
                 break;
 

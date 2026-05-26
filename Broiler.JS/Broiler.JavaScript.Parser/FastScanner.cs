@@ -637,34 +637,31 @@ public class FastScanner
     {
         var ch = Consume();
 
-        // At least, one hex digit is required.
+        // At least one hex digit is required.
         if (ch == '}')
             throw Unexpected();
 
-        Span<char> text = stackalloc char[10];
-        int i = 0;
-
-        text.Fill('0');
-        text[0] = '\\';
-        text[1] = 'U';
-
+        var codePoint = 0;
         while (ch != char.MaxValue)
         {
             if (!ch.IsDigitPart(true, false))
                 break;
 
-            for (int j = i; j > 0; j--)
-                text[9 - j] = text[10 - j];
-
-            text[9] = ch;
+            codePoint = checked(codePoint * 16 + ch.HexValue());
             ch = Consume();
-            i++;
         }
 
         if (ch != '}')
             throw Unexpected();
 
-        return new string(text.ToArray());
+        try
+        {
+            return codePoint.FromCodePoint();
+        }
+        catch (ArgumentOutOfRangeException)
+        {
+            throw Unexpected();
+        }
     }
 
     private FastToken ReadTemplateString(State state, TokenTypes part = TokenTypes.TemplateBegin)

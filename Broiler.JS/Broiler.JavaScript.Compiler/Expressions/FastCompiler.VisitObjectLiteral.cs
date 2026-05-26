@@ -112,25 +112,7 @@ partial class FastCompiler
 
                     case FastNodeType.Literal:
                         var l = pKey as AstLiteral;
-                        if (l.TokenType == TokenTypes.String)
-                        {
-                            if (NumberParser.TryGetArrayIndex(l.StringValue, out var ui))
-                            {
-                                key = YExpression.Constant(ui);
-
-                            }
-                            else
-                            {
-                                key = KeyOfName(l.StringValue);
-                            }
-                        }
-                        else if (l.TokenType == TokenTypes.Number)
-                        {
-                            key = YExpression.Constant((uint)l.NumericValue);
-                        }
-                        else
-                            throw new NotSupportedException();
-
+                        key = GetLiteralPropertyKey(l);
                         break;
 
                     default:
@@ -229,26 +211,7 @@ partial class FastCompiler
 
                 case FastNodeType.Literal:
                     var l = pKey as AstLiteral;
-                    if (l.TokenType == TokenTypes.String)
-                    {
-                        if (NumberParser.TryGetArrayIndex(l.StringValue, out var ui))
-                        {
-                            key = YExpression.Constant(ui);
-                        }
-                        else
-                        {
-                            key = KeyOfName(l.StringValue);
-                        }
-                    }
-                    else if (l.TokenType == TokenTypes.Number)
-                    {
-                        key = YExpression.Constant((uint)l.NumericValue);
-                    }
-                    else
-                    {
-                        throw new NotSupportedException();
-                    }
-
+                    key = GetLiteralPropertyKey(l);
                     break;
 
                 default:

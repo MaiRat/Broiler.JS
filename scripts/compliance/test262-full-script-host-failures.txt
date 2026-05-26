@@ -4097,7 +4097,6 @@ test/intl402/DateTimeFormat/prototype/formatToParts/pattern-on-calendar.js
 test/intl402/DateTimeFormat/prototype/formatToParts/related-year-zh.js
 test/intl402/DateTimeFormat/prototype/formatToParts/related-year.js
 test/intl402/DateTimeFormat/prototype/formatToParts/time-clip-to-integer.js
-test/intl402/DateTimeFormat/prototype/prop-desc.js
 test/intl402/DateTimeFormat/prototype/resolvedOptions/basic.js
 test/intl402/DateTimeFormat/prototype/resolvedOptions/builtin.js
 test/intl402/DateTimeFormat/prototype/resolvedOptions/calendar.js
@@ -4157,7 +4156,6 @@ test/intl402/DisplayNames/prototype/of/type-datetimefield-valid.js
 test/intl402/DisplayNames/prototype/of/type-language-invalid.js
 test/intl402/DisplayNames/prototype/of/type-language-valid.js
 test/intl402/DisplayNames/prototype/of/type-region-invalid.js
-test/intl402/DisplayNames/prototype/prop-desc.js
 test/intl402/DisplayNames/prototype/resolvedOptions/default-option-values.js
 test/intl402/DisplayNames/prototype/resolvedOptions/length.js
 test/intl402/DisplayNames/prototype/resolvedOptions/name.js
@@ -4228,7 +4226,6 @@ test/intl402/DurationFormat/prototype/formatToParts/negative-duration-with-leadi
 test/intl402/DurationFormat/prototype/formatToParts/negative-duration-with-leading-zero-style-long-en.js
 test/intl402/DurationFormat/prototype/formatToParts/negative-duration-with-leading-zero-style-narrow-en.js
 test/intl402/DurationFormat/prototype/formatToParts/negative-duration-with-leading-zero-style-short-en.js
-test/intl402/DurationFormat/prototype/prototype_attributes.js
 test/intl402/DurationFormat/prototype/resolvedOptions/resolved-numbering-system-unicode-extensions-and-options.js
 test/intl402/DurationFormat/prototype/resolvedOptions/return-keys-order-default.js
 test/intl402/DurationFormat/supportedLocalesOf/basic.js
@@ -4310,7 +4307,6 @@ test/intl402/ListFormat/prototype/formatToParts/iterable-iteratorclose.js
 test/intl402/ListFormat/prototype/formatToParts/iterable-iteratorstep-throw.js
 test/intl402/ListFormat/prototype/formatToParts/iterable-iteratorvalue-throw.js
 test/intl402/ListFormat/prototype/formatToParts/iterable.js
-test/intl402/ListFormat/prototype/prop-desc.js
 test/intl402/ListFormat/prototype/resolvedOptions/order.js
 test/intl402/ListFormat/prototype/resolvedOptions/type.js
 test/intl402/Locale/canonicalize-locale-list-take-locale.js
@@ -4385,7 +4381,6 @@ test/intl402/Locale/prototype/numberingSystem/name.js
 test/intl402/Locale/prototype/numberingSystem/prop-desc.js
 test/intl402/Locale/prototype/numeric/name.js
 test/intl402/Locale/prototype/numeric/prop-desc.js
-test/intl402/Locale/prototype/prop-desc.js
 test/intl402/Locale/prototype/region/name.js
 test/intl402/Locale/prototype/region/prop-desc.js
 test/intl402/Locale/prototype/script/name.js
@@ -4562,7 +4557,6 @@ test/intl402/NumberFormat/prototype/formatToParts/unit-ko-KR.js
 test/intl402/NumberFormat/prototype/formatToParts/unit-zh-TW.js
 test/intl402/NumberFormat/prototype/formatToParts/unit.js
 test/intl402/NumberFormat/prototype/formatToParts/value-tonumber.js
-test/intl402/NumberFormat/prototype/prop-desc.js
 test/intl402/NumberFormat/prototype/resolvedOptions/basic.js
 test/intl402/NumberFormat/prototype/resolvedOptions/builtin.js
 test/intl402/NumberFormat/prototype/resolvedOptions/compactDisplay.js
@@ -4598,7 +4592,6 @@ test/intl402/PluralRules/constructor-option-read-order.js
 test/intl402/PluralRules/constructor-options-throwing-getters.js
 test/intl402/PluralRules/default-options-object-prototype.js
 test/intl402/PluralRules/notation.js
-test/intl402/PluralRules/prototype/properties.js
 test/intl402/PluralRules/prototype/resolvedOptions/builtins.js
 test/intl402/PluralRules/prototype/resolvedOptions/length.js
 test/intl402/PluralRules/prototype/resolvedOptions/name.js
@@ -4654,7 +4647,6 @@ test/intl402/RelativeTimeFormat/prototype/formatToParts/pl-pl-style-narrow.js
 test/intl402/RelativeTimeFormat/prototype/formatToParts/pl-pl-style-short.js
 test/intl402/RelativeTimeFormat/prototype/formatToParts/result-type.js
 test/intl402/RelativeTimeFormat/prototype/formatToParts/value-non-finite.js
-test/intl402/RelativeTimeFormat/prototype/prop-desc.js
 test/intl402/RelativeTimeFormat/prototype/resolvedOptions/branding.js
 test/intl402/RelativeTimeFormat/prototype/resolvedOptions/caching.js
 test/intl402/RelativeTimeFormat/prototype/resolvedOptions/length.js
@@ -4687,7 +4679,6 @@ test/intl402/Segmenter/constructor/supportedLocalesOf/options-toobject.js
 test/intl402/Segmenter/constructor/supportedLocalesOf/options-undefined.js
 test/intl402/Segmenter/constructor/supportedLocalesOf/prop-desc.js
 test/intl402/Segmenter/constructor/supportedLocalesOf/result-type.js
-test/intl402/Segmenter/prototype/prop-desc.js
 test/intl402/Segmenter/prototype/resolvedOptions/branding.js
 test/intl402/Segmenter/prototype/resolvedOptions/caching.js
 test/intl402/Segmenter/prototype/resolvedOptions/length.js

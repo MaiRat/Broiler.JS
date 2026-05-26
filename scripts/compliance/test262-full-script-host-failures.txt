@@ -435,7 +435,6 @@ test/built-ins/Array/of/return-abrupt-from-data-property-using-proxy.js
 test/built-ins/Array/of/return-abrupt-from-data-property.js
 test/built-ins/Array/of/return-abrupt-from-setting-length.js
 test/built-ins/Array/of/sets-length.js
-test/built-ins/Array/prop-desc.js
 test/built-ins/Array/prototype/Symbol.unscopables/array-find-from-last.js
 test/built-ins/Array/prototype/Symbol.unscopables/prop-desc.js
 test/built-ins/Array/prototype/Symbol.unscopables/value.js
@@ -810,7 +809,6 @@ test/built-ins/Array/prototype/unshift/throws-if-integer-limit-exceeded.js
 test/built-ins/Array/prototype/values/iteration-mutable.js
 test/built-ins/Array/prototype/values/length.js
 test/built-ins/ArrayBuffer/length-is-too-large-throws.js
-test/built-ins/ArrayBuffer/prop-desc.js
 test/built-ins/ArrayBuffer/prototype-from-newtarget.js
 test/built-ins/ArrayBuffer/prototype/immutable/prop-desc.js
 test/built-ins/ArrayBuffer/prototype/immutable/this-has-no-arraybufferdata-internal.js
@@ -910,7 +908,6 @@ test/built-ins/BigInt/infinity-throws-rangeerror.js
 test/built-ins/BigInt/is-a-constructor.js
 test/built-ins/BigInt/nan-throws-rangeerror.js
 test/built-ins/BigInt/negative-infinity-throws.rangeerror.js
-test/built-ins/BigInt/prop-desc.js
 test/built-ins/BigInt/prototype/toString/a-z.js
 test/built-ins/BigInt/prototype/toString/name.js
 test/built-ins/BigInt/prototype/toString/radix-err.js
@@ -921,7 +918,6 @@ test/built-ins/BigInt/prototype/valueOf/return.js
 test/built-ins/BigInt/valueof-throws.js
 test/built-ins/BigInt/wrapper-object-ordinary-toprimitive.js
 test/built-ins/Boolean/S15.6.2.1_A4.js
-test/built-ins/Boolean/prop-desc.js
 test/built-ins/Boolean/prototype/S15.6.3.1_A1.js
 test/built-ins/Boolean/prototype/S15.6.3.1_A4.js
 test/built-ins/Boolean/prototype/toString/S15.6.4.2_A1_T1.js
@@ -929,7 +925,6 @@ test/built-ins/Boolean/prototype/toString/S15.6.4.2_A1_T2.js
 test/built-ins/Boolean/prototype/valueOf/S15.6.4.3_A1_T1.js
 test/built-ins/Boolean/prototype/valueOf/S15.6.4.3_A1_T2.js
 test/built-ins/DataView/byteoffset-is-negative-throws.js
-test/built-ins/DataView/dataview.js
 test/built-ins/DataView/defined-bytelength-and-byteoffset.js
 test/built-ins/DataView/defined-byteoffset-undefined-bytelength.js
 test/built-ins/DataView/defined-byteoffset.js
@@ -1027,7 +1022,6 @@ test/built-ins/Date/UTC/non-integer-values.js
 test/built-ins/Date/UTC/time-clip.js
 test/built-ins/Date/UTC/year-offset.js
 test/built-ins/Date/parse/zero.js
-test/built-ins/Date/prop-desc.js
 test/built-ins/Date/prototype/getDate/this-value-valid-date.js
 test/built-ins/Date/prototype/setDate/arg-coercion-order.js
 test/built-ins/Date/prototype/setDate/date-value-read-before-tonumber-when-date-is-invalid.js
@@ -1108,7 +1102,6 @@ test/built-ins/Error/prototype/S15.11.3.1_A3_T1.js
 test/built-ins/Error/prototype/constructor/S15.11.4.1_A1_T2.js
 test/built-ins/Error/tostring-1.js
 test/built-ins/Error/tostring-2.js
-test/built-ins/FinalizationRegistry/prop-desc.js
 test/built-ins/FinalizationRegistry/prototype-from-newtarget-custom.js
 test/built-ins/FinalizationRegistry/prototype/register/throws-when-target-cannot-be-held-weakly.js
 test/built-ins/FinalizationRegistry/prototype/register/throws-when-unregisterToken-not-undefined-and-cannot-be-held-weakly.js
@@ -1265,7 +1258,6 @@ test/built-ins/Iterator/from/iterable-primitives.js
 test/built-ins/Iterator/from/result-proto.js
 test/built-ins/Iterator/from/return-method-calls-base-return-method.js
 test/built-ins/Iterator/from/return-method-throws-for-invalid-this.js
-test/built-ins/Iterator/prop-desc.js
 test/built-ins/Iterator/prototype/Symbol.iterator/name.js
 test/built-ins/Iterator/prototype/Symbol.toStringTag/prop-desc.js
 test/built-ins/Iterator/prototype/Symbol.toStringTag/weird-setter.js
@@ -1503,7 +1495,6 @@ test/built-ins/JSON/parse/reviver-object-non-configurable-prop-create.js
 test/built-ins/JSON/parse/reviver-wrapper.js
 test/built-ins/JSON/parse/text-non-string-primitive.js
 test/built-ins/JSON/parse/text-object-abrupt.js
-test/built-ins/JSON/prop-desc.js
 test/built-ins/JSON/rawJSON/basic.js
 test/built-ins/JSON/rawJSON/bigint-raw-json-can-be-stringified.js
 test/built-ins/JSON/rawJSON/illegal-empty-and-start-end-chars.js
@@ -1541,7 +1532,6 @@ test/built-ins/JSON/stringify/value-symbol.js
 test/built-ins/JSON/stringify/value-tojson-arguments.js
 test/built-ins/JSON/stringify/value-tojson-result.js
 test/built-ins/Map/groupBy/string.js
-test/built-ins/Map/map.js
 test/built-ins/Map/prototype/clear/map-data-list-is-preserved.js
 test/built-ins/Map/prototype/delete/does-not-break-iterators.js
 test/built-ins/Map/prototype/entries/name.js
@@ -1574,7 +1564,6 @@ test/built-ins/Math/hypot/Math.hypot_InfinityNaN.js
 test/built-ins/Math/max/zeros.js
 test/built-ins/Math/min/zeros.js
 test/built-ins/Math/pow/applying-the-exp-operator_A1.js
-test/built-ins/Math/prop-desc.js
 test/built-ins/Math/round/S15.8.2.15_A7.js
 test/built-ins/Math/sign/sign-specialVals.js
 test/built-ins/Math/sqrt/results.js
@@ -1620,7 +1609,6 @@ test/built-ins/Number/S9.3.1_A3_T2_U180E.js
 test/built-ins/Number/bigint-conversion.js
 test/built-ins/Number/parseFloat.js
 test/built-ins/Number/parseInt.js
-test/built-ins/Number/prop-desc.js
 test/built-ins/Number/prototype/S15.7.3.1_A2_T1.js
 test/built-ins/Number/prototype/S15.7.3.1_A2_T2.js
 test/built-ins/Number/prototype/S15.7.3.1_A3.js
@@ -1994,7 +1982,6 @@ test/built-ins/Promise/executor-call-context-sloppy.js
 test/built-ins/Promise/executor-call-context-strict.js
 test/built-ins/Promise/executor-function-name.js
 test/built-ins/Promise/length.js
-test/built-ins/Promise/promise.js
 test/built-ins/Promise/prototype/catch/this-value-obj-coercible.js
 test/built-ins/Promise/prototype/finally/invokes-then-with-function.js
 test/built-ins/Promise/prototype/finally/species-constructor.js
@@ -2108,7 +2095,6 @@ test/built-ins/Proxy/has/trap-is-undefined-using-with.js
 test/built-ins/Proxy/ownKeys/call-parameters-object-getownpropertysymbols.js
 test/built-ins/Proxy/ownKeys/trap-is-missing-target-is-proxy.js
 test/built-ins/Proxy/proxy-no-prototype.js
-test/built-ins/Proxy/proxy.js
 test/built-ins/Proxy/revocable/revocation-function-name.js
 test/built-ins/Proxy/set/call-parameters-prototype-dunder-proto.js
 test/built-ins/Proxy/set/call-parameters.js
@@ -2127,9 +2113,7 @@ test/built-ins/Reflect/ownKeys/order-after-define-property.js
 test/built-ins/Reflect/ownKeys/return-non-enumerable-keys.js
 test/built-ins/Reflect/ownKeys/return-on-corresponding-order-large-index.js
 test/built-ins/Reflect/ownKeys/return-on-corresponding-order.js
-test/built-ins/Reflect/prop-desc.js
 test/built-ins/Reflect/set/different-property-descriptors.js
-test/built-ins/Reflect/set/length.js
 test/built-ins/Reflect/set/receiver-is-not-object.js
 test/built-ins/Reflect/setPrototypeOf/return-false-if-target-and-proto-are-the-same.js
 test/built-ins/Reflect/setPrototypeOf/return-false-if-target-is-not-extensible.js
@@ -2913,7 +2897,6 @@ test/built-ins/Set/prototype/union/set-like-class-order.js
 test/built-ins/Set/prototype/union/size-is-a-number.js
 test/built-ins/Set/prototype/values/name.js
 test/built-ins/Set/prototype/values/values-iteration-mutable.js
-test/built-ins/Set/set.js
 test/built-ins/SetIteratorPrototype/Symbol.toStringTag.js
 test/built-ins/SetIteratorPrototype/next/iteration-mutable.js
 test/built-ins/SetIteratorPrototype/next/length.js
@@ -2981,7 +2964,6 @@ test/built-ins/String/S15.5.2.1_A3.js
 test/built-ins/String/S15.5.5_A2_T2.js
 test/built-ins/String/fromCodePoint/argument-is-not-integer.js
 test/built-ins/String/numeric-properties.js
-test/built-ins/String/prop-desc.js
 test/built-ins/String/prototype/S15.5.4_A1.js
 test/built-ins/String/prototype/S15.5.4_A2.js
 test/built-ins/String/prototype/S15.5.4_A3.js
@@ -3136,7 +3118,6 @@ test/built-ins/Symbol/replace/prop-desc.js
 test/built-ins/Symbol/search/prop-desc.js
 test/built-ins/Symbol/species/basic.js
 test/built-ins/Symbol/split/prop-desc.js
-test/built-ins/Symbol/symbol.js
 test/built-ins/Symbol/toPrimitive/prop-desc.js
 test/built-ins/Symbol/toStringTag/prop-desc.js
 test/built-ins/Symbol/unscopables/prop-desc.js
@@ -3760,9 +3741,7 @@ test/built-ins/TypedArray/prototype/with/length-property-ignored.js
 test/built-ins/TypedArray/prototype/with/negative-fractional-index-truncated-to-zero.js
 test/built-ins/TypedArray/prototype/with/order-of-evaluation.js
 test/built-ins/TypedArray/prototype/with/value-throw-completion.js
-test/built-ins/TypedArrayConstructors/BigInt64Array/prop-desc.js
 test/built-ins/TypedArrayConstructors/BigInt64Array/prototype/BYTES_PER_ELEMENT.js
-test/built-ins/TypedArrayConstructors/BigUint64Array/prop-desc.js
 test/built-ins/TypedArrayConstructors/BigUint64Array/prototype/BYTES_PER_ELEMENT.js
 test/built-ins/TypedArrayConstructors/Float32Array/prototype/BYTES_PER_ELEMENT.js
 test/built-ins/TypedArrayConstructors/Float64Array/prototype/BYTES_PER_ELEMENT.js
@@ -3991,9 +3970,7 @@ test/built-ins/WeakMap/prototype/has/returns-true-when-symbol-key-present.js
 test/built-ins/WeakMap/prototype/set/adds-symbol-element.js
 test/built-ins/WeakMap/prototype/set/returns-this-when-ignoring-duplicate.js
 test/built-ins/WeakMap/prototype/set/returns-this.js
-test/built-ins/WeakMap/weakmap.js
 test/built-ins/WeakRef/length.js
-test/built-ins/WeakRef/prop-desc.js
 test/built-ins/WeakRef/prototype-from-newtarget-custom.js
 test/built-ins/WeakRef/throws-when-target-cannot-be-held-weakly.js
 test/built-ins/WeakSet/iterable-with-symbol-values.js
@@ -4009,7 +3986,6 @@ test/built-ins/WeakSet/prototype/has/returns-false-when-object-value-not-present
 test/built-ins/WeakSet/prototype/has/returns-false-when-symbol-value-not-present.js
 test/built-ins/WeakSet/prototype/has/returns-false-when-value-cannot-be-held-weakly.js
 test/built-ins/WeakSet/prototype/has/returns-true-when-symbol-value-present.js
-test/built-ins/WeakSet/weakset.js
 test/built-ins/decodeURI/S15.1.3.1_A5.5.js
 test/built-ins/decodeURI/S15.1.3.1_A6_T1.js
 test/built-ins/decodeURIComponent/S15.1.3.2_A1.10_T1.js
@@ -4064,9 +4040,7 @@ test/built-ins/encodeURIComponent/S15.1.3.4_A5.5.js
 test/built-ins/encodeURIComponent/S15.1.3.4_A6_T1.js
 test/built-ins/eval/length-enumerable.js
 test/built-ins/global/S10.2.3_A2.1_T3.js
-test/built-ins/global/S10.2.3_A2.1_T4.js
 test/built-ins/global/S10.2.3_A2.3_T3.js
-test/built-ins/global/S10.2.3_A2.3_T4.js
 test/built-ins/global/property-descriptor.js
 test/built-ins/parseFloat/S15.1.2.3_A1_T7.js
 test/built-ins/parseFloat/S15.1.2.3_A2_T10_U180E.js
@@ -6958,7 +6932,6 @@ test/language/future-reserved-words/protected.js
 test/language/future-reserved-words/public.js
 test/language/future-reserved-words/static.js
 test/language/global-code/decl-func-dup.js
-test/language/global-code/decl-lex-configurable-global.js
 test/language/global-code/decl-lex.js
 test/language/global-code/switch-case-decl-strict.js
 test/language/global-code/switch-dflt-decl-strict.js
@@ -10020,7 +9993,6 @@ test/staging/sm/Iterator/from/proxy-wrap-return.js
 test/staging/sm/Iterator/from/return-iterator-if-iterable.js
 test/staging/sm/Iterator/from/wrap-next-not-object-throws.js
 test/staging/sm/Iterator/from/wrap-return-closes-iterator.js
-test/staging/sm/Iterator/iterator.js
 test/staging/sm/Iterator/prototype/drop/drop-more-than-available.js
 test/staging/sm/Iterator/prototype/every/check-fn-after-getting-iterator.js
 test/staging/sm/Iterator/prototype/every/fn-throws-close-iterator.js
@@ -10149,7 +10121,6 @@ test/staging/sm/Reflect/get.js
 test/staging/sm/Reflect/getOwnPropertyDescriptor.js
 test/staging/sm/Reflect/propertyKeys.js
 test/staging/sm/Reflect/setPrototypeOf.js
-test/staging/sm/Reflect/surfaces.js
 test/staging/sm/RegExp/7.8.5-01.js
 test/staging/sm/RegExp/RegExpExec-exec-type-check.js
 test/staging/sm/RegExp/RegExpExec-return.js
@@ -10402,7 +10373,6 @@ test/staging/sm/extensions/destructuring-for-inof-__proto__.js
 test/staging/sm/extensions/function-caller-skips-eval-frames.js
 test/staging/sm/extensions/function-properties.js
 test/staging/sm/extensions/mutable-proto-special-form.js
-test/staging/sm/extensions/nested-delete-name-in-evalcode.js
 test/staging/sm/extensions/newer-type-functions-caller-arguments.js
 test/staging/sm/extensions/quote-string-for-nul-character.js
 test/staging/sm/fields/await-identifier-script.js

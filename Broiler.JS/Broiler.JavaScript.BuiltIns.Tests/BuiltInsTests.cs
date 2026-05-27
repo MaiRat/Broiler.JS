@@ -10712,4 +10712,124 @@ public class BuiltInsTests
     }
 
     #endregion
+
+    #region Proxy HasProperty Prototype Chain
+
+    [Fact]
+    public void Proxy_Has_Trap_Invoked_Via_Prototype_Chain()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = new JSContext();
+        var result = ctx.Eval("""
+            var proxy = new Proxy({}, {
+                has: function(t, p) { return true; }
+            });
+            var obj = Object.create(proxy);
+            ("foo" in obj).toString();
+        """);
+        Assert.Equal("true", result.ToString());
+    }
+
+    #endregion
+
+    #region RegExp DotAll and Unicode
+
+    [Fact]
+    public void RegExp_Dot_Excludes_All_LineTerminators()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = new JSContext();
+        var result = ctx.Eval("""
+            var r = /^.$/;
+            [r.test("\r"), r.test("\u2028"), r.test("\u2029"), r.test("\n")]
+                .every(function(v) { return v === false; }).toString();
+        """);
+        Assert.Equal("true", result.ToString());
+    }
+
+    [Fact]
+    public void RegExp_DotAll_Matches_All_LineTerminators()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = new JSContext();
+        var result = ctx.Eval("""
+            var r = /^.$/s;
+            [r.test("\r"), r.test("\u2028"), r.test("\u2029"), r.test("\n")]
+                .every(function(v) { return v === true; }).toString();
+        """);
+        Assert.Equal("true", result.ToString());
+    }
+
+    [Fact]
+    public void RegExp_Unicode_DotAll_Matches_All()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = new JSContext();
+        var result = ctx.Eval("""
+            var r = /^.$/su;
+            [r.test("\r"), r.test("\u2028"), r.test("\u2029"), r.test("\n")]
+                .every(function(v) { return v === true; }).toString();
+        """);
+        Assert.Equal("true", result.ToString());
+    }
+
+    [Fact]
+    public void RegExp_Unicode_Dot_Excludes_LineTerminators()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = new JSContext();
+        var result = ctx.Eval("""
+            var r = /^.$/u;
+            [r.test("\r"), r.test("\u2028"), r.test("\u2029"), r.test("\n")]
+                .every(function(v) { return v === false; }).toString();
+        """);
+        Assert.Equal("true", result.ToString());
+    }
+
+    [Fact]
+    public void RegExp_Unicode_NonWhitespace_Matches_Surrogate_Pairs()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = new JSContext();
+        var result = ctx.Eval("""
+            var r = /^\S$/u;
+            r.test("\ud800\udc00").toString();
+        """);
+        Assert.Equal("true", result.ToString());
+    }
+
+    [Fact]
+    public void RegExp_Unicode_CharClass_Surrogate_Pairs()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = new JSContext();
+        var result = ctx.Eval("""
+            var r = /^[\ud834\udf06]$/u;
+            r.test("\ud834\udf06").toString();
+        """);
+        Assert.Equal("true", result.ToString());
+    }
+
+    #endregion
+
+    #region Indirect Eval Global Scope
+
+    [Fact]
+    public void Indirect_Eval_Sees_Global_Scope()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = new JSContext();
+        var result = ctx.Eval("""
+            var __x = "str";
+            function testcase() {
+                var __x = "str1";
+                var r = eval("var _eval = eval; _eval('__x')");
+                return r;
+            }
+            testcase();
+        """);
+        Assert.Equal("str", result.ToString());
+    }
+
+    #endregion
 }

@@ -73,6 +73,7 @@ public class JSContext : JSObject, IJSExecutionContext, IDisposable
     private int directEvalDepth;
     private int directEvalCompilationDepth;
     private int directEvalLocalVarEnvironmentDepth;
+    private readonly List<DirectEvalScope> activeDirectEvalScopes = [];
     private WithScope withScope;
 
     private sealed class WithScope : IDisposable
@@ -149,11 +150,62 @@ public class JSContext : JSObject, IJSExecutionContext, IDisposable
                 context.globalVars.Put(key.Key) = variable;
             }
 
+            context.activeDirectEvalScopes.Add(this);
             context.directEvalDepth++;
+        }
+
+        /// <summary>
+        /// Temporarily removes overlay bindings from the global object so
+        /// that indirect eval can see the true global environment.
+        /// </summary>
+        public void Suspend()
+        {
+            foreach (var entry in entries)
+            {
+                if (entry.HadPreviousVariable)
+                {
+                    context.globalVars.Put(entry.Name.Key) = entry.PreviousVariable;
+                    if (entry.HadOwnProperty)
+                        context[entry.Name] = entry.PreviousValue;
+                    else
+                        context.Delete(entry.Name);
+                }
+                else
+                {
+                    context.globalVars.RemoveAt(entry.Name.Key);
+                    if (entry.HadOwnProperty)
+                        context[entry.Name] = entry.PreviousValue;
+                    else
+                        context.Delete(entry.Name);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Re-applies overlay bindings after indirect eval completes.
+        /// </summary>
+        public void Resume()
+        {
+            foreach (var entry in entries)
+            {
+                // Re-read the current global value (indirect eval may have
+                // modified the real global binding).
+                var property = context.GetInternalProperty(entry.Name, false);
+                entry.HadOwnProperty = !property.IsEmpty;
+                if (entry.HadOwnProperty)
+                    entry.PreviousValue = context[entry.Name];
+                entry.HadPreviousVariable = context.globalVars.TryGetValue(entry.Name.Key, out var pv);
+                entry.PreviousVariable = pv;
+
+                context.Register(entry.OverlayVariable);
+                context.globalVars.Put(entry.Name.Key) = entry.OverlayVariable;
+            }
         }
 
         public void Dispose()
         {
+            context.activeDirectEvalScopes.Remove(this);
+
             foreach (var entry in entries)
             {
                 if (entry.HadPreviousVariable)
@@ -186,6 +238,61 @@ public class JSContext : JSObject, IJSExecutionContext, IDisposable
     }
 
     public IDisposable PushDirectEvalScope(JSVariable[] variables) => new DirectEvalScope(this, variables);
+
+    /// <summary>
+    /// Temporarily suspends all active direct-eval scope overlays AND resets
+    /// the direct-eval compilation/depth counters.  The returned IDisposable
+    /// re-applies everything when disposed.  Used by indirect eval so that
+    /// the evaluated code sees the true global environment (§19.2.1.1).
+    /// </summary>
+    public IDisposable SuspendDirectEvalOverlays()
+    {
+        if (activeDirectEvalScopes.Count == 0
+            && directEvalCompilationDepth == 0
+            && directEvalDepth == 0)
+            return null;
+
+        return new DirectEvalSuspension(this);
+    }
+
+    private sealed class DirectEvalSuspension : IDisposable
+    {
+        private readonly JSContext context;
+        private readonly int savedCompilationDepth;
+        private readonly int savedLocalVarDepth;
+        private readonly int savedEvalDepth;
+        private readonly DirectEvalScope[] suspendedScopes;
+
+        public DirectEvalSuspension(JSContext context)
+        {
+            this.context = context;
+
+            // Save and reset compilation flags
+            savedCompilationDepth = context.directEvalCompilationDepth;
+            savedLocalVarDepth = context.directEvalLocalVarEnvironmentDepth;
+            savedEvalDepth = context.directEvalDepth;
+            context.directEvalCompilationDepth = 0;
+            context.directEvalLocalVarEnvironmentDepth = 0;
+            context.directEvalDepth = 0;
+
+            // Suspend all overlay scopes (innermost first)
+            suspendedScopes = context.activeDirectEvalScopes.ToArray();
+            for (int i = suspendedScopes.Length - 1; i >= 0; i--)
+                suspendedScopes[i].Suspend();
+        }
+
+        public void Dispose()
+        {
+            // Resume overlay scopes (outermost first)
+            for (int i = 0; i < suspendedScopes.Length; i++)
+                suspendedScopes[i].Resume();
+
+            // Restore compilation flags
+            context.directEvalCompilationDepth = savedCompilationDepth;
+            context.directEvalLocalVarEnvironmentDepth = savedLocalVarDepth;
+            context.directEvalDepth = savedEvalDepth;
+        }
+    }
 
     private sealed class DirectEvalCompilationScope(JSContext context, bool usesLocalVarEnvironment) : IDisposable
     {

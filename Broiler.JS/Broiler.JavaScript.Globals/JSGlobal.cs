@@ -112,7 +112,14 @@ public partial class JSGlobalStatic
         (JSEngine.Current as IJSExecutionContext)?.DispatchEvalEvent(ref text, ref location);
         if (JSEngine.Current is JSContext context)
         {
-            using var _ = context.PushDirectEvalCompilation();
+            // This function is only reachable via indirect eval (e.g.
+            // `var _eval = eval; _eval(code)`).  Direct eval is handled
+            // entirely inside DirectEvalSupport.Execute.
+            //
+            // Per §19.2.1.1, indirect eval evaluates its code in the
+            // global environment.  Suspend any active direct-eval scope
+            // overlays so the compiled code sees the true global bindings.
+            using var suspension = context.SuspendDirectEvalOverlays();
             return context.Eval(text, location, context);
         }
 

@@ -538,11 +538,15 @@ public abstract partial class JSValue : IDynamicMetaObjectProvider, IPropertyAcc
         if (this is not JSObject target)
             throw NewTypeError($"Cannot use 'in' operator to search for '{propertyKey}' in {this}");
 
-        for (JSValue prototype = target; prototype is JSObject prototypeObject; prototype = prototypeObject.GetPrototypeOf())
-        {
-            if (!prototypeObject.GetOwnPropertyDescriptor(propertyKey).IsUndefined)
-                return BooleanTrue;
-        }
+        // §10.1.7 OrdinaryHasProperty: check own property first
+        if (!target.GetOwnPropertyDescriptor(propertyKey).IsUndefined)
+            return BooleanTrue;
+
+        // Then delegate to the prototype's [[HasProperty]] (not GetOwnPropertyDescriptor)
+        // so that Proxy objects in the prototype chain invoke their "has" trap.
+        var proto = target.GetPrototypeOf();
+        if (proto is JSObject protoObj)
+            return protoObj.HasProperty(propertyKey);
 
         return BooleanFalse;
     }

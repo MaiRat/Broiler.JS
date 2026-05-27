@@ -85,6 +85,16 @@ public partial class JSString
 
         if (!pattern.IsNullOrUndefined)
         {
+            if (JSRegExp.IsRegExpLike(pattern))
+            {
+                var flags = pattern[KeyStrings.GetOrCreate("flags")];
+                if (flags.IsNullOrUndefined)
+                    throw JSEngine.NewTypeError("String.prototype.matchAll called with a non-global RegExp argument");
+
+                if (!flags.ToString().Contains('g'))
+                    throw JSEngine.NewTypeError("String.prototype.matchAll called with a non-global RegExp argument");
+            }
+
             var matcher = pattern[(IJSSymbol)JSSymbol.matchAll];
             if (!matcher.IsUndefined && !matcher.IsNull)
             {

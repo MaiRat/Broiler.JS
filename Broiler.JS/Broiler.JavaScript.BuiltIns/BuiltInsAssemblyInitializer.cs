@@ -784,10 +784,24 @@ internal static class BuiltInsAssemblyInitializer
         if (context[KeyStrings.Function] is not JSFunction functionCtor)
             return;
 
-        EnsureAccessorProperty(functionCtor.prototype, KeyStrings.GetOrCreate("caller"), "caller", static (in Arguments a)
-            => throw JSEngine.NewTypeError("Cannot access caller in strict mode"));
-        EnsureAccessorProperty(functionCtor.prototype, KeyStrings.arguments, "arguments", static (in Arguments a)
-            => throw JSEngine.NewTypeError("Cannot access arguments in strict mode"));
+        var callerKey = KeyStrings.GetOrCreate("caller");
+        if (functionCtor.prototype.GetOwnPropertyDescriptor(JSValue.CreateStringWithKey(callerKey.ToString(), callerKey)).IsUndefined)
+        {
+            functionCtor.prototype.FastAddProperty(
+                callerKey,
+                CreateNativeGetter(static (in Arguments a) => throw JSEngine.NewTypeError("Cannot access caller in strict mode"), "caller"),
+                CreateNativeSetter(static (in Arguments a) => throw JSEngine.NewTypeError("Cannot access caller in strict mode"), "caller"),
+                JSPropertyAttributes.ConfigurableProperty);
+        }
+
+        if (functionCtor.prototype.GetOwnPropertyDescriptor(JSValue.CreateStringWithKey(KeyStrings.arguments.ToString(), KeyStrings.arguments)).IsUndefined)
+        {
+            functionCtor.prototype.FastAddProperty(
+                KeyStrings.arguments,
+                CreateNativeGetter(static (in Arguments a) => throw JSEngine.NewTypeError("Cannot access arguments in strict mode"), "arguments"),
+                CreateNativeSetter(static (in Arguments a) => throw JSEngine.NewTypeError("Cannot access arguments in strict mode"), "arguments"),
+                JSPropertyAttributes.ConfigurableProperty);
+        }
 
         ref var symbols = ref functionCtor.prototype.GetSymbols();
         symbols.Put(JSSymbol.hasInstance.Key) = JSProperty.Property(CreateNativeFunction((in Arguments a) =>
@@ -1217,6 +1231,15 @@ internal static class BuiltInsAssemblyInitializer
                 var position = (int)result[KeyStrings.index].DoubleValue;
                 var capturesLength = Math.Max((int)result[KeyStrings.length].DoubleValue, 0);
                 var namedCaptures = result[KeyStrings.GetOrCreate("groups")];
+                JSValue normalizedNamedCaptures = JSUndefined.Value;
+                if (!namedCaptures.IsUndefined)
+                {
+                    if (namedCaptures.IsNull)
+                        throw JSEngine.NewTypeError("RegExp replacement named captures must be an object");
+
+                    normalizedNamedCaptures = namedCaptures as JSObject
+                        ?? (JSObject)JSObject.CreatePrimitiveObject(namedCaptures);
+                }
 
                 List<JSValue> captures = [];
                 for (var i = 1; i < capturesLength; i++)
@@ -1232,14 +1255,14 @@ internal static class BuiltInsAssemblyInitializer
                     replacerArgs.AddRange(captures);
                     replacerArgs.Add(JSValue.CreateNumber(position));
                     replacerArgs.Add(JSValue.CreateString(input));
-                    if (!namedCaptures.IsUndefined)
-                        replacerArgs.Add(namedCaptures);
+                    if (!normalizedNamedCaptures.IsUndefined)
+                        replacerArgs.Add(normalizedNamedCaptures);
 
                     replacement = replaceValue.InvokeFunction(new Arguments(JSUndefined.Value, replacerArgs.ToArray())).ToString();
                 }
                 else
                 {
-                    replacement = GetSubstitution(matched, input, position, captures, namedCaptures, replacementText);
+                    replacement = GetSubstitution(matched, input, position, captures, normalizedNamedCaptures, replacementText);
                 }
 
                 if (position > nextSourcePosition)

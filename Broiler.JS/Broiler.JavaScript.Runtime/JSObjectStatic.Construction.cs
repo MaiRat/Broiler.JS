@@ -78,15 +78,15 @@ public partial class JSObject
         }
 
         var newLength = (uint)newLengthNumber;
+        if (!currentWritable)
+            throw NewTypeError("Cannot redefine property");
+
         if (newLength >= currentLength)
         {
             target[KeyStrings.length] = JSValue.CreateNumber(newLength);
             SetArrayLengthWritable(target, newWritable);
             return;
         }
-
-        if (!currentWritable)
-            throw NewTypeError("Cannot redefine property");
 
         for (uint i = currentLength; i > newLength; i--)
         {

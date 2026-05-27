@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Collections.Generic;
+using System.Text;
 using System.Text.RegularExpressions;
 using System;
 using Broiler.JavaScript.ExpressionCompiler;
@@ -602,7 +603,7 @@ public partial class JSRegExp : JSObject, IJSRegExp
 
             // ECMAScript \s must match all Unicode whitespace (Zs category + BOM + line terminators).
             // .NET's \s only covers ASCII whitespace, so expand to the full set.
-            pattern = TransformUnicodeWhitespace(pattern);
+            pattern = TransformUnicodeWhitespace(pattern, unicode || unicodeSets);
 
             // .NET IgnoreCase doesn't handle all Unicode CaseFolding pairs (e.g. µ↔μ, ſ↔s).
             // Expand literal characters to include their missing case-fold equivalents.
@@ -623,21 +624,38 @@ public partial class JSRegExp : JSObject, IJSRegExp
             // Unicode code point.  .NET's '.' only matches a single UTF-16
             // code unit, so expand it to also match surrogate pairs.
             if (unicode || unicodeSets)
+            {
                 pattern = TransformUnicodeDot(pattern, dotAll);
+                // Transform character class escapes (\S, \W, \D) outside character
+                // classes so they also match supplementary-plane code points (surrogate pairs).
+                pattern = TransformUnicodeCharClassEscapes(pattern);
+                // Transform character classes containing supplementary characters
+                // (surrogate pairs) so they match as whole code points.
+                pattern = TransformUnicodeCharClasses(pattern);
+            }
+
+            // ES §21.2.2.8 Atom: Without dotAll, '.' must not match any of
+            // the four LineTerminator characters: \n \r \u2028 \u2029.
+            // .NET's '.' (without Singleline) only excludes \n, so replace
+            // remaining '.' with a class that excludes all four.
+            // Skip when unicode/unicodeSets already handled the dots above,
+            // or when dotAll (Singleline) is active and '.' should match all.
+            if (!dotAll && !unicode && !unicodeSets)
+                pattern = TransformDotLineTerminators(pattern);
 
             if ((options & RegexOptions.Multiline) == RegexOptions.Multiline)
             {
                 // In the .NET Regex implementation with multiline mode:
-                // '.' matches any character except \n
                 // '^' matches the start of the string or \n (positive lookbehind)
                 // '$' matches the end of the string or \n (positive lookahead)
                 // In Javascript, we want all three characters to also match \r in the same way they match \n.
+                // Note: '.' is already handled above by TransformDotLineTerminators or TransformUnicodeDot.
 
                 StringBuilder builder = null;
                 int start = 0, end = -1;
                 while (end < pattern.Length)
                 {
-                    end = pattern.IndexOfAny(['.', '^', '$', '\\'], end + 1);
+                    end = pattern.IndexOfAny(['^', '$', '\\'], end + 1);
                     if (end == -1)
                         break;
                     
@@ -647,10 +665,6 @@ public partial class JSRegExp : JSObject, IJSRegExp
                     start = end + 1;
                     switch (pattern[end])
                     {
-                        case '.':
-                            builder.Append(@"[^\r\n]");
-                            break;
-
                         case '^':
                             // [^abc] is a thing. The ^ does NOT match the start of the line in this case.
                             if (end > 0 && pattern[end - 1] == '[')
@@ -766,6 +780,287 @@ public partial class JSRegExp : JSObject, IJSRegExp
     }
 
     /// <summary>
+    /// In Unicode mode, \S, \W, \D outside character classes need to also
+    /// match supplementary-plane code points (encoded as surrogate pairs).
+    /// .NET's \S/\W/\D only match single UTF-16 code units, missing
+    /// surrogate pairs that are non-space/non-word/non-digit code points.
+    /// </summary>
+    private static string TransformUnicodeCharClassEscapes(string pattern)
+    {
+        if (string.IsNullOrEmpty(pattern))
+            return pattern;
+
+        StringBuilder sb = null;
+        int start = 0;
+        bool inClass = false;
+
+        for (int i = 0; i < pattern.Length; i++)
+        {
+            char c = pattern[i];
+
+            if (c == '[' && !inClass)
+            {
+                inClass = true;
+                continue;
+            }
+            if (inClass && c == ']')
+            {
+                inClass = false;
+                continue;
+            }
+            if (c == '\\' && i + 1 < pattern.Length)
+            {
+                char next = pattern[i + 1];
+                if (!inClass && (next == 'S' || next == 'W' || next == 'D'))
+                {
+                    // Expand \S / \W / \D to also match surrogate pairs.
+                    // A surrogate pair is always a non-whitespace, non-digit code point.
+                    // For \W, supplementary code points are non-word characters.
+                    // The surrogate-pair alternative must come FIRST so it is
+                    // tried before \S/\W/\D, which would otherwise greedily
+                    // match a lone high surrogate as a single code unit.
+                    sb ??= new StringBuilder(pattern.Length + 64);
+                    sb.Append(pattern, start, i - start);
+                    sb.Append(@"(?:[\uD800-\uDBFF][\uDC00-\uDFFF]|");
+                    sb.Append('\\');
+                    sb.Append(next);
+                    sb.Append(@")");
+                    start = i + 2;
+                }
+                i++; // skip escaped char
+                continue;
+            }
+        }
+
+        if (sb == null)
+            return pattern;
+
+        sb.Append(pattern, start, pattern.Length - start);
+        return sb.ToString();
+    }
+
+    /// <summary>
+    /// Transforms character classes containing supplementary-plane characters
+    /// (represented as surrogate pairs) so that .NET regex treats them as
+    /// whole code points rather than two independent code units.
+    /// E.g. [𝌆a-z] → (?:\uD834\uDF06|[a-z])
+    /// </summary>
+    private static string TransformUnicodeCharClasses(string pattern)
+    {
+        if (string.IsNullOrEmpty(pattern))
+            return pattern;
+
+        StringBuilder sb = null;
+        int start = 0;
+
+        for (int i = 0; i < pattern.Length; i++)
+        {
+            char c = pattern[i];
+
+            if (c == '\\' && i + 1 < pattern.Length)
+            {
+                i++; // skip escaped char
+                continue;
+            }
+
+            if (c == '[')
+            {
+                // Find the end of this character class
+                int classStart = i;
+                bool negated = false;
+                i++; // skip '['
+                if (i < pattern.Length && pattern[i] == '^')
+                {
+                    negated = true;
+                    i++;
+                }
+                // Allow ] as first char in class
+                if (i < pattern.Length && pattern[i] == ']')
+                    i++;
+
+                // Scan for supplementary chars (surrogate pairs) in this class
+                var supplementaryChars = new List<string>();
+                bool hasSupplementary = false;
+
+                int scanPos = i;
+                while (scanPos < pattern.Length && pattern[scanPos] != ']')
+                {
+                    if (pattern[scanPos] == '\\' && scanPos + 1 < pattern.Length)
+                    {
+                        scanPos += 2;
+                        continue;
+                    }
+                    if (char.IsHighSurrogate(pattern[scanPos]) && scanPos + 1 < pattern.Length 
+                        && char.IsLowSurrogate(pattern[scanPos + 1]))
+                    {
+                        hasSupplementary = true;
+                        break;
+                    }
+                    scanPos++;
+                }
+
+                if (!hasSupplementary)
+                {
+                    // Find end of class and skip
+                    while (i < pattern.Length && pattern[i] != ']')
+                    {
+                        if (pattern[i] == '\\' && i + 1 < pattern.Length)
+                            i++;
+                        i++;
+                    }
+                    continue;
+                }
+
+                // We have supplementary chars - rebuild the class
+                sb ??= new StringBuilder(pattern.Length + 64);
+                sb.Append(pattern, start, classStart - start);
+
+                // Collect BMP parts and supplementary chars
+                var bmpParts = new StringBuilder();
+                i = classStart + 1; // skip '['
+                if (negated)
+                    i++; // skip '^'
+                // Handle ] as first char
+                if (i < pattern.Length && pattern[i] == ']')
+                {
+                    bmpParts.Append(']');
+                    i++;
+                }
+
+                while (i < pattern.Length && pattern[i] != ']')
+                {
+                    if (pattern[i] == '\\' && i + 1 < pattern.Length)
+                    {
+                        bmpParts.Append(pattern[i]);
+                        bmpParts.Append(pattern[i + 1]);
+                        i += 2;
+                        continue;
+                    }
+                    if (char.IsHighSurrogate(pattern[i]) && i + 1 < pattern.Length 
+                        && char.IsLowSurrogate(pattern[i + 1]))
+                    {
+                        supplementaryChars.Add(pattern.Substring(i, 2));
+                        i += 2;
+                        continue;
+                    }
+                    bmpParts.Append(pattern[i]);
+                    i++;
+                }
+
+                // i now points at ']'
+                if (negated)
+                {
+                    // [^𝌆a-z] → (?:(?!𝌆)[^a-z\uD800-\uDFFF]|(?!𝌆)[\uD800-\uDBFF][\uDC00-\uDFFF])
+                    // Simplified: negative classes with supplementary chars are rare;
+                    // use a negative lookahead approach
+                    sb.Append("(?:");
+                    foreach (var sp in supplementaryChars)
+                    {
+                        sb.Append("(?!");
+                        sb.Append(sp);
+                        sb.Append(')');
+                    }
+                    if (bmpParts.Length > 0)
+                    {
+                        sb.Append("(?:[^");
+                        sb.Append(bmpParts);
+                        sb.Append(@"\uD800-\uDFFF]|[\uD800-\uDBFF][\uDC00-\uDFFF])");
+                    }
+                    else
+                    {
+                        sb.Append(@"(?:[^\uD800-\uDFFF]|[\uD800-\uDBFF][\uDC00-\uDFFF])");
+                    }
+                    sb.Append(')');
+                }
+                else
+                {
+                    // [𝌆a-z] → (?:𝌆|[a-z])
+                    sb.Append("(?:");
+                    for (int si = 0; si < supplementaryChars.Count; si++)
+                    {
+                        sb.Append(supplementaryChars[si]);
+                        sb.Append('|');
+                    }
+                    if (bmpParts.Length > 0)
+                    {
+                        sb.Append('[');
+                        sb.Append(bmpParts);
+                        sb.Append(']');
+                    }
+                    else
+                    {
+                        // Remove trailing |
+                        sb.Length--;
+                    }
+                    sb.Append(')');
+                }
+
+                start = i + 1; // skip past ']'
+            }
+        }
+
+        if (sb == null)
+            return pattern;
+
+        sb.Append(pattern, start, pattern.Length - start);
+        return sb.ToString();
+    }
+
+    /// <summary>
+    /// Replaces unescaped '.' outside character classes with a class that
+    /// excludes all four ECMAScript LineTerminator characters:
+    /// \n (U+000A), \r (U+000D), \u2028 (LS), \u2029 (PS).
+    /// .NET's '.' only excludes \n; this method closes the gap for
+    /// non-unicode, non-dotAll regexes.
+    /// </summary>
+    private static string TransformDotLineTerminators(string pattern)
+    {
+        if (string.IsNullOrEmpty(pattern))
+            return pattern;
+
+        StringBuilder sb = null;
+        int start = 0;
+        bool inClass = false;
+
+        for (int i = 0; i < pattern.Length; i++)
+        {
+            char c = pattern[i];
+
+            if (c == '\\' && i + 1 < pattern.Length)
+            {
+                i++; // skip escaped character
+                continue;
+            }
+
+            if (c == '[' && !inClass)
+            {
+                inClass = true;
+                continue;
+            }
+
+            if (inClass && c == ']')
+            {
+                inClass = false;
+                continue;
+            }
+
+            if (c == '.' && !inClass)
+            {
+                sb ??= new StringBuilder(pattern.Length + 32);
+                sb.Append(pattern, start, i - start);
+                sb.Append(@"[^\n\r\u2028\u2029]");
+                start = i + 1;
+            }
+        }
+
+        if (sb == null)
+            return pattern;
+
+        sb.Append(pattern, start, pattern.Length - start);
+        return sb.ToString();
+    }
+
+    /// <summary>
     /// In Unicode mode, '.' must match any single Unicode code point,
     /// including astral code points encoded as UTF-16 surrogate pairs.
     /// .NET's '.' only matches one UTF-16 code unit, so we expand
@@ -786,10 +1081,14 @@ public partial class JSRegExp : JSObject, IJSRegExp
         // a single code point.
         pattern = CollapseSurrogatePairEscapes(pattern);
 
-        // Replacement for '.': a surrogate pair, or any single non-surrogate code unit.
+        // Replacement for '.': a surrogate pair, lone surrogates, or BMP chars.
+        // dotAll=true:  match any code point (surrogate pair, lone surrogate, or any BMP char).
+        //               With RegexOptions.Singleline the inner '.' already matches everything.
+        // dotAll=false: match any code point except LineTerminator (\n \r \u2028 \u2029).
+        //               Lone surrogates are valid code points and must still match.
         string dotReplacement = dotAll
-            ? @"(?:[\uD800-\uDBFF][\uDC00-\uDFFF]|.)"
-            : @"(?:[\uD800-\uDBFF][\uDC00-\uDFFF]|[^\uD800-\uDFFF])";
+            ? @"(?:[\uD800-\uDBFF][\uDC00-\uDFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]|[^\uD800-\uDFFF])"
+            : @"(?:[\uD800-\uDBFF][\uDC00-\uDFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]|[^\n\r\u2028\u2029\uD800-\uDFFF])";
 
         StringBuilder sb = null;
         int start = 0;
@@ -1064,7 +1363,7 @@ public partial class JSRegExp : JSObject, IJSRegExp
     /// ECMAScript \s must match all Unicode whitespace (Zs category + BOM + line terminators).
     /// .NET's \s only covers ASCII whitespace, so replace \s and \S with the full set.
     /// </summary>
-    private static string TransformUnicodeWhitespace(string pattern)
+    private static string TransformUnicodeWhitespace(string pattern, bool unicodeMode = false)
     {
         if (string.IsNullOrEmpty(pattern))
             return pattern;
@@ -1117,6 +1416,16 @@ public partial class JSRegExp : JSObject, IJSRegExp
                     {
                         if (next == 's')
                             sb.Append('[').Append(esWhitespaceChars).Append(']');
+                        else if (unicodeMode)
+                        {
+                            // In unicode mode, \S must also match supplementary-plane
+                            // code points (surrogate pairs).  The surrogate-pair branch
+                            // must come first so it is preferred over the BMP negated
+                            // class which would greedily match a lone high surrogate.
+                            sb.Append(@"(?:[\uD800-\uDBFF][\uDC00-\uDFFF]|[^")
+                              .Append(esWhitespaceChars)
+                              .Append(@"\uD800-\uDFFF])");
+                        }
                         else
                             sb.Append("[^").Append(esWhitespaceChars).Append(']');
                     }

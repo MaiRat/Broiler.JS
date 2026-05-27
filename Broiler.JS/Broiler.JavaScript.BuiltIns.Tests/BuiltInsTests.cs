@@ -2159,6 +2159,22 @@ public class BuiltInsTests
     }
 
     [Fact]
+    public void BuiltIn_Functions_Keep_Function_Class_Tag()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = new JSContext();
+        var result = ctx.Eval(@"[
+            Object.getOwnPropertyDescriptor(Object.prototype, Symbol.toStringTag) === undefined,
+            Object.prototype.toString.call(new Intl.NumberFormat().format),
+            Object.prototype.toString.call(new Intl.DateTimeFormat().format),
+            Object.prototype.toString.call(Intl.NumberFormat.supportedLocalesOf),
+            Object.prototype.toString.call(String.prototype.localeCompare)
+        ].join('|');");
+
+        Assert.Equal("true|[object Function]|[object Function]|[object Function]|[object Function]", result.ToString());
+    }
+
+    [Fact]
     public void Array_FromAsync_IsDisabled_WhenFlagIsOff()
     {
         EnsureBuiltInsLoaded();

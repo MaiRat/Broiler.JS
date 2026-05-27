@@ -1547,18 +1547,11 @@ internal static class BuiltInsAssemblyInitializer
             SetToStringTag(dvProto, "DataView");
 
         // Generator.prototype[@@toStringTag] = "Generator"
-        // GeneratorFunction.prototype[@@toStringTag] = "GeneratorFunction"
         // AsyncGenerator.prototype[@@toStringTag] = "AsyncGenerator"
         // AsyncGeneratorFunction.prototype[@@toStringTag] = "AsyncGeneratorFunction"
-        // (AsyncGeneratorFunction.prototype handled in JSGeneratorFunctionV2)
+        // (GeneratorFunction.prototype / AsyncGeneratorFunction.prototype handled in JSGeneratorFunctionV2)
         if (context[KeyStrings.GetOrCreate("Generator")] is JSFunction generatorCtor && generatorCtor.prototype is JSObject generatorProto)
-        {
             SetToStringTag(generatorProto, "Generator");
-
-            // The GeneratorFunction.prototype is the [[Prototype]] of Generator.prototype
-            if (generatorProto.GetPrototypeOf() is JSObject generatorFuncProto)
-                SetToStringTag(generatorFuncProto, "GeneratorFunction");
-        }
     }
 
     internal static void PatchAsyncIteratorPrototype(JSContext context)

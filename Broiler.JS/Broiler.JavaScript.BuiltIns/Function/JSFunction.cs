@@ -209,6 +209,22 @@ public partial class JSFunction : JSObject, IPropertyAccessor, IJSFunction
 
     internal protected override bool SetValue(KeyString name, JSValue value, JSValue receiver, bool throwError = true)
     {
+        if (prototypeChain == null
+            && GetInternalProperty(name, false).IsEmpty
+            && !ReferenceEquals(receiver as JSObject ?? this, (JSEngine.Current as IJSExecutionContext)?.FunctionPrototype)
+            && (JSEngine.Current as IJSExecutionContext)?.FunctionPrototype is JSObject functionPrototype)
+        {
+            var property = functionPrototype.GetInternalProperty(name, false);
+            if (!property.IsEmpty)
+            {
+                var inheritedResult = functionPrototype.SetValue(name, value, receiver ?? this, throwError);
+                if (inheritedResult && name.Key == KeyStrings.prototype.Key && ReferenceEquals(receiver as JSObject ?? this, this))
+                    prototype = value as JSObject;
+
+                return inheritedResult;
+            }
+        }
+
         var result = base.SetValue(name, value, receiver, throwError);
         if (result && name.Key == KeyStrings.prototype.Key && ReferenceEquals(receiver as JSObject ?? this, this))
             prototype = value as JSObject;

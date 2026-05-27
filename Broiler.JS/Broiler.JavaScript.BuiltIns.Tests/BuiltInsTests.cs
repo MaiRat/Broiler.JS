@@ -612,8 +612,14 @@ public class BuiltInsTests
 
               var arr2 = [];
 
-              var arr3 = [1, 2, 3];
-              Object.defineProperty(arr3, 'length', { writable: false });
+                var arr3 = [1, 2, 3];
+                Object.defineProperty(arr3, 'length', { writable: false });
+
+                var arr4 = [];
+                Object.defineProperty(arr4, 'length', { writable: false });
+
+                var arr5 = [];
+                Object.defineProperty(arr5, 'length', { writable: false });
 
               return [
                 thrownCtor(function () {
@@ -624,12 +630,18 @@ public class BuiltInsTests
                 }),
                 thrownCtor(function () {
                   Object.defineProperties(arr3, { '3': { value: 'abc' } });
-                }) + ':' + arr3.hasOwnProperty('3')
+                }) + ':' + arr3.hasOwnProperty('3'),
+                thrownCtor(function () {
+                  Object.defineProperty(arr4, 'length', { value: 12 });
+                }) + ':' + arr4.length,
+                thrownCtor(function () {
+                  Object.defineProperties(arr5, { length: { value: 12 } });
+                }) + ':' + arr5.length
               ].join('|');
             })();
             """);
 
-        Assert.Equal("TypeError:2|TypeError|TypeError:false", result.ToString());
+        Assert.Equal("TypeError:2|TypeError|TypeError:false|TypeError:0|TypeError:0", result.ToString());
     }
 
     [Fact]
@@ -6844,6 +6856,79 @@ public class BuiltInsTests
         ].join('||');");
 
         Assert.Equal("TypeError||TypeError|1|1||TypeError||TypeError", result.ToString());
+    }
+
+    [Fact]
+    public void Bound_Function_Restricted_Property_Setters_Throw_TypeError()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = new JSContext();
+
+        var result = ctx.Eval("""
+            (function () {
+                function thrownCtor(fn) {
+                    try {
+                        fn();
+                        return 'no-throw';
+                    } catch (e) {
+                        return e.constructor.name;
+                    }
+                }
+
+                function target() {}
+                var bound = target.bind(null);
+
+                return [
+                    thrownCtor(function () { bound.caller = {}; }),
+                    thrownCtor(function () { bound.arguments = {}; })
+                ].join('|');
+            })();
+            """);
+
+        Assert.Equal("TypeError|TypeError", result.ToString());
+    }
+
+    [Fact]
+    public void Intl_And_RegExp_TypeError_Regressions_Match_Test262_Expectations()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = new JSContext();
+
+        var result = ctx.Eval("""
+            (function () {
+                function thrownCtor(fn) {
+                    try {
+                        fn();
+                        return 'no-throw';
+                    } catch (e) {
+                        return e.constructor.name;
+                    }
+                }
+
+                const localeToString = Intl.Locale.prototype.toString;
+                const pluralRules = new Intl.PluralRules();
+                const regExp = /./;
+                regExp.exec = function () {
+                    return {
+                        length: 1,
+                        0: '',
+                        index: 0,
+                        groups: null
+                    };
+                };
+
+                return [
+                    thrownCtor(function () { localeToString.call(undefined); }),
+                    thrownCtor(function () { localeToString.call({}); }),
+                    new Intl.Locale('en-US').toString(),
+                    thrownCtor(function () { pluralRules.selectRange(undefined, 201); }),
+                    thrownCtor(function () { pluralRules.selectRange(102, undefined); }),
+                    thrownCtor(function () { regExp[Symbol.replace]('bar', ''); })
+                ].join('|');
+            })();
+            """);
+
+        Assert.Equal("TypeError|TypeError|en-US|TypeError|TypeError|TypeError", result.ToString());
     }
 
     [Fact]

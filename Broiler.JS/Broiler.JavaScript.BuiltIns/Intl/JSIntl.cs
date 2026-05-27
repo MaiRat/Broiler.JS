@@ -114,16 +114,22 @@ public static class JSIntl
         var constructor = new JSFunction((in Arguments a) =>
         {
             ValidateConstructorArguments("PluralRules", in a);
-            return new JSObject();
+            return new JSIntlPluralRules();
         }, "PluralRules", "function PluralRules() { [native code] }", length: 0);
         constructor.FastAddValue(SupportedLocalesOfKey, CreateSupportedLocalesOfFunction(), JSPropertyAttributes.ConfigurableValue);
         constructor.prototype.FastAddValue(KeyStrings.GetOrCreate("selectRange"),
             new JSFunction(static (in Arguments a) =>
             {
-                if (a.This is not JSObject)
+                if (a.This is not JSIntlPluralRules)
                     throw JSEngine.NewTypeError("Intl.PluralRules.prototype.selectRange called on incompatible receiver");
-                _ = (a[0] ?? JSUndefined.Value).DoubleValue;
-                _ = (a.GetAt(1) ?? JSUndefined.Value).DoubleValue;
+
+                var start = a.Get1();
+                var end = a.GetAt(1);
+                if (start.IsUndefined || end.IsUndefined)
+                    throw JSEngine.NewTypeError("Intl.PluralRules.prototype.selectRange requires defined start and end values");
+
+                _ = start.DoubleValue;
+                _ = end.DoubleValue;
                 return JSValue.CreateString("other");
             }, "selectRange", "function selectRange() { [native code] }", createPrototype: false, length: 2),
             JSPropertyAttributes.ConfigurableValue);
@@ -187,8 +193,7 @@ public static class JSIntl
     {
         var constructor = new JSFunction(static (in Arguments a) =>
         {
-            ValidateLocaleConstructorArguments(in a);
-            return new JSIntlLocale();
+            return new JSIntlLocale(ValidateLocaleConstructorArguments(in a));
         }, "Locale", "function Locale() { [native code] }", length: 1);
         constructor.prototype.FastAddValue(KeyStrings.GetOrCreate("maximize"),
             new JSFunction(JSIntlLocale.MaximizePrototype, "maximize", "function maximize() { [native code] }", createPrototype: false, length: 0),
@@ -216,6 +221,9 @@ public static class JSIntl
             JSPropertyAttributes.ConfigurableValue);
         constructor.prototype.FastAddValue(KeyStrings.GetOrCreate("getWeekInfo"),
             new JSFunction(JSIntlLocale.GetWeekInfoPrototype, "getWeekInfo", "function getWeekInfo() { [native code] }", createPrototype: false, length: 0),
+            JSPropertyAttributes.ConfigurableValue);
+        constructor.prototype.FastAddValue(KeyStrings.toString,
+            new JSFunction(JSIntlLocale.ToStringPrototype, "toString", "function toString() { [native code] }", createPrototype: false, length: 0),
             JSPropertyAttributes.ConfigurableValue);
         SetIntlToStringTag(constructor, "Locale");
         return constructor;
@@ -334,7 +342,7 @@ public static class JSIntl
         return ValidateOptionsArgument(a.GetAt(1));
     }
 
-    internal static void ValidateLocaleConstructorArguments(in Arguments a)
+    internal static string ValidateLocaleConstructorArguments(in Arguments a)
     {
         if (JSEngine.NewTarget == null && (JSEngine.Current as IJSExecutionContext)?.CurrentNewTarget == null)
             throw JSEngine.NewTypeError("Intl.Locale requires 'new'");
@@ -346,6 +354,7 @@ public static class JSIntl
         var tagString = tag.StringValue;
         ValidateLanguageTag(tagString);
         ValidateLocaleOptions(tagString, ValidateOptionsArgument(a.GetAt(1)));
+        return tagString;
     }
 
     internal static JSObject ValidateOptionsArgument(JSValue options)
@@ -680,23 +689,33 @@ public sealed class JSIntlListFormat : JSObject
 
 public sealed class JSIntlLocale : JSObject
 {
-    private static JSValue RequireLocale(in Arguments a, string method)
+    private readonly string tag;
+
+    public JSIntlLocale(string tag = "und") : base(CurrentPrototype()) => this.tag = tag;
+
+    private static JSObject CurrentPrototype()
+        => (JSEngine.CurrentContext as JSObject)?[KeyStrings.GetOrCreate("Intl")] is JSObject intl
+            ? (intl[KeyStrings.GetOrCreate("Locale")] as JSFunction)?.prototype
+            : null;
+
+    private static JSIntlLocale RequireLocale(in Arguments a, string method)
     {
-        if (a.This is not JSIntlLocale)
+        if (a.This is not JSIntlLocale locale)
             throw JSEngine.NewTypeError($"Intl.Locale.prototype.{method} called on incompatible receiver");
-        return JSUndefined.Value;
+
+        return locale;
     }
 
     public static JSValue MaximizePrototype(in Arguments a)
     {
-        RequireLocale(in a, "maximize");
-        return new JSIntlLocale();
+        var locale = RequireLocale(in a, "maximize");
+        return new JSIntlLocale(locale.tag);
     }
 
     public static JSValue MinimizePrototype(in Arguments a)
     {
-        RequireLocale(in a, "minimize");
-        return new JSIntlLocale();
+        var locale = RequireLocale(in a, "minimize");
+        return new JSIntlLocale(locale.tag);
     }
 
     public static JSValue GetCalendarsPrototype(in Arguments a)
@@ -740,6 +759,19 @@ public sealed class JSIntlLocale : JSObject
         RequireLocale(in a, "getWeekInfo");
         return new JSObject();
     }
+
+    public static JSValue ToStringPrototype(in Arguments a)
+        => JSValue.CreateString(RequireLocale(in a, "toString").tag);
+}
+
+public sealed class JSIntlPluralRules : JSObject
+{
+    public JSIntlPluralRules() : base(CurrentPrototype()) { }
+
+    private static JSObject CurrentPrototype()
+        => (JSEngine.CurrentContext as JSObject)?[KeyStrings.GetOrCreate("Intl")] is JSObject intl
+            ? (intl[KeyStrings.GetOrCreate("PluralRules")] as JSFunction)?.prototype
+            : null;
 }
 
 public class JSIntlNumberFormat : JSObject

@@ -83,13 +83,10 @@ test/annexB/language/eval-code/direct/func-if-stmt-else-decl-eval-func-skip-earl
 test/annexB/language/eval-code/direct/func-if-stmt-else-decl-eval-func-skip-early-err-switch.js
 test/annexB/language/eval-code/direct/func-if-stmt-else-decl-eval-func-skip-early-err.js
 test/annexB/language/eval-code/direct/func-switch-case-eval-func-block-scoping.js
-test/annexB/language/eval-code/direct/func-switch-case-eval-func-existing-fn-no-init.js
 test/annexB/language/eval-code/direct/func-switch-case-eval-func-existing-fn-update.js
 test/annexB/language/eval-code/direct/func-switch-case-eval-func-existing-var-update.js
 test/annexB/language/eval-code/direct/func-switch-case-eval-func-init.js
-test/annexB/language/eval-code/direct/func-switch-case-eval-func-skip-early-err-block.js
 test/annexB/language/eval-code/direct/func-switch-case-eval-func-skip-early-err-switch.js
-test/annexB/language/eval-code/direct/func-switch-case-eval-func-skip-early-err.js
 test/annexB/language/eval-code/direct/func-switch-dflt-eval-func-block-scoping.js
 test/annexB/language/eval-code/direct/func-switch-dflt-eval-func-existing-block-fn-no-init.js
 test/annexB/language/eval-code/direct/func-switch-dflt-eval-func-existing-block-fn-update.js
@@ -141,11 +138,7 @@ test/annexB/language/eval-code/direct/global-if-stmt-else-decl-eval-global-skip-
 test/annexB/language/eval-code/direct/global-if-stmt-else-decl-eval-global-skip-early-err-switch.js
 test/annexB/language/eval-code/direct/global-if-stmt-else-decl-eval-global-skip-early-err.js
 test/annexB/language/eval-code/direct/global-switch-case-eval-global-block-scoping.js
-test/annexB/language/eval-code/direct/global-switch-case-eval-global-existing-fn-no-init.js
-test/annexB/language/eval-code/direct/global-switch-case-eval-global-existing-fn-update.js
-test/annexB/language/eval-code/direct/global-switch-case-eval-global-skip-early-err-block.js
 test/annexB/language/eval-code/direct/global-switch-case-eval-global-skip-early-err-switch.js
-test/annexB/language/eval-code/direct/global-switch-case-eval-global-skip-early-err.js
 test/annexB/language/eval-code/direct/global-switch-dflt-eval-global-block-scoping.js
 test/annexB/language/eval-code/direct/global-switch-dflt-eval-global-existing-block-fn-no-init.js
 test/annexB/language/eval-code/direct/global-switch-dflt-eval-global-existing-block-fn-update.js
@@ -200,11 +193,7 @@ test/annexB/language/eval-code/indirect/global-if-stmt-else-decl-eval-global-ski
 test/annexB/language/eval-code/indirect/global-if-stmt-else-decl-eval-global-skip-early-err-switch.js
 test/annexB/language/eval-code/indirect/global-if-stmt-else-decl-eval-global-skip-early-err.js
 test/annexB/language/eval-code/indirect/global-switch-case-eval-global-block-scoping.js
-test/annexB/language/eval-code/indirect/global-switch-case-eval-global-existing-fn-no-init.js
-test/annexB/language/eval-code/indirect/global-switch-case-eval-global-existing-fn-update.js
-test/annexB/language/eval-code/indirect/global-switch-case-eval-global-skip-early-err-block.js
 test/annexB/language/eval-code/indirect/global-switch-case-eval-global-skip-early-err-switch.js
-test/annexB/language/eval-code/indirect/global-switch-case-eval-global-skip-early-err.js
 test/annexB/language/eval-code/indirect/global-switch-dflt-eval-global-block-scoping.js
 test/annexB/language/eval-code/indirect/global-switch-dflt-eval-global-existing-block-fn-no-init.js
 test/annexB/language/eval-code/indirect/global-switch-dflt-eval-global-existing-block-fn-update.js
@@ -285,15 +274,8 @@ test/annexB/language/function-code/if-stmt-else-decl-func-skip-early-err-block.j
 test/annexB/language/function-code/if-stmt-else-decl-func-skip-early-err-switch.js
 test/annexB/language/function-code/if-stmt-else-decl-func-skip-early-err.js
 test/annexB/language/function-code/if-stmt-else-decl-func-skip-param.js
-test/annexB/language/function-code/switch-case-func-existing-fn-no-init.js
-test/annexB/language/function-code/switch-case-func-existing-fn-update.js
-test/annexB/language/function-code/switch-case-func-existing-var-update.js
 test/annexB/language/function-code/switch-case-func-no-skip-try.js
-test/annexB/language/function-code/switch-case-func-skip-dft-param.js
-test/annexB/language/function-code/switch-case-func-skip-early-err-block.js
 test/annexB/language/function-code/switch-case-func-skip-early-err-switch.js
-test/annexB/language/function-code/switch-case-func-skip-early-err.js
-test/annexB/language/function-code/switch-case-func-skip-param.js
 test/annexB/language/function-code/switch-dflt-decl-nostrict.js
 test/annexB/language/function-code/switch-dflt-func-block-scoping.js
 test/annexB/language/function-code/switch-dflt-func-existing-block-fn-no-init.js
@@ -351,12 +333,7 @@ test/annexB/language/global-code/if-stmt-else-decl-global-skip-early-err-block.j
 test/annexB/language/global-code/if-stmt-else-decl-global-skip-early-err-switch.js
 test/annexB/language/global-code/if-stmt-else-decl-global-skip-early-err.js
 test/annexB/language/global-code/switch-case-global-block-scoping.js
-test/annexB/language/global-code/switch-case-global-existing-fn-no-init.js
-test/annexB/language/global-code/switch-case-global-existing-fn-update.js
-test/annexB/language/global-code/switch-case-global-existing-var-update.js
-test/annexB/language/global-code/switch-case-global-skip-early-err-block.js
 test/annexB/language/global-code/switch-case-global-skip-early-err-switch.js
-test/annexB/language/global-code/switch-case-global-skip-early-err.js
 test/annexB/language/global-code/switch-dflt-global-block-scoping.js
 test/annexB/language/global-code/switch-dflt-global-existing-block-fn-no-init.js
 test/annexB/language/global-code/switch-dflt-global-existing-block-fn-update.js
@@ -6758,7 +6735,6 @@ test/language/function-code/10.4.3-1-76gs.js
 test/language/function-code/S10.2.1_A4_T1.js
 test/language/function-code/eval-param-env-with-computed-key.js
 test/language/function-code/eval-param-env-with-prop-initializer.js
-test/language/function-code/switch-case-decl-onlystrict.js
 test/language/function-code/switch-dflt-decl-onlystrict.js
 test/language/future-reserved-words/implements.js
 test/language/future-reserved-words/interface.js
@@ -6769,7 +6745,6 @@ test/language/future-reserved-words/public.js
 test/language/future-reserved-words/static.js
 test/language/global-code/decl-func-dup.js
 test/language/global-code/decl-lex.js
-test/language/global-code/switch-case-decl-strict.js
 test/language/global-code/switch-dflt-decl-strict.js
 test/language/global-code/yield-non-strict.js
 test/language/identifier-resolution/S10.2.2_A1_T3.js
@@ -8999,10 +8974,8 @@ test/language/statements/for-in/S12.6.4_A3.js
 test/language/statements/for-in/S12.6.4_A4.js
 test/language/statements/for-in/S12.6.4_A6.1.js
 test/language/statements/for-in/S12.6.4_A6.js
-test/language/statements/for-in/head-const-bound-names-fordecl-tdz.js
 test/language/statements/for-in/head-decl-expr.js
 test/language/statements/for-in/head-expr-expr.js
-test/language/statements/for-in/head-let-bound-names-fordecl-tdz.js
 test/language/statements/for-in/head-lhs-let.js
 test/language/statements/for-in/head-lhs-member.js
 test/language/statements/for-in/head-var-bound-names-dup.js
@@ -9016,7 +8989,6 @@ test/language/statements/for-in/scope-body-lex-close.js
 test/language/statements/for-in/scope-body-lex-open.js
 test/language/statements/for-in/scope-body-var-none.js
 test/language/statements/for-in/scope-head-lex-close.js
-test/language/statements/for-in/scope-head-lex-open.js
 test/language/statements/for-in/scope-head-var-none.js
 test/language/statements/for-of/arguments-mapped-aliasing.js
 test/language/statements/for-of/array-contract.js
@@ -9374,11 +9346,9 @@ test/language/statements/for-of/generator-close-via-break.js
 test/language/statements/for-of/generator-close-via-continue.js
 test/language/statements/for-of/generator-close-via-return.js
 test/language/statements/for-of/generator-close-via-throw.js
-test/language/statements/for-of/head-const-bound-names-fordecl-tdz.js
 test/language/statements/for-of/head-expr-obj-iterator-method.js
 test/language/statements/for-of/head-expr-primitive-iterator-method.js
 test/language/statements/for-of/head-expr-to-obj.js
-test/language/statements/for-of/head-let-bound-names-fordecl-tdz.js
 test/language/statements/for-of/head-lhs-async-dot.js
 test/language/statements/for-of/head-lhs-async-escaped.js
 test/language/statements/for-of/head-lhs-async-parens.js
@@ -9396,7 +9366,6 @@ test/language/statements/for-of/scope-body-lex-close.js
 test/language/statements/for-of/scope-body-lex-open.js
 test/language/statements/for-of/scope-body-var-none.js
 test/language/statements/for-of/scope-head-lex-close.js
-test/language/statements/for-of/scope-head-lex-open.js
 test/language/statements/for-of/scope-head-var-none.js
 test/language/statements/for-of/set-contract-expand.js
 test/language/statements/for-of/set-contract.js
@@ -9594,7 +9563,6 @@ test/language/statements/switch/S12.11_A1_T3.js
 test/language/statements/switch/S12.11_A1_T4.js
 test/language/statements/switch/cptn-a-fall-thru-nrml.js
 test/language/statements/switch/cptn-abrupt-empty.js
-test/language/statements/switch/cptn-b-final.js
 test/language/statements/switch/cptn-dflt-abrupt-empty.js
 test/language/statements/switch/cptn-dflt-b-abrupt-empty.js
 test/language/statements/switch/cptn-dflt-b-fall-thru-abrupt-empty.js
@@ -9603,7 +9571,6 @@ test/language/statements/switch/cptn-dflt-b-final.js
 test/language/statements/switch/cptn-dflt-fall-thru-abrupt-empty.js
 test/language/statements/switch/cptn-dflt-fall-thru-nrml.js
 test/language/statements/switch/cptn-dflt-final.js
-test/language/statements/switch/cptn-no-dflt-match-final.js
 test/language/statements/switch/cptn-no-dflt-no-match.js
 test/language/statements/switch/scope-lex-close-case.js
 test/language/statements/switch/scope-lex-close-dflt.js
@@ -10224,7 +10191,6 @@ test/staging/sm/lexical-environment/block-scoped-functions-annex-b-if.js
 test/staging/sm/lexical-environment/block-scoped-functions-annex-b-label.js
 test/staging/sm/lexical-environment/block-scoped-functions-annex-b-parameter.js
 test/staging/sm/lexical-environment/block-scoped-functions-deprecated-redecl.js
-test/staging/sm/lexical-environment/block-scoped-functions-hoisted-tdz.js
 test/staging/sm/lexical-environment/bug-1216623.js
 test/staging/sm/lexical-environment/const-declaration-in-for-loop.js
 test/staging/sm/lexical-environment/eval-has-lexical-environment.js

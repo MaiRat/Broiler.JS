@@ -1105,7 +1105,7 @@ internal static class BuiltInsAssemblyInitializer
         symbols.Put(JSSymbol.match.Key) = JSProperty.Property(CreateNativeFunction((in Arguments a) =>
         {
             var rx = a.This;
-            if (rx is not JSObject)
+            if (rx is not JSObject rxObj)
                 throw JSEngine.NewTypeError("RegExp.prototype[Symbol.match] called on incompatible receiver");
 
             var input = a.Get1();
@@ -1118,7 +1118,7 @@ internal static class BuiltInsAssemblyInitializer
                 return RegExpExec(rx, input);
             }
 
-            rx[KeyStrings.lastIndex] = JSValue.NumberZero;
+            rxObj.SetPropertyOrThrow(KeyStrings.lastIndex.ToJSValue(), JSValue.NumberZero);
             var matches = JSValue.CreateArray();
             uint matchCount = 0;
             while (true)
@@ -1133,7 +1133,7 @@ internal static class BuiltInsAssemblyInitializer
                     continue;
 
                 var nextIndex = (int)rx[KeyStrings.lastIndex].DoubleValue;
-                rx[KeyStrings.lastIndex] = JSValue.CreateNumber(nextIndex + 1);
+                rxObj.SetPropertyOrThrow(KeyStrings.lastIndex.ToJSValue(), JSValue.CreateNumber(nextIndex + 1));
             }
         }, "[Symbol.match]", 1), JSPropertyAttributes.ConfigurableValue);
         symbols.Put(JSSymbol.matchAll.Key) = JSProperty.Property(CreateNativeFunction((in Arguments a) =>
@@ -1257,17 +1257,17 @@ internal static class BuiltInsAssemblyInitializer
         symbols.Put(JSSymbol.search.Key) = JSProperty.Property(CreateNativeFunction((in Arguments a) =>
         {
             var rx = a.This;
-            if (rx is not JSObject)
+            if (rx is not JSObject rxObj)
                 throw JSEngine.NewTypeError("RegExp.prototype[Symbol.search] called on incompatible receiver");
 
             var previousLastIndex = rx[KeyStrings.lastIndex];
             if (!IsPositiveZero(previousLastIndex))
-                rx[KeyStrings.lastIndex] = JSValue.NumberZero;
+                rxObj.SetPropertyOrThrow(KeyStrings.lastIndex.ToJSValue(), JSValue.NumberZero);
 
             var result = RegExpExec(rx, JSValue.CreateString(a.Get1().StringValue));
             var currentLastIndex = rx[KeyStrings.lastIndex];
             if (!SameValue(currentLastIndex, previousLastIndex))
-                rx[KeyStrings.lastIndex] = previousLastIndex;
+                rxObj.SetPropertyOrThrow(KeyStrings.lastIndex.ToJSValue(), previousLastIndex);
 
             return result.IsObject ? result[KeyStrings.index] : JSValue.NumberMinusOne;
         }, "[Symbol.search]", 1), JSPropertyAttributes.ConfigurableValue);

@@ -119,7 +119,9 @@ public partial class JSObject
             return;
         }
 
-        target.DefineProperty(index, descriptor);
+        var r = target.DefineProperty(index, descriptor);
+        if (r.IsBoolean && !r.BooleanValue)
+            throw NewTypeError("Cannot define property");
     }
 
     private static void DefineOwnProperty(JSObject target, KeyString key, JSObject descriptor)
@@ -138,7 +140,9 @@ public partial class JSObject
             return;
         }
 
-        target.DefineProperty(key, descriptor);
+        var r = target.DefineProperty(key, descriptor);
+        if (r.IsBoolean && !r.BooleanValue)
+            throw NewTypeError("Cannot define property");
     }
 
     private static void DefineOwnProperty(JSObject target, IJSSymbol key, JSObject descriptor)
@@ -151,7 +155,9 @@ public partial class JSObject
             return;
         }
 
-        target.DefineProperty(key, descriptor);
+        var r = target.DefineProperty(key, descriptor);
+        if (r.IsBoolean && !r.BooleanValue)
+            throw NewTypeError("Cannot define property");
     }
 
     [JSExport("create")]
@@ -256,9 +262,6 @@ public partial class JSObject
 
         var pdObject = pds as JSObject ?? (JSObject)CreatePrimitiveObject(pds);
 
-        if (!target.IsExtensible())
-            throw NewTypeError("Object is not extensible");
-
         var ownElements = pds is JSObject
             ? pdObject.GetElementEnumerator()
             : pds.GetElementEnumerator();
@@ -323,7 +326,9 @@ public partial class JSObject
             case KeyType.Symbol:
                 if (targetObject.GetType() == typeof(JSObject))
                 {
-                    targetObject.DefineProperty(propertyKey.Symbol, pd);
+                    var symbolResult = targetObject.DefineProperty(propertyKey.Symbol, pd);
+                    if (symbolResult.IsBoolean && !symbolResult.BooleanValue)
+                        throw NewTypeError("Cannot define property");
                 }
                 else
                 {

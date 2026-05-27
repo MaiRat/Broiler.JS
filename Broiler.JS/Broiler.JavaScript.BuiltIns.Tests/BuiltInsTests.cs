@@ -10887,4 +10887,96 @@ public class BuiltInsTests
     }
 
     #endregion
+
+    #region DefineProperty TypeError on non-extensible objects
+
+    [Fact]
+    public void DefineProperty_Throws_TypeError_On_NonExtensible_PlainObject()
+    {
+        using var ctx = CreateContext();
+        Assert.Throws<JSException>(() => ctx.Eval("""
+            var obj = {};
+            Object.preventExtensions(obj);
+            Object.defineProperty(obj, 'newProp', { value: 42 });
+        """));
+    }
+
+    [Fact]
+    public void DefineProperties_Allows_Redefining_On_NonExtensible_Object()
+    {
+        using var ctx = CreateContext();
+        var result = ctx.Eval("""
+            var obj = { x: 1 };
+            Object.preventExtensions(obj);
+            Object.defineProperties(obj, { x: { value: 2 } });
+            obj.x;
+        """);
+        Assert.Equal(2.0, result.DoubleValue);
+    }
+
+    [Fact]
+    public void DefineProperty_Throws_TypeError_On_NonExtensible_Symbol()
+    {
+        using var ctx = CreateContext();
+        Assert.Throws<JSException>(() => ctx.Eval("""
+            var obj = {};
+            Object.preventExtensions(obj);
+            Object.defineProperty(obj, Symbol('test'), { value: 42 });
+        """));
+    }
+
+    [Fact]
+    public void DefineProperty_Throws_TypeError_On_NonExtensible_Index()
+    {
+        using var ctx = CreateContext();
+        Assert.Throws<JSException>(() => ctx.Eval("""
+            var obj = {};
+            Object.preventExtensions(obj);
+            Object.defineProperty(obj, 0, { value: 42 });
+        """));
+    }
+
+    #endregion
+
+    #region String.prototype.matchAll flags check
+
+    [Fact]
+    public void MatchAll_Throws_TypeError_On_NonGlobal_RegExp()
+    {
+        using var ctx = CreateContext();
+        Assert.Throws<JSException>(() => ctx.Eval("""
+            'test'.matchAll(/t/);
+        """));
+    }
+
+    [Fact]
+    public void MatchAll_Throws_TypeError_On_RegExpLike_UndefinedFlags()
+    {
+        using var ctx = CreateContext();
+        Assert.Throws<JSException>(() => ctx.Eval("""
+            var obj = { [Symbol.match]: true };
+            'test'.matchAll(obj);
+        """));
+    }
+
+    #endregion
+
+    #region RegExp Symbol.search lastIndex TypeError
+
+    [Fact]
+    public void RegExp_SymbolSearch_Throws_On_NonWritable_LastIndex_Init()
+    {
+        using var ctx = CreateContext();
+        Assert.Throws<JSException>(() => ctx.Eval("""
+            var obj = {
+                exec: function() { return null; },
+                get flags() { return ''; },
+                lastIndex: 1
+            };
+            Object.defineProperty(obj, 'lastIndex', { writable: false });
+            RegExp.prototype[Symbol.search].call(obj, '');
+        """));
+    }
+
+    #endregion
 }

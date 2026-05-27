@@ -636,6 +636,14 @@ internal static class SyntaxValidation
         var enumerator = properties.GetFastEnumerator();
         while (enumerator.MoveNext(out var property))
         {
+            if (withinPattern
+                && property.Init != null
+                && property.Value.Start.Previous?.Type == TokenTypes.BracketStart
+                && property.Value.End.Next?.Type == TokenTypes.Assign)
+            {
+                return true;
+            }
+
             if (ContainsInvalidParenthesizedPattern(property.Value, withinPattern))
                 return true;
         }

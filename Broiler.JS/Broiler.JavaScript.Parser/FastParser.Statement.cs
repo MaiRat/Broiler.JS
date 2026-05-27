@@ -137,7 +137,8 @@ partial class FastParser
 
         if (ExpressionSequence(out var expression, TokenTypes.SemiColon))
         {
-            if (!EndOfStatement())
+            if (stream.Current.Type == TokenTypes.CurlyBracketStart
+                && stream.Previous.Type != TokenTypes.SemiColon)
                 throw stream.Unexpected();
 
             node = new AstExpressionStatement(token, PreviousToken, expression);

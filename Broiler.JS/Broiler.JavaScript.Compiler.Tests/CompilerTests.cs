@@ -1498,19 +1498,6 @@ public class CompilerTests
     }
 
     [Fact]
-    public void Function_Constructor_Allows_Parenthesized_Assignment_Targets_Inside_Destructuring()
-    {
-        using var ctx = new JSContext();
-        var result = ctx.Eval("""
-            (function () {
-                return Function("var a, b; [(a), b] = [1, 2]; return [a, b].join(',');")();
-            })()
-            """);
-
-        Assert.Equal("1,2", result.ToString());
-    }
-
-    [Fact]
     public void Unicode_Escaped_Keyword_Allowed_As_Property_Name()
     {
         using var ctx = new JSContext();

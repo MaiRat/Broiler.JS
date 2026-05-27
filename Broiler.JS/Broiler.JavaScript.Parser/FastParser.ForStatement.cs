@@ -157,8 +157,6 @@ partial class FastParser
                     statement = block;
                 }
 
-                private static bool IsEscapedKeyword(FastToken token, string keyword)
-                    => token.CookedText == keyword && token.Span.Value != keyword;
             }
             else if (NonDeclarativeStatement(out statement))
             {
@@ -365,4 +363,7 @@ partial class FastParser
             return (r, block, update, test);
         }
     }
+
+    private static bool IsEscapedKeyword(FastToken token, string keyword)
+        => token.CookedText == keyword && token.Span.Value != keyword;
 }

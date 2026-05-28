@@ -405,7 +405,10 @@ partial class FastParser
 
             statementList[0] = new AstVariableDeclaration(declaration.Start, declaration.End, scopedDeclarations, declaration.Kind);
 
-            var r = new AstVariableDeclaration(declaration.Start, declaration.End, tempDeclarations);
+            var tempDeclarationKind = requiresReplacement && declaration.Kind == FastVariableKind.Const
+                ? FastVariableKind.Const
+                : FastVariableKind.Var;
+            var r = new AstVariableDeclaration(declaration.Start, declaration.End, tempDeclarations, tempDeclarationKind);
             var last = body.Count == 0 ? declaration : body.Last();
             var block = new AstBlock(r.Start, last.End, statementList);
 

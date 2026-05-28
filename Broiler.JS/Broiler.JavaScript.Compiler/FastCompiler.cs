@@ -250,6 +250,13 @@ public partial class FastCompiler : AstMapVisitor<YExpression>
 
     protected override YExpression VisitExpressionStatement(AstExpressionStatement expressionStatement)
     {
+        if (isDirectEvalCompilation
+            && scope.Top.Function == null
+            && expressionStatement.Expression is AstFunctionExpression { IsStatement: true, Id: { } } directEvalFunctionDeclaration)
+        {
+            return TrackCompletion(VisitRuntimeFunctionDeclaration(directEvalFunctionDeclaration));
+        }
+
         var result = TrackCompletion(Visit(expressionStatement.Expression));
 
         if (IsStrictMode
@@ -294,8 +301,15 @@ public partial class FastCompiler : AstMapVisitor<YExpression>
         var statements = new Sequence<YExpression>
         {
             YExpression.Assign(temp.Variable, result),
-            YExpression.Assign(currentBinding.Expression, temp.Variable)
         };
+
+        if (isDirectEvalCompilation && scope.Top.Function == null && !usesDirectEvalLocalVarEnvironment)
+            statements.Add(JSContextBuilder.EnsureCanDeclareGlobalFunction(KeyOfName(functionDeclaration.Id.Name)));
+
+        statements.AddRange(
+        [
+            YExpression.Assign(currentBinding.Expression, temp.Variable)
+        ]);
 
         AppendAnnexBOuterBindingAssignments(statements, currentBinding, functionDeclaration.Id.Name, temp.Variable);
 

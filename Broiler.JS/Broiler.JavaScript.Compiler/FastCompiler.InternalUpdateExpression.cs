@@ -49,6 +49,33 @@ partial class FastCompiler
 
                 return YExpression.Block(variables, statements);
             }
+
+            if (variable.Variable?.Type == typeof(JSVariable) && !variable.IsDeletable)
+            {
+                using var current = scope.Top.GetTempVariable(typeof(JSValue));
+                using var previous = updateExpression.Prefix ? null : scope.Top.GetTempVariable(typeof(JSValue));
+                var variables = new Sequence<YParameterExpression> { current.Variable };
+                var statements = new Sequence<YExpression>
+                {
+                    YExpression.Assign(current.Variable, variable.Expression)
+                };
+
+                if (previous != null)
+                {
+                    variables.Add(previous.Variable);
+                    statements.Add(YExpression.Assign(previous.Variable, current.Expression));
+                }
+
+                statements.Add(YExpression.Assign(
+                    current.Variable,
+                    JSValueBuilder.AddDouble(
+                        current.Expression,
+                        YExpression.Constant(updateExpression.Operator == UnaryOperator.Increment ? 1d : -1d))));
+                statements.Add(JSVariableBuilder.Assign(variable.Variable, current.Expression));
+                statements.Add(previous?.Expression ?? current.Expression);
+
+                return YExpression.Block(variables, statements);
+            }
         }
 
         var list = new Sequence<YExpression>();

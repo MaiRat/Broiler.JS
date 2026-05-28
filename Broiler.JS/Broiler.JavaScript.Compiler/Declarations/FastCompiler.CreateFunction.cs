@@ -237,7 +237,19 @@ partial class FastCompiler
 
             if (jsFVarScope != null)
             {
-                jsFVarScope.SetPostInit(jsf);
+                if (isDirectEvalCompilation
+                    && !usesDirectEvalLocalVarEnvironment
+                    && previousScope.Function == null)
+                {
+                    jsFVarScope.SetPostInit(YExpression.Block(
+                        JSContextBuilder.EnsureCanDeclareGlobalFunction(KeyOfName(functionName)),
+                        jsf));
+                }
+                else
+                {
+                    jsFVarScope.SetPostInit(jsf);
+                }
+
                 return jsFVarScope.Expression;
             }
 

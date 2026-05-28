@@ -91,7 +91,7 @@ public static class DirectEvalSupport
             var token = stream.Current;
             if (token.IsKeyword
                 && IsStrictReservedWord(token.Keyword)
-                && previous?.Type is not TokenTypes.Dot and not TokenTypes.QuestionDot)
+                && previous?.Type is not (TokenTypes.Dot or TokenTypes.QuestionDot))
             {
                 var nextType = stream.Next?.Type ?? TokenTypes.EOF;
                 if (nextType is TokenTypes.Assign

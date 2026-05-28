@@ -36,7 +36,9 @@ public partial class JSObject
         if (index >= target.Length && lengthProperty.IsReadOnly)
             throw NewTypeError("Cannot redefine property");
 
-        target.DefineProperty(index, descriptor);
+        var result = target.DefineProperty(index, descriptor);
+        if (result.IsBoolean && !result.BooleanValue)
+            throw NewTypeError("Cannot define property");
     }
 
     private static void DefineArrayLength(JSObject target, JSObject descriptor)

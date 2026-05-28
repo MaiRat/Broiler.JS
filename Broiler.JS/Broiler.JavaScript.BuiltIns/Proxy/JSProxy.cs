@@ -519,23 +519,6 @@ public partial class JSProxy : JSObject
         return target.GetValue(key, receiver, throwError);
     }
 
-    internal protected override bool SetValue(IJSSymbol name, JSValue value, JSValue receiver, bool throwError = true)
-    {
-        var target = RequireTarget();
-        var fx = GetTrap(KeyStrings.set);
-        if (!fx.IsUndefined)
-        {
-            var setResult = fx.InvokeFunction(new Arguments(handler, target, (JSValue)(JSSymbol)name, value, receiver));
-            if (!setResult.BooleanValue)
-                return false;
-
-            ValidateSetInvariant(target, PropertyKey.FromSymbol(name), value);
-            return true;
-        }
-
-        return target.SetValue(name, value, receiver, throwError);
-    }
-
     internal protected override bool SetValue(KeyString name, JSValue value, JSValue receiver, bool throwError = true)
     {
         if (name.Key == KeyStrings.__proto__.Key)
@@ -559,6 +542,12 @@ public partial class JSProxy : JSObject
             return true;
         }
 
+        if (ReferenceEquals(receiver as JSObject ?? this, this)
+            && TrySetReceiverOwnProperty(name.ToJSValue(), value, receiver, throwError, out var receiverResult))
+        {
+            return receiverResult;
+        }
+
         return target.SetValue(name, value, receiver, throwError);
     }
 
@@ -576,7 +565,79 @@ public partial class JSProxy : JSObject
             return true;
         }
 
+        if (ReferenceEquals(receiver as JSObject ?? this, this)
+            && TrySetReceiverOwnProperty(JSValue.CreateString(name.ToString()), value, receiver, throwError, out var receiverResult))
+        {
+            return receiverResult;
+        }
+
         return target.SetValue(name, value, receiver, throwError);
+    }
+
+    internal protected override bool SetValue(IJSSymbol name, JSValue value, JSValue receiver, bool throwError = true)
+    {
+        var target = RequireTarget();
+        var fx = GetTrap(KeyStrings.set);
+        if (!fx.IsUndefined)
+        {
+            var setResult = fx.InvokeFunction(new Arguments(handler, target, (JSValue)(JSSymbol)name, value, receiver));
+            if (!setResult.BooleanValue)
+                return false;
+
+            ValidateSetInvariant(target, PropertyKey.FromSymbol(name), value);
+            return true;
+        }
+
+        if (ReferenceEquals(receiver as JSObject ?? this, this)
+            && TrySetReceiverOwnProperty((JSValue)(JSSymbol)name, value, receiver, throwError, out var receiverResult))
+        {
+            return receiverResult;
+        }
+
+        return target.SetValue(name, value, receiver, throwError);
+    }
+
+    private bool TrySetReceiverOwnProperty(JSValue propertyKey, JSValue value, JSValue receiver, bool throwError, out bool result)
+    {
+        var descriptorValue = GetOwnPropertyDescriptor(propertyKey);
+        RequireTarget();
+
+        if (descriptorValue is not JSObject descriptor)
+        {
+            result = false;
+            return false;
+        }
+
+        var hasGetter = !descriptor.GetInternalProperty(KeyStrings.get, false).IsEmpty;
+        var hasSetter = !descriptor.GetInternalProperty(KeyStrings.set, false).IsEmpty;
+        if (hasGetter || hasSetter)
+        {
+            if (hasSetter && descriptor[KeyStrings.set] is IJSFunction setter)
+            {
+                setter.InvokeFunction(new Arguments(receiver ?? this, value));
+                result = true;
+                return true;
+            }
+
+            if (throwError)
+                throw JSEngine.NewTypeError($"Cannot modify property {propertyKey} of {this} which has only a getter");
+
+            result = false;
+            return true;
+        }
+
+        if (!descriptor.GetInternalProperty(KeyStrings.writable, false).IsEmpty
+            && !descriptor[KeyStrings.writable].BooleanValue)
+        {
+            if (throwError)
+                throw JSEngine.NewTypeError($"Cannot modify property {propertyKey} of {this}");
+
+            result = false;
+            return true;
+        }
+
+        result = false;
+        return false;
     }
 
     public override JSValue GetPrototypeOf()

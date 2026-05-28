@@ -368,6 +368,45 @@ public class JSContext : JSObject, IJSExecutionContext, IDisposable
         return new WithScope(this, @object);
     }
 
+    public JSObject[] CaptureWithScopes()
+    {
+        if (withScope == null)
+            return [];
+
+        var scopes = new List<JSObject>();
+        for (var current = withScope; current != null; current = current.Previous)
+            scopes.Add(current.Object);
+
+        scopes.Reverse();
+        return [.. scopes];
+    }
+
+    public IDisposable PushWithScopes(JSObject[] values)
+    {
+        if (values == null || values.Length == 0)
+            return null;
+
+        return new CompositeWithScope(this, values);
+    }
+
+    private sealed class CompositeWithScope : IDisposable
+    {
+        private readonly IDisposable[] scopes;
+
+        public CompositeWithScope(JSContext context, JSObject[] values)
+        {
+            scopes = new IDisposable[values.Length];
+            for (var i = 0; i < values.Length; i++)
+                scopes[i] = new WithScope(context, values[i]);
+        }
+
+        public void Dispose()
+        {
+            for (var i = scopes.Length - 1; i >= 0; i--)
+                scopes[i]?.Dispose();
+        }
+    }
+
     private bool TryResolveWithObject(in KeyString name, out JSObject @object)
     {
         var propertyKey = name.ToJSValue();

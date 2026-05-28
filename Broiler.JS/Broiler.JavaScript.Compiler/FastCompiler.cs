@@ -126,9 +126,6 @@ public partial class FastCompiler : AstMapVisitor<YExpression>
                 if (v.Name == "this")
                     continue;
 
-                if (isDirectEvalCompilation && usesDirectEvalLocalVarEnvironment)
-                    continue;
-
                 sList.Add(JSContextBuilder.Register(lScope, v.Variable));
             }
         }

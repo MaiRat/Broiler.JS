@@ -229,6 +229,9 @@ partial class FastCompiler
                     jsf = JSFunctionBuilder.EnableNonStrictThis(jsf);
                 else
                     jsf = JSFunctionBuilder.EnableStrictMode(jsf);
+
+                if (withBoundaries.Count > 0 && !isDirectEvalCompilation)
+                    jsf = JSFunctionBuilder.CaptureWithScopes(jsf);
             }
 
             IsStrictMode = previousStrictMode;

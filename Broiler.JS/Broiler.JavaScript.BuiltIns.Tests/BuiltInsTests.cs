@@ -2821,6 +2821,48 @@ public class BuiltInsTests
         Assert.Equal("SyntaxError", result.ToString());
     }
 
+    [Fact]
+    public void Direct_Eval_In_Parameter_Defaults_Rejects_Function_Body_Arguments_And_Eval_Bindings()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = new JSContext();
+
+        var result = ctx.Eval("""
+            function getErrorName(run) {
+              try {
+                run();
+                return "no error";
+              } catch (e) {
+                return e.name;
+              }
+            }
+
+            [
+              getErrorName(function () {
+                async function * f(p = eval("var arguments = 'param'")) {
+                  function arguments() {}
+                }
+                f();
+              }),
+              getErrorName(function () {
+                ({
+                  method(p = eval("var eval = 'param'")) {
+                    let eval;
+                  }
+                }).method();
+              }),
+              getErrorName(function () {
+                function f(p = eval("var arguments = 'param'")) {
+                  var arguments;
+                }
+                f();
+              })
+            ].join("|");
+            """);
+
+        Assert.Equal("SyntaxError|SyntaxError|SyntaxError", result.ToString());
+    }
+
     // ── M2: JSMap tests ──────────────────────────────────────────────
 
     [Fact]

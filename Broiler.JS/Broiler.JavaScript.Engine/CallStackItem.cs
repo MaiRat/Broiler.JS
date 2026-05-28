@@ -66,7 +66,13 @@ public class CallStackItem
     private Dictionary<uint, JSVariable> directEvalBindings;
 
     internal bool TryGetDirectEvalBinding(in KeyString name, out JSVariable variable)
-        => directEvalBindings?.TryGetValue(name.Key, out variable) == true;
+    {
+        if (directEvalBindings?.TryGetValue(name.Key, out variable) == true)
+            return true;
+
+        variable = null;
+        return false;
+    }
 
     internal void RegisterDirectEvalBinding(JSVariable variable)
     {

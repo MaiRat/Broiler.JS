@@ -50,8 +50,6 @@ test/annexB/language/eval-code/direct/func-if-decl-else-decl-a-eval-func-existin
 test/annexB/language/eval-code/direct/func-if-decl-else-decl-a-eval-func-existing-var-update.js
 test/annexB/language/eval-code/direct/func-if-decl-else-decl-a-eval-func-no-skip-try.js
 test/annexB/language/eval-code/direct/func-if-decl-else-decl-a-eval-func-skip-early-err-block.js
-test/annexB/language/eval-code/direct/func-if-decl-else-decl-a-eval-func-skip-early-err-for-in.js
-test/annexB/language/eval-code/direct/func-if-decl-else-decl-a-eval-func-skip-early-err-for-of.js
 test/annexB/language/eval-code/direct/func-if-decl-else-decl-a-eval-func-skip-early-err-for.js
 test/annexB/language/eval-code/direct/func-if-decl-else-decl-a-eval-func-skip-early-err-switch.js
 test/annexB/language/eval-code/direct/func-if-decl-else-decl-a-eval-func-skip-early-err.js
@@ -61,8 +59,6 @@ test/annexB/language/eval-code/direct/func-if-decl-else-decl-b-eval-func-existin
 test/annexB/language/eval-code/direct/func-if-decl-else-decl-b-eval-func-existing-var-update.js
 test/annexB/language/eval-code/direct/func-if-decl-else-decl-b-eval-func-no-skip-try.js
 test/annexB/language/eval-code/direct/func-if-decl-else-decl-b-eval-func-skip-early-err-block.js
-test/annexB/language/eval-code/direct/func-if-decl-else-decl-b-eval-func-skip-early-err-for-in.js
-test/annexB/language/eval-code/direct/func-if-decl-else-decl-b-eval-func-skip-early-err-for-of.js
 test/annexB/language/eval-code/direct/func-if-decl-else-decl-b-eval-func-skip-early-err-for.js
 test/annexB/language/eval-code/direct/func-if-decl-else-decl-b-eval-func-skip-early-err-switch.js
 test/annexB/language/eval-code/direct/func-if-decl-else-decl-b-eval-func-skip-early-err.js
@@ -4606,7 +4602,6 @@ test/language/eval-code/direct/new.target-arrow.js
 test/language/eval-code/direct/new.target-fn.js
 test/language/eval-code/direct/new.target.js
 test/language/eval-code/direct/non-definable-function-with-function.js
-test/language/eval-code/direct/non-definable-function-with-variable.js
 test/language/eval-code/direct/parse-failure-3.js
 test/language/eval-code/direct/parse-failure-4.js
 test/language/eval-code/direct/parse-failure-5.js
@@ -4636,7 +4631,6 @@ test/language/eval-code/indirect/global-env-rec-with.js
 test/language/eval-code/indirect/lex-env-heritage.js
 test/language/eval-code/indirect/new.target.js
 test/language/eval-code/indirect/non-definable-function-with-function.js
-test/language/eval-code/indirect/non-definable-function-with-variable.js
 test/language/eval-code/indirect/parse-failure-3.js
 test/language/eval-code/indirect/parse-failure-4.js
 test/language/eval-code/indirect/parse-failure-5.js

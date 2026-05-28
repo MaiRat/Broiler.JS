@@ -105,6 +105,7 @@ public partial class JSArrayBuffer : JSObject
 
     internal byte[] buffer;
     internal bool isDetached;
+    internal bool isImmutable;
 
     public byte[] Buffer => buffer;
 
@@ -217,6 +218,8 @@ public partial class JSArrayBuffer : JSObject
         var created = ctor?.CreateInstance(JSValue.CreateNumber(newLen)) ?? new JSArrayBuffer(newLen);
         if (created is not JSArrayBuffer target)
             throw JSEngine.NewTypeError("ArrayBuffer species constructor did not return an ArrayBuffer");
+        if (target.isImmutable)
+            throw JSEngine.NewTypeError("ArrayBuffer species constructor returned an immutable ArrayBuffer");
 
         if (ReferenceEquals(target, source))
             throw JSEngine.NewTypeError("ArrayBuffer species constructor returned the original ArrayBuffer");
@@ -256,6 +259,7 @@ public partial class JSArrayBuffer : JSObject
 
         int newLen = Math.Max(end - begin, 0);
         var result = new JSArrayBuffer(newLen);
+        result.isImmutable = true;
         System.Array.Copy(source.buffer, begin, result.buffer, 0, newLen);
         return result;
     }

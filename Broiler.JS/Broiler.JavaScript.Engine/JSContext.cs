@@ -444,6 +444,26 @@ public class JSContext : JSObject, IJSExecutionContext, IDisposable
         return value;
     }
 
+    public void EnsureCanDeclareGlobalFunction(in KeyString name)
+    {
+        var property = GetInternalProperty(name, false);
+        if (property.IsEmpty)
+        {
+            if (!IsExtensible())
+                throw JSEngine.NewTypeError($"Cannot define global function {name}");
+
+            return;
+        }
+
+        if (property.IsConfigurable)
+            return;
+
+        if (!property.IsProperty && !property.IsReadOnly && property.IsEnumerable)
+            return;
+
+        throw JSEngine.NewTypeError($"Cannot define global function {name}");
+    }
+
     public JSValue DeleteIdentifier(in KeyString name)
     {
         if (TryResolveWithObject(name, out var withObject))

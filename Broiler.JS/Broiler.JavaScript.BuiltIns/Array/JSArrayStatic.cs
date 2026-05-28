@@ -18,44 +18,67 @@ public partial class JSArray
     public static JSValue StaticFrom(in Arguments a)
     {
         var (f, map, mapThis) = a.Get3();
+        if (f.IsNullOrUndefined)
+            throw JSEngine.NewTypeError(JSException.Cannot_convert_undefined_or_null_to_object);
+
+        if (!map.IsUndefined && !map.IsFunction)
+            throw JSEngine.NewTypeError("mapFn must be a function");
+
         var t = a.This;
-        var en = f.GetElementEnumerator();
-        var values = new List<JSValue>();
+        var constructor = JSConstructorOperations.IsConstructor(t) && t is JSObject ctor ? ctor : null;
+        var iteratorMethod = JSValue.SymbolIterator == null ? JSUndefined.Value : f.PropertyOrUndefined(JSValue.SymbolIterator);
+        var useArrayLike = iteratorMethod.IsUndefined || iteratorMethod.IsNull;
 
-        if (map is JSFunction fx)
+        if (useArrayLike)
         {
-            var cb = fx.f;
-            while (en.MoveNext(out var hasValue, out var item, out var index))
+            var arrayLike = ToArrayLikeObject(f);
+            var length = GetArrayLikeLength(arrayLike);
+            var arrayLikeResult = constructor != null
+                ? constructor.CreateInstance(new Arguments(JSUndefined.Value, JSValue.CreateNumber(length))) as JSObject
+                : new JSArray();
+            if (arrayLikeResult == null)
+                throw JSEngine.NewTypeError("Array.from constructor must return an object");
+
+            for (uint i = 0; i < length; i++)
             {
-                if (!hasValue)
-                    continue;
+                var value = arrayLike[i];
+                if (!map.IsUndefined)
+                    value = map.InvokeFunction(new Arguments(mapThis, value, new JSNumber(i)));
 
-                values.Add(cb(new Arguments(mapThis, item, new JSNumber(index))));
+                arrayLikeResult.SetPropertyOrThrow(JSValue.CreateNumber(i), value);
             }
-        }
-        else
-        {
-            while (en.MoveNext(out var hasValue, out var item, out var index))
-            {
-                if (!hasValue)
-                    continue;
 
-                values.Add(item);
-            }
+            if (arrayLikeResult is JSArray arrayLikeArray)
+                arrayLikeArray._length = length;
+            else
+                arrayLikeResult.SetPropertyOrThrow(KeyStrings.length.ToJSValue(), JSValue.CreateNumber(length));
+
+            return arrayLikeResult;
         }
 
-        var length = (uint)values.Count;
-        var r = JSConstructorOperations.IsConstructor(t) && t is JSObject constructor
-            ? constructor.CreateInstance(new Arguments(JSUndefined.Value, JSValue.CreateNumber(length)))
+        var r = constructor != null
+            ? constructor.CreateInstance(new Arguments(JSUndefined.Value)) as JSObject
             : new JSArray();
+        if (r == null)
+            throw JSEngine.NewTypeError("Array.from constructor must return an object");
 
-        for (var i = 0; i < values.Count; i++)
-            r[(uint)i] = values[i];
+        var en = f.GetIterableEnumerator();
+        uint index = 0;
+        while (en.MoveNext(out var hasValue, out var item, out var _))
+        {
+            if (!hasValue)
+                continue;
+
+            if (!map.IsUndefined)
+                item = map.InvokeFunction(new Arguments(mapThis, item, new JSNumber(index)));
+
+            r.SetPropertyOrThrow(JSValue.CreateNumber(index++), item);
+        }
 
         if (r is JSArray array)
-            array._length = length;
+            array._length = index;
         else
-            r[KeyStrings.length] = JSValue.CreateNumber(length);
+            r.SetPropertyOrThrow(KeyStrings.length.ToJSValue(), JSValue.CreateNumber(index));
 
         return r;
     }

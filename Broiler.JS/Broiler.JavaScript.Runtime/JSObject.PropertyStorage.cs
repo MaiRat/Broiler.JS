@@ -361,6 +361,36 @@ public partial class JSObject
     private bool SetKeyStringOnReceiver(KeyString name, JSValue value, JSValue receiver, JSPropertyAttributes defaultAttributes, bool throwError)
     {
         var target = receiver as JSObject ?? this;
+        if (!ReferenceEquals(target, this))
+        {
+            var descriptor = target.GetOwnPropertyDescriptor(name.ToJSValue()) as JSObject;
+            if (descriptor != null)
+            {
+                if (TrySetReceiverAccessorProperty(target, descriptor, receiver, value, name, throwError, out var accessorResult))
+                    return accessorResult;
+
+                if (IsReceiverReadOnly(descriptor))
+                {
+                    if (throwError)
+                        throw NewTypeError($"Cannot modify property {name} of {target}");
+
+                    return false;
+                }
+
+                return DefineReceiverDataProperty(target, name, value, GetReceiverAttributes(descriptor, defaultAttributes), throwError);
+            }
+
+            if (!target.IsExtensible())
+            {
+                if (throwError)
+                    throw NewTypeError($"Cannot add property {name} to {target}");
+
+                return false;
+            }
+
+            return DefineReceiverDataProperty(target, name, value, defaultAttributes, throwError);
+        }
+
         var p = target.GetInternalProperty(name, false);
         if (p.IsProperty)
         {
@@ -406,6 +436,36 @@ public partial class JSObject
     private bool SetIndexOnReceiver(uint name, JSValue value, JSValue receiver, JSPropertyAttributes defaultAttributes, bool throwError)
     {
         var target = receiver as JSObject ?? this;
+        if (!ReferenceEquals(target, this))
+        {
+            var descriptor = target.GetOwnPropertyDescriptor(JSValue.CreateNumber(name)) as JSObject;
+            if (descriptor != null)
+            {
+                if (TrySetReceiverAccessorProperty(target, descriptor, receiver, value, name, throwError, out var accessorResult))
+                    return accessorResult;
+
+                if (IsReceiverReadOnly(descriptor))
+                {
+                    if (throwError)
+                        throw NewTypeError($"Cannot modify property {name} of {target}");
+
+                    return false;
+                }
+
+                return DefineReceiverDataProperty(target, name, value, GetReceiverAttributes(descriptor, defaultAttributes), throwError);
+            }
+
+            if (!target.IsExtensible())
+            {
+                if (throwError)
+                    throw NewTypeError($"Cannot add property {name} to {target}");
+
+                return false;
+            }
+
+            return DefineReceiverDataProperty(target, name, value, defaultAttributes, throwError);
+        }
+
         var p = target.GetInternalProperty(name, false);
         if (p.IsProperty)
         {
@@ -456,6 +516,38 @@ public partial class JSObject
         else if (JSValue.SymbolAsyncIterator != null && name.Key == JSValue.SymbolAsyncIterator.Key)
             target.HasAsyncIterator = true;
 
+        if (!ReferenceEquals(target, this))
+        {
+            var symbolValue = (JSValue)(JSValue.GetSymbolByKeyFactory?.Invoke(name.Key)
+                ?? throw new InvalidOperationException($"Unknown symbol key {name.Key}"));
+            var descriptor = target.GetOwnPropertyDescriptor(symbolValue) as JSObject;
+            if (descriptor != null)
+            {
+                if (TrySetReceiverAccessorProperty(target, descriptor, receiver, value, name, throwError, out var accessorResult))
+                    return accessorResult;
+
+                if (IsReceiverReadOnly(descriptor))
+                {
+                    if (throwError)
+                        throw NewTypeError($"Cannot modify property {name} of {target}");
+
+                    return false;
+                }
+
+                return DefineReceiverDataProperty(target, name, value, GetReceiverAttributes(descriptor, defaultAttributes), throwError);
+            }
+
+            if (!target.IsExtensible())
+            {
+                if (throwError)
+                    throw NewTypeError($"Cannot add property {name} to {target}");
+
+                return false;
+            }
+
+            return DefineReceiverDataProperty(target, name, value, defaultAttributes, throwError);
+        }
+
         var p = target.GetInternalProperty(name, false);
         if (p.IsProperty)
         {
@@ -496,6 +588,57 @@ public partial class JSObject
         }
 
         return DefineReceiverDataProperty(target, name, value, !p.IsEmpty ? p.Attributes : defaultAttributes, throwError);
+    }
+
+    private static bool TrySetReceiverAccessorProperty(JSObject target, JSObject descriptor, JSValue receiver, JSValue value, object name, bool throwError, out bool result)
+    {
+        var hasGet = !descriptor.GetInternalProperty(KeyStrings.get, false).IsEmpty;
+        var hasSet = !descriptor.GetInternalProperty(KeyStrings.set, false).IsEmpty;
+        if (!hasGet && !hasSet)
+        {
+            result = false;
+            return false;
+        }
+
+        if (hasSet && descriptor[KeyStrings.set] is IJSFunction setter)
+        {
+            setter.InvokeFunction(new Arguments(receiver ?? target, value));
+            result = true;
+            return true;
+        }
+
+        if (throwError)
+            throw NewTypeError($"Cannot modify property {name} of {target} which has only a getter");
+
+        result = false;
+        return true;
+    }
+
+    private static bool IsReceiverReadOnly(JSObject descriptor)
+        => !descriptor.GetInternalProperty(KeyStrings.writable, false).IsEmpty
+            && !descriptor[KeyStrings.writable].BooleanValue;
+
+    private static JSPropertyAttributes GetReceiverAttributes(JSObject descriptor, JSPropertyAttributes defaultAttributes)
+    {
+        var attributes = JSPropertyAttributes.Value;
+        if (IsReceiverReadOnly(descriptor))
+            attributes |= JSPropertyAttributes.Readonly;
+
+        if (!descriptor.GetInternalProperty(KeyStrings.enumerable, false).IsEmpty
+            ? descriptor[KeyStrings.enumerable].BooleanValue
+            : defaultAttributes.HasFlag(JSPropertyAttributes.Enumerable))
+        {
+            attributes |= JSPropertyAttributes.Enumerable;
+        }
+
+        if (!descriptor.GetInternalProperty(KeyStrings.configurable, false).IsEmpty
+            ? descriptor[KeyStrings.configurable].BooleanValue
+            : defaultAttributes.HasFlag(JSPropertyAttributes.Configurable))
+        {
+            attributes |= JSPropertyAttributes.Configurable;
+        }
+
+        return attributes;
     }
 
     private bool DefineReceiverDataProperty(JSObject target, KeyString name, JSValue value, JSPropertyAttributes attributes, bool throwError)

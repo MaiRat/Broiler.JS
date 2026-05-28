@@ -1372,6 +1372,23 @@ public class CompilerTests
     }
 
     [Fact]
+    public void Compile_Const_ForStatement_Update_Throws_TypeError()
+    {
+        using var ctx = new JSContext();
+        var result = ctx.Eval("""
+            (function () {
+                try {
+                    for (const x = 0; x < 1; x++) {}
+                    return 'no-throw';
+                } catch (e) {
+                    return e instanceof TypeError;
+                }
+            })()
+            """);
+        Assert.Equal(true, result.BooleanValue);
+    }
+
+    [Fact]
     public void Compile_Delete_String_Wrapper_Length_Throws_In_Strict_Mode()
     {
         using var ctx = new JSContext();

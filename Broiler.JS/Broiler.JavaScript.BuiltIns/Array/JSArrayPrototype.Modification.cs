@@ -252,19 +252,21 @@ public partial class JSArray
     [JSExport("sort", Length = 1)]
     public static JSValue Sort(in Arguments a)
     {
-        // To be modified by Akash
         var fx = a.Get1();
         var @this = a.This as JSObject;
 
         if (@this == null)
             throw JSEngine.NewTypeError($"Sort can only be called with an Array or an Object");
 
+        if (!fx.IsUndefined && !fx.IsFunction)
+            throw JSEngine.NewTypeError($"Argument is not a function");
+
         var length = @this.Length;
         if (length <= 1)
             return @this;
 
         Comparison<JSValue> cx = null;
-        if (fx is JSFunction fn)
+        if (!fx.IsUndefined)
         {
             cx = (left, right) =>
             {
@@ -293,8 +295,7 @@ public partial class JSArray
                 if (right == JSUndefined.Value)
                     return -1;
 
-                var arg = new Arguments(JSUndefined.Value, left, right);
-                var r = fn.f(arg).DoubleValue;
+                var r = fx.InvokeFunction(new Arguments(JSUndefined.Value, left, right)).DoubleValue;
 
                 if (double.IsNaN(r))
                     return 0;
@@ -304,9 +305,6 @@ public partial class JSArray
         }
         else
         {
-            if (!fx.IsUndefined)
-                throw JSEngine.NewTypeError($"Argument is not a function");
-
             cx = (left, right) =>
             {
                 left = left ?? JSNull.Value;

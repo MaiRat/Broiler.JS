@@ -3832,6 +3832,36 @@ public class BuiltInsTests
     }
 
     [Fact]
+    public void Array_From_ArrayLike_Reads_Length_Before_Construct_And_Element_Access()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = new JSContext();
+        var result = ctx.Eval("""
+            (function () {
+                var log = "";
+                var created;
+                function C() {
+                    log += "C";
+                    created = this;
+                }
+                var arrayLike = {
+                    get length() { log += "l"; return 1; },
+                    get 0() { log += "0"; return "q"; }
+                };
+                var marker = {};
+                try {
+                    Array.from.call(C, arrayLike, function () { throw marker; });
+                    return "no-throw";
+                } catch (e) {
+                    return [e === marker, log, created instanceof C].join("|");
+                }
+            })();
+            """);
+
+        Assert.Equal("true|lC0|true", result.ToString());
+    }
+
+    [Fact]
     public void Object_Assign_Throws_TypeError_For_Primitive_Frozen_And_NonExtensible_Targets()
     {
         EnsureBuiltInsLoaded();

@@ -202,17 +202,23 @@ internal static class BuiltInsAssemblyInitializer
         // Wire factory delegates for JSError types so Core can create
         // error instances without referencing the concrete types directly.
         JSEngine.CreateTypeError = static (message, function, filePath, line) =>
-            new JSTypeError(new Arguments(JSUndefined.Value, JSValue.CreateString(message)), function: function, filePath: filePath, line: line).Exception;
+            new JSException(message, ((JSEngine.CurrentContext as JSObject)?[KeyStrings.TypeError] as IJSFunction)?.Prototype as JSObject,
+                function: function, filePath: filePath, line: line);
         JSEngine.CreateSyntaxError = static (message, function, filePath, line) =>
-            new JSSyntaxError(new Arguments(JSUndefined.Value, JSValue.CreateString(message)), function: function, filePath: filePath, line: line).Exception;
+            new JSException(message, ((JSEngine.CurrentContext as JSObject)?[KeyStrings.SyntaxError] as IJSFunction)?.Prototype as JSObject,
+                function: function, filePath: filePath, line: line);
         JSEngine.CreateURIError = static (message, function, filePath, line) =>
-            new JSURIError(new Arguments(JSUndefined.Value, JSValue.CreateString(message)), function: function, filePath: filePath, line: line).Exception;
+            new JSException(message, ((JSEngine.CurrentContext as JSObject)?[KeyStrings.URIError] as IJSFunction)?.Prototype as JSObject,
+                function: function, filePath: filePath, line: line);
         JSEngine.CreateRangeError = static (message, function, filePath, line) =>
-            new JSRangeError(new Arguments(JSUndefined.Value, JSValue.CreateString(message)), function: function, filePath: filePath, line: line).Exception;
+            new JSException(message, ((JSEngine.CurrentContext as JSObject)?[KeyStrings.RangeError] as IJSFunction)?.Prototype as JSObject,
+                function: function, filePath: filePath, line: line);
         JSEngine.CreateReferenceError = static (message, function, filePath, line) =>
-            new JSReferenceError(new Arguments(JSUndefined.Value, JSValue.CreateString(message)), function: function, filePath: filePath, line: line).Exception;
+            new JSException(message, ((JSEngine.CurrentContext as JSObject)?[KeyStrings.ReferenceError] as IJSFunction)?.Prototype as JSObject,
+                function: function, filePath: filePath, line: line);
         JSEngine.CreateError = static (message, function, filePath, line) =>
-            new JSError(new Arguments(JSUndefined.Value, JSValue.CreateString(message)), function: function, filePath: filePath, line: line).Exception;
+            new JSException(message, ((JSEngine.CurrentContext as JSObject)?[KeyStrings.Error] as IJSFunction)?.Prototype as JSObject,
+                function: function, filePath: filePath, line: line);
         JSException.CreateJSError = static (ex, msg) => new JSError(ex, msg);
         JSException.CreateJSErrorWithPrototype = static (ex, prototype) => new JSError(ex, prototype);
         JSException.JSErrorFrom = static (ex) => JSError.From(ex);
@@ -807,7 +813,7 @@ internal static class BuiltInsAssemblyInitializer
         symbols.Put(JSSymbol.hasInstance.Key) = JSProperty.Property(CreateNativeFunction((in Arguments a) =>
         {
             var constructor = a.This;
-            if (!constructor.IsFunction)
+            if (!constructor.IsFunction && !ReferenceEquals(constructor, functionCtor.prototype))
                 return JSValue.BooleanFalse;
 
             if (constructor is JSFunction { BoundTargetFunction: JSValue boundTargetFunction } && boundTargetFunction != null && !boundTargetFunction.IsUndefined)

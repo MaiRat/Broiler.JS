@@ -568,20 +568,19 @@ partial class JSTypedArray
     public JSValue Sort(in Arguments a)
     {
         var fx = a.Get1();
+        if (!fx.IsUndefined && !fx.IsFunction)
+            throw JSEngine.NewTypeError($"Argument is not a function");
 
         Comparison<JSValue> cx = null;
-        if (fx is JSFunction fn)
+        if (!fx.IsUndefined)
         {
             cx = (l, r) =>
             {
-                var arg = new Arguments(this, l, r);
-                return (int)fn.f(arg).DoubleValue;
+                return (int)fx.InvokeFunction(new Arguments(this, l, r)).DoubleValue;
             };
         }
         else
         {
-            if (!fx.IsUndefined)
-                throw JSEngine.NewTypeError($"Argument is not a function");
             cx = (l, r) =>
             {
                 var x = l.DoubleValue;

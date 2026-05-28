@@ -27,6 +27,9 @@ public struct JSIterator(JSValue iterator, bool awaitResult = false) : IElementE
     private readonly JSValue GetIteratorResult()
         => ValidateIteratorResult(JSObjectCoreExtensions.InvokeMethodOn(iterator, KeyStrings.next), "next");
 
+    private readonly JSValue GetIteratorResult(JSValue value)
+        => ValidateIteratorResult(iterator[KeyStrings.next].InvokeFunction(new Arguments(iterator, value ?? JSUndefined.Value)), "next");
+
     public bool MoveNext(out bool hasValue, out JSValue value, out uint index)
     {
         value = GetIteratorResult();
@@ -51,6 +54,18 @@ public struct JSIterator(JSValue iterator, bool awaitResult = false) : IElementE
         var done = value[KeyStrings.done];
         value = value[KeyStrings.value];
         
+        if (done.BooleanValue)
+            return false;
+
+        return true;
+    }
+
+    public readonly bool MoveNext(JSValue nextValue, out JSValue value)
+    {
+        value = GetIteratorResult(nextValue);
+        var done = value[KeyStrings.done];
+        value = value[KeyStrings.value];
+
         if (done.BooleanValue)
             return false;
 

@@ -64,6 +64,7 @@ public class JSContext : JSObject, IJSExecutionContext, IDisposable
     public JSObject FunctionPrototype { get; private set; }
     public new JSObject ObjectPrototype { get; private set; }
     public JSValue Object { get; private set; }
+    public JSValue IntrinsicEval { get; private set; } = JSUndefined.Value;
     public event LogEventHandler Log;
     public event ErrorEventHandler Error;
     public event ConsoleEvent ConsoleEvent;
@@ -534,6 +535,7 @@ public class JSContext : JSObject, IJSExecutionContext, IDisposable
             JSEngine.CoreClassRegistrations?.Invoke(this);
         }
 
+        IntrinsicEval = this[KeyStrings.eval];
         this[KeyStrings.globalThis] = this;
         this[KeyStrings.debug] = JSValue.CreateFunction(Debug);
     }

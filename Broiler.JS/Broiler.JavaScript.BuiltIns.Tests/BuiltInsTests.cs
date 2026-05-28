@@ -8712,6 +8712,37 @@ public class BuiltInsTests
     }
 
     [Fact]
+    public void Generator_Next_Forwards_First_Argument_To_Delegated_Iterator()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = CreateContext();
+        var result = ctx.Eval("""
+            (function () {
+              var received;
+              var iterable = {
+                [Symbol.iterator]: function () {
+                  return {
+                    next: function (...args) {
+                      received = args.length + '|' + String(args[0]);
+                      return { done: true };
+                    }
+                  };
+                }
+              };
+
+              function* outer() {
+                yield* iterable;
+              }
+
+              outer().next(123);
+              return received;
+            })();
+            """);
+
+        Assert.Equal("1|undefined", result.ToString());
+    }
+
+    [Fact]
     public void Function_Bind_Uses_Current_Name_And_Length_Descriptors_When_Creating_Bound_Functions()
     {
         EnsureBuiltInsLoaded();

@@ -38,6 +38,7 @@ public class ClrGeneratorV2(JSValue generator, JSGeneratorDelegateV2 @delegate, 
     public Box[] Variables;
     private IElementEnumerator delegatedEnumerator;
     private JSValue delegatedCompletionValue;
+    private bool delegatedNeedsInitialNext;
 
     public JSValue LastValue;
 
@@ -81,7 +82,20 @@ public class ClrGeneratorV2(JSValue generator, JSGeneratorDelegateV2 @delegate, 
             {
                 try
                 {
-                    if (delegatedEnumerator.MoveNext(out value))
+                    if (delegatedEnumerator is JSIterator iterator)
+                    {
+                        var delegatedNextValue = delegatedNeedsInitialNext
+                            ? JSUndefined.Value
+                            : next ?? JSUndefined.Value;
+                        delegatedNeedsInitialNext = false;
+                        delegatedEnumerator = iterator;
+                        if (iterator.MoveNext(delegatedNextValue, out value))
+                        {
+                            done = false;
+                            return;
+                        }
+                    }
+                    else if (delegatedEnumerator.MoveNext(out value))
                     {
                         done = false;
                         return;
@@ -112,6 +126,7 @@ public class ClrGeneratorV2(JSValue generator, JSGeneratorDelegateV2 @delegate, 
                     try
                     {
                         delegatedEnumerator = GetDelegatedEnumerator(v.Value);
+                        delegatedNeedsInitialNext = true;
                     }
                     catch (Exception ex)
                     {
@@ -174,6 +189,7 @@ public class ClrGeneratorV2(JSValue generator, JSGeneratorDelegateV2 @delegate, 
     {
         delegatedEnumerator = null;
         delegatedCompletionValue = completionValue;
+        delegatedNeedsInitialNext = false;
     }
 
     private GeneratorState GetNext(int nextJump, JSValue lastValue, Exception nextExp = null)

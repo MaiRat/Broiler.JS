@@ -71,7 +71,7 @@ partial class FastCompiler
                     JSValueBuilder.AddDouble(
                         current.Expression,
                         YExpression.Constant(updateExpression.Operator == UnaryOperator.Increment ? 1d : -1d))));
-                statements.Add(JSVariableBuilder.Assign(variable.Variable, current.Expression));
+                statements.Add(YExpression.Assign(variable.Expression, current.Expression));
                 statements.Add(previous?.Expression ?? current.Expression);
 
                 return YExpression.Block(variables, statements);

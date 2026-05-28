@@ -1323,7 +1323,6 @@ test/built-ins/Iterator/from/result-proto.js
 test/built-ins/Iterator/from/return-method-calls-base-return-method.js
 test/built-ins/Iterator/from/return-method-throws-for-invalid-this.js
 test/built-ins/Iterator/prototype/Symbol.iterator/name.js
-test/built-ins/Iterator/prototype/Symbol.iterator/prop-desc.js
 test/built-ins/Iterator/prototype/Symbol.toStringTag/prop-desc.js
 test/built-ins/Iterator/prototype/Symbol.toStringTag/weird-setter.js
 test/built-ins/Iterator/prototype/constructor/weird-setter.js
@@ -2166,7 +2165,6 @@ test/built-ins/Promise/any/species-get-error.js
 test/built-ins/Promise/exec-args.js
 test/built-ins/Promise/executor-call-context-sloppy.js
 test/built-ins/Promise/executor-call-context-strict.js
-test/built-ins/Promise/executor-function-name.js
 test/built-ins/Promise/prototype/catch/this-value-obj-coercible.js
 test/built-ins/Promise/prototype/finally/invokes-then-with-function.js
 test/built-ins/Promise/prototype/finally/species-constructor.js
@@ -2244,11 +2242,9 @@ test/built-ins/Promise/race/same-reject-function.js
 test/built-ins/Promise/race/same-resolve-function.js
 test/built-ins/Promise/race/species-get-error.js
 test/built-ins/Promise/reject-function-length.js
-test/built-ins/Promise/reject-function-name.js
 test/built-ins/Promise/reject/capability-executor-called-twice.js
 test/built-ins/Promise/reject/ctx-ctor.js
 test/built-ins/Promise/resolve-function-length.js
-test/built-ins/Promise/resolve-function-name.js
 test/built-ins/Promise/resolve/S25.4.4.5_A2.1_T1.js
 test/built-ins/Promise/resolve/S25.4.4.5_A2.2_T1.js
 test/built-ins/Promise/resolve/S25.4.4.5_A2.3_T1.js
@@ -2277,7 +2273,6 @@ test/built-ins/Proxy/has/trap-is-undefined-using-with.js
 test/built-ins/Proxy/ownKeys/call-parameters-object-getownpropertysymbols.js
 test/built-ins/Proxy/ownKeys/trap-is-missing-target-is-proxy.js
 test/built-ins/Proxy/proxy-no-prototype.js
-test/built-ins/Proxy/revocable/revocation-function-name.js
 test/built-ins/Proxy/set/call-parameters-prototype-dunder-proto.js
 test/built-ins/Proxy/set/call-parameters.js
 test/built-ins/Proxy/set/trap-is-missing-receiver-multiple-calls-index.js
@@ -3330,7 +3325,6 @@ test/built-ins/Symbol/split/prop-desc.js
 test/built-ins/Symbol/toPrimitive/prop-desc.js
 test/built-ins/Symbol/toStringTag/prop-desc.js
 test/built-ins/Symbol/unscopables/prop-desc.js
-test/built-ins/ThrowTypeError/name.js
 test/built-ins/ThrowTypeError/unique-per-realm-function-proto.js
 test/built-ins/ThrowTypeError/unique-per-realm-non-simple.js
 test/built-ins/ThrowTypeError/unique-per-realm-unmapped-args.js
@@ -3900,7 +3894,6 @@ test/intl402/DateTimeFormat/numbering-system-calendar-options.js
 test/intl402/DateTimeFormat/prototype/format/dayPeriod-long-en.js
 test/intl402/DateTimeFormat/prototype/format/dayPeriod-narrow-en.js
 test/intl402/DateTimeFormat/prototype/format/dayPeriod-short-en.js
-test/intl402/DateTimeFormat/prototype/format/format-function-name.js
 test/intl402/DateTimeFormat/prototype/format/fractionalSecondDigits.js
 test/intl402/DateTimeFormat/prototype/format/numbering-system.js
 test/intl402/DateTimeFormat/prototype/format/proleptic-gregorian-calendar.js
@@ -4243,7 +4236,6 @@ test/intl402/NumberFormat/prototype/format/engineering-scientific-ko-KR.js
 test/intl402/NumberFormat/prototype/format/engineering-scientific-zh-TW.js
 test/intl402/NumberFormat/prototype/format/format-fraction-digits-precision.js
 test/intl402/NumberFormat/prototype/format/format-fraction-digits.js
-test/intl402/NumberFormat/prototype/format/format-function-name.js
 test/intl402/NumberFormat/prototype/format/format-max-min-fraction-significant-digits.js
 test/intl402/NumberFormat/prototype/format/format-negative-numbers.js
 test/intl402/NumberFormat/prototype/format/format-rounding-increment-1.js
@@ -4858,7 +4850,6 @@ test/language/expressions/assignment/dstr/obj-rest-to-property.js
 test/language/expressions/assignment/dstr/obj-rest-val-null.js
 test/language/expressions/assignment/dstr/obj-rest-val-undefined.js
 test/language/expressions/assignment/dstr/obj-rest-valid-object.js
-test/language/expressions/assignment/fn-name-lhs-cover.js
 test/language/expressions/assignment/line-terminator.js
 test/language/expressions/assignment/target-super-computed-reference-null.js
 test/language/expressions/assignment/target-super-computed-reference.js
@@ -9611,8 +9602,6 @@ test/language/statements/for-of/dstr/var-ary-ptrn-rest-id-iter-val-err.js
 test/language/statements/for-of/dstr/var-ary-ptrn-rest-id.js
 test/language/statements/for-of/dstr/var-ary-ptrn-rest-obj-id.js
 test/language/statements/for-of/dstr/var-ary-ptrn-rest-obj-prop-id.js
-test/language/statements/for-of/dstr/var-obj-init-null.js
-test/language/statements/for-of/dstr/var-obj-init-undefined.js
 test/language/statements/for-of/dstr/var-obj-ptrn-id-get-value-err.js
 test/language/statements/for-of/dstr/var-obj-ptrn-id-init-skipped.js
 test/language/statements/for-of/dstr/var-obj-ptrn-id-init-throws.js
@@ -9630,8 +9619,6 @@ test/language/statements/for-of/dstr/var-obj-ptrn-prop-id-init-throws.js
 test/language/statements/for-of/dstr/var-obj-ptrn-prop-id-init-unresolvable.js
 test/language/statements/for-of/dstr/var-obj-ptrn-prop-id-trailing-comma.js
 test/language/statements/for-of/dstr/var-obj-ptrn-prop-id.js
-test/language/statements/for-of/dstr/var-obj-ptrn-prop-obj-value-null.js
-test/language/statements/for-of/dstr/var-obj-ptrn-prop-obj-value-undef.js
 test/language/statements/for-of/dstr/var-obj-ptrn-prop-obj.js
 test/language/statements/for-of/dstr/var-obj-ptrn-rest-getter.js
 test/language/statements/for-of/dstr/var-obj-ptrn-rest-skip-non-enumerable.js
@@ -10231,7 +10218,6 @@ test/staging/sm/Promise/bug-1288382.js
 test/staging/sm/Promise/for-of-iterator-uses-getv.js
 test/staging/sm/Proxy/getPrototypeOf.js
 test/staging/sm/Proxy/json-stringify-replacer-array-revocable-proxy.js
-test/staging/sm/Proxy/revoke-no-name.js
 test/staging/sm/Proxy/revoked-get-function-realm-typeerror.js
 test/staging/sm/Proxy/setPrototypeOf.js
 test/staging/sm/Proxy/trap-null.js

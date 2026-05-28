@@ -338,9 +338,9 @@ public partial class FastCompiler : AstMapVisitor<YExpression>
         if (IsStrictMode)
             return;
 
-        var rootFunction = scope.Top.RootScope.Function;
-        if (rootFunction?.IsArrowFunction == true
-            && !HasSimpleParameterList(rootFunction.Params)
+        var currentFunction = scope.Top.Function;
+        if (currentFunction?.IsArrowFunction == true
+            && !HasSimpleParameterList(currentFunction.Params)
             && (name.Equals("arguments") || name.Equals("eval")))
         {
             return;

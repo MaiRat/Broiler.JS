@@ -193,7 +193,11 @@ partial class FastCompiler
 
             sList.Add(YExpression.Label(r, JSUndefinedBuilder.Value));
 
-            var block = YExpression.Block(vList, sList);
+            var block = YExpression.Block(
+                vList,
+                YExpression.TryFinally(
+                    YExpression.Block(sList),
+                    JSContextStackBuilder.Pop(stackItem, cs.Context)));
 
             // adding lexical scope pending...
 

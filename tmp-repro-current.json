@@ -1,0 +1,48 @@
+{
+  "suiteRef": "ccaac100ff49d81e9ff47a75ff4c60e0bd3f262e",
+  "broilerDll": "/tmp/workspace/MaiRat/Broiler.JS/Broiler.JS/Broiler.JavaScript/bin/Release/net8.0/BroilerJS.dll",
+  "testTimeoutSeconds": 30.0,
+  "memoryLimitMb": 0,
+  "maxWorkers": 1,
+  "shuffleSeed": null,
+  "includeNegative": false,
+  "prioritizeFragile": false,
+  "promotedCount": 0,
+  "requestedPaths": [
+    "test/built-ins/Proxy/get/trap-is-undefined-target-is-proxy.js",
+    "test/language/statements/class/elements/after-same-line-gen-rs-static-privatename-identifier-initializer.js"
+  ],
+  "expandedPaths": [
+    "test/built-ins/Proxy/get/trap-is-undefined-target-is-proxy.js",
+    "test/language/statements/class/elements/after-same-line-gen-rs-static-privatename-identifier-initializer.js"
+  ],
+  "selectionMode": "requested",
+  "candidateCount": 2,
+  "selectedCountBeforeSharding": 2,
+  "shardCount": 1,
+  "shardIndex": 0,
+  "executed": 2,
+  "passed": 0,
+  "failed": 2,
+  "failedPaths": [
+    "test/built-ins/Proxy/get/trap-is-undefined-target-is-proxy.js",
+    "test/language/statements/class/elements/after-same-line-gen-rs-static-privatename-identifier-initializer.js"
+  ],
+  "skipped": 0,
+  "timedOut": 0,
+  "timedOutPaths": [],
+  "results": [
+    {
+      "path": "test/built-ins/Proxy/get/trap-is-undefined-target-is-proxy.js",
+      "status": "failed",
+      "stdout": "",
+      "stderr": "Unhandled exception. Broiler.JavaScript.Runtime.JSException: Test262Error: Expected SameValue(\u00abundefined\u00bb, \u00ab1\u00bb) to be true\nat Throw in /tmp/workspace/MaiRat/Broiler.JS/Broiler.JS/Broiler.JavaScript.Runtime/JSException.cs:line 114\n\n"
+    },
+    {
+      "path": "test/language/statements/class/elements/after-same-line-gen-rs-static-privatename-identifier-initializer.js",
+      "status": "failed",
+      "stdout": "",
+      "stderr": "Unhandled exception. Broiler.JavaScript.Runtime.JSException: Test262Error: Expected SameValue(\u00abundefined\u00bb, \u00ab1\u00bb) to be true\nat Throw in /tmp/workspace/MaiRat/Broiler.JS/Broiler.JS/Broiler.JavaScript.Runtime/JSException.cs:line 114\n\n"
+    }
+  ]
+}

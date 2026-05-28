@@ -46,6 +46,9 @@ public static class DirectEvalSupport
 
     private static bool IsDirectEval(JSValue callee)
     {
+        if (JSEngine.CurrentContext is JSContext context)
+            return !context.IntrinsicEval.IsUndefined && callee.StrictEquals(context.IntrinsicEval);
+
         var globalEval = (JSEngine.CurrentContext as JSObject)?[KeyStrings.eval];
         return !globalEval.IsUndefined && callee.StrictEquals(globalEval);
     }

@@ -154,23 +154,24 @@ public partial class JSArray
             return new JSArray(arrayLength);
 
         var constructor = source[KeyStrings.constructor];
-        if (constructor.IsObject)
-        {
-            var species = constructor[(IJSSymbol)JSSymbol.species];
-            if (species.IsNull)
-                return new JSArray(arrayLength);
+        if (constructor.IsUndefined)
+            return new JSArray(arrayLength);
 
-            if (!species.IsUndefined)
-            {
-                var created = species.CreateInstance(new Arguments(JSUndefined.Value, new JSNumber(arrayLength)));
-                if (created is not JSObject createdObject)
-                    throw JSEngine.NewTypeError("Array species constructor did not return an object");
+        if (!constructor.IsObject)
+            throw JSEngine.NewTypeError("Array constructor is not an object");
 
-                return createdObject;
-            }
-        }
+        var species = constructor[(IJSSymbol)JSSymbol.species];
+        if (species.IsNull || species.IsUndefined)
+            return new JSArray(arrayLength);
 
-        return new JSArray(arrayLength);
+        if (!species.IsFunction)
+            throw JSEngine.NewTypeError("Array species constructor is not a constructor");
+
+        var created = species.CreateInstance(new Arguments(JSUndefined.Value, new JSNumber(arrayLength)));
+        if (created is not JSObject createdObject)
+            throw JSEngine.NewTypeError("Array species constructor did not return an object");
+
+        return createdObject;
     }
 
     private static void CreateDataPropertyOrThrow(JSObject target, uint index, JSValue value)

@@ -177,7 +177,9 @@ public partial class JSString
                 if (!splitter.IsFunction)
                     throw JSEngine.NewTypeError("@@split is not callable");
 
-                return splitter.InvokeFunction(new Arguments(_separator, @thisValue, limit));
+                return limit.IsUndefined
+                    ? splitter.InvokeFunction(new Arguments(_separator, @thisValue))
+                    : splitter.InvokeFunction(new Arguments(_separator, @thisValue, limit));
             }
         }
 

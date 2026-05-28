@@ -55,7 +55,7 @@ public partial class JSGenerator : JSObject, IJSGenerator
         if (a.This is not JSGenerator generator)
             throw JSEngine.NewTypeError("Iterator.prototype.next called on incompatible receiver");
 
-        return generator.Next();
+        return generator.Next(in a);
     }
 
     [JSExport("toString")]

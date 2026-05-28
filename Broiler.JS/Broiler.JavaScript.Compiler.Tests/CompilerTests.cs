@@ -1096,11 +1096,44 @@ public class CompilerTests
                     withResult = eval(1);
                 }
 
-                return [run(), functionCalls, withResult, withCalls].join('|');
+                var globalCalls = 0;
+                function globalReplacement(value) {
+                    globalCalls++;
+                    return value + 3;
+                }
+
+                var originalEval = eval;
+                eval = globalReplacement;
+                var globalResult = eval(1);
+                eval = originalEval;
+
+                return [run(), functionCalls, withResult, withCalls, globalResult, globalCalls].join('|');
             })();
             """);
 
-        Assert.Equal("2|1|3|1", result.ToString());
+        Assert.Equal("2|1|3|1|4|1", result.ToString());
+    }
+
+    [Fact]
+    public void Compile_Update_Expressions_Modify_Captured_Variables()
+    {
+        using var ctx = new JSContext();
+
+        var result = ctx.Eval("""
+            (function () {
+                var postfix = 0;
+                var prefix = 0;
+                var viaMethod = 0;
+
+                (function () { postfix++; })();
+                (function () { ++prefix; })();
+                ({ update: function () { viaMethod++; } }).update();
+
+                return [postfix, prefix, viaMethod].join('|');
+            })();
+            """);
+
+        Assert.Equal("1|1|1", result.ToString());
     }
 
     [Fact]

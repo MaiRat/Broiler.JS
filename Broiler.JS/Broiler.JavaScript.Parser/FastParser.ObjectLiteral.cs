@@ -94,6 +94,9 @@ partial class FastParser
                     if (!Statement(out var body))
                         throw stream.Unexpected();
 
+                    if (body.Type != FastNodeType.Block)
+                        throw stream.Unexpected();
+
                     var fx = new AstFunctionExpression(current, PreviousToken, false, isAsync, isGenerator, null, parameters, body);
 
                     property = new AstClassProperty(current, PreviousToken, key.Start.ContextualKeyword == FastKeywords.constructor ? AstPropertyKind.Constructor : AstPropertyKind.Method,
@@ -107,7 +110,7 @@ partial class FastParser
             }
             else if (stream.Current.Type == TokenTypes.Comma || stream.Current.Type == TokenTypes.CurlyBracketEnd || stream.Current.Type == TokenTypes.EOF)
             {
-                if (key is AstLiteral)
+                if (computed || key is AstLiteral)
                     throw stream.Unexpected();
                 property = new AstClassProperty(current, PreviousToken, AstPropertyKind.Data, isPrivate, isStatic, key, computed, key);
                 return true;

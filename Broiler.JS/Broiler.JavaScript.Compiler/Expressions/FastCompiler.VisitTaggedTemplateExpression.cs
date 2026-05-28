@@ -36,13 +36,16 @@ partial class FastCompiler
                 if (l.TokenType == TokenTypes.TemplatePart || l.TokenType == TokenTypes.TemplateEnd)
                 {
                     var r = l.Start.Span.Value;
-                    r = r.Trim('`');
+                    if (r.StartsWith("`"))
+                        r = r.Substring(1);
 
                     if (r.StartsWith("}"))
                         r = r.TrimStart('}');
 
                     if (r.EndsWith("${"))
                         r = r.Substring(0, r.Length - 2);
+                    else if (r.EndsWith("`"))
+                        r = r.Substring(0, r.Length - 1);
 
                     raw.Add(JSStringBuilder.New(YExpression.Constant(r)));
                     parts.Add(new YElementInit(JSArrayBuilder._Add, JSStringBuilder.New(YExpression.Constant(l.StringValue))));

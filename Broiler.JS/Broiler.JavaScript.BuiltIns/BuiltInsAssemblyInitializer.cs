@@ -955,14 +955,14 @@ internal static class BuiltInsAssemblyInitializer
             return JSValue.CreateString(sb.ToString());
         }
 
-        static void InvokeSpeciesConstructor(JSRegExp regExp, JSValue flags)
+        static JSValue InvokeSpeciesConstructor(JSRegExp regExp, JSValue flags)
         {
             var constructor = regExp[KeyStrings.constructor];
             var species = GetSpeciesConstructor(constructor);
             if (species.IsNullOrUndefined)
-                return;
+                return JSUndefined.Value;
 
-            species.CreateInstance(new Arguments(species, regExp, flags));
+            return species.CreateInstance(new Arguments(species, regExp, flags));
         }
 
         static JSValue RegExpExec(JSValue rx, JSValue input)
@@ -1161,14 +1161,15 @@ internal static class BuiltInsAssemblyInitializer
             if (a.This is JSRegExp regExp)
             {
                 var flags = GetObservableFlags(regExp);
-                InvokeSpeciesConstructor(regExp, flags);
-                var matcher = new JSRegExp(new Arguments(JSUndefined.Value, regExp, flags));
+                var matcher = InvokeSpeciesConstructor(regExp, flags);
+                if (matcher.IsUndefined)
+                    matcher = new JSRegExp(new Arguments(JSUndefined.Value, regExp, flags));
                 matcher[KeyStrings.lastIndex] = regExp[KeyStrings.lastIndex];
                 return new JSRegExpStringIterator(
                     matcher,
                     JSValue.CreateString(a.Get1().ToString()),
-                    matcher.globalSearch,
-                    matcher.unicode);
+                    matcher[KeyStrings.GetOrCreate("global")].BooleanValue,
+                    matcher[KeyStrings.GetOrCreate("unicode")].BooleanValue || matcher[KeyStrings.GetOrCreate("unicodeSets")].BooleanValue);
             }
 
             if (JSRegExp.IsRegExpLike(a.This))

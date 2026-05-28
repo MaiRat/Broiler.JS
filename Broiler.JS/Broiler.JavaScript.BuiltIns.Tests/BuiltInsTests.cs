@@ -6724,6 +6724,50 @@ public class BuiltInsTests
     }
 
     [Fact]
+    public void Array_Prototype_Invalid_Species_Constructors_Throw_TypeError()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = new JSContext();
+
+        var result = ctx.Eval("""
+            (function () {
+                function thrownCtor(fn) {
+                    try {
+                        fn();
+                        return 'no-throw';
+                    } catch (e) {
+                        return e && e.constructor ? e.constructor.name : typeof e;
+                    }
+                }
+
+                function invalidConstructorResult(method) {
+                    var sample = [1];
+                    sample.constructor = null;
+                    return thrownCtor(function () { method(sample); });
+                }
+
+                function invalidSpeciesResult(method) {
+                    var sample = [1];
+                    sample.constructor = {};
+                    sample.constructor[Symbol.species] = parseInt;
+                    return thrownCtor(function () { method(sample); });
+                }
+
+                return [
+                    invalidConstructorResult(function (sample) { sample.filter(function () { return true; }); }),
+                    invalidConstructorResult(function (sample) { sample.flat(); }),
+                    invalidConstructorResult(function (sample) { sample.flatMap(function (value) { return [value]; }); }),
+                    invalidSpeciesResult(function (sample) { sample.filter(function () { return true; }); }),
+                    invalidSpeciesResult(function (sample) { sample.flat(); }),
+                    invalidSpeciesResult(function (sample) { sample.flatMap(function (value) { return [value]; }); })
+                ].join('|');
+            })();
+            """);
+
+        Assert.Equal("TypeError|TypeError|TypeError|TypeError|TypeError|TypeError", result.ToString());
+    }
+
+    [Fact]
     public void TypeError_Regressions_For_Array_ArrayBuffer_Boolean_And_Async_Functions_Match_Test262()
     {
         EnsureBuiltInsLoaded();
@@ -8709,6 +8753,37 @@ public class BuiltInsTests
             """);
 
         Assert.Equal("true|true|true|true|false|undefined|4|true|false", result.ToString());
+    }
+
+    [Fact]
+    public void Generator_Next_Forwards_First_Argument_To_Delegated_Iterator()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = CreateContext();
+        var result = ctx.Eval("""
+            (function () {
+              var received;
+              var iterable = {
+                [Symbol.iterator]: function () {
+                  return {
+                    next: function (...args) {
+                      received = args.length + '|' + String(args[0]);
+                      return { done: true };
+                    }
+                  };
+                }
+              };
+
+              function* outer() {
+                yield* iterable;
+              }
+
+              outer().next(123);
+              return received;
+            })();
+            """);
+
+        Assert.Equal("1|undefined", result.ToString());
     }
 
     [Fact]

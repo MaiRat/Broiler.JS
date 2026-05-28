@@ -158,6 +158,12 @@ public partial class JSRegExp : JSObject, IJSRegExp
             switch (c)
             {
                 case '/':
+                    if (i > 0 && pattern[i - 1] == '\\')
+                    {
+                        sb.Append('/');
+                        continue;
+                    }
+
                     sb.Append(@"\/");
                     continue;
                 case '\n':

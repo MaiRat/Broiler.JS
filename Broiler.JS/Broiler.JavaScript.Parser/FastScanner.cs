@@ -528,6 +528,15 @@ public class FastScanner
             case '\n':
                 return true;
 
+            case '\r':
+                if (CanConsumeNext('\n'))
+                    Consume();
+                return true;
+
+            case '\u2028':
+            case '\u2029':
+                return true;
+
             case 'u':
                 if (CanConsumeNext('{'))
                 {

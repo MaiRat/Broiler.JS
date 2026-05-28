@@ -75,6 +75,7 @@ public class JSContext : JSObject, IJSExecutionContext, IDisposable
     private int directEvalCompilationDepth;
     private int directEvalLocalVarEnvironmentDepth;
     private readonly List<DirectEvalScope> activeDirectEvalScopes = [];
+    private readonly List<CallStackItem> directEvalActivationOwners = [];
     private WithScope withScope;
 
     private sealed class WithScope : IDisposable
@@ -240,6 +241,57 @@ public class JSContext : JSObject, IJSExecutionContext, IDisposable
 
     public IDisposable PushDirectEvalScope(JSVariable[] variables) => new DirectEvalScope(this, variables);
 
+    private sealed class DirectEvalActivationScope(JSContext context, CallStackItem owner) : IDisposable
+    {
+        public void Dispose()
+        {
+            if (owner == null)
+                return;
+
+            for (var i = context.directEvalActivationOwners.Count - 1; i >= 0; i--)
+            {
+                if (!ReferenceEquals(context.directEvalActivationOwners[i], owner))
+                    continue;
+
+                context.directEvalActivationOwners.RemoveAt(i);
+                break;
+            }
+        }
+    }
+
+    internal IDisposable PushDirectEvalActivation()
+    {
+        if (Top == null)
+            return null;
+
+        directEvalActivationOwners.Add(Top);
+        return new DirectEvalActivationScope(this, Top);
+    }
+
+    private bool TryGetCurrentDirectEvalActivationOwner(out CallStackItem owner)
+    {
+        if (directEvalActivationOwners.Count > 0)
+        {
+            owner = directEvalActivationOwners[^1];
+            return true;
+        }
+
+        owner = null;
+        return false;
+    }
+
+    internal bool TryResolveDirectEvalBinding(in KeyString name, out JSVariable variable)
+    {
+        for (var current = Top; current != null; current = current.Parent)
+        {
+            if (current.TryGetDirectEvalBinding(name, out variable))
+                return true;
+        }
+
+        variable = null;
+        return false;
+    }
+
     /// <summary>
     /// Temporarily suspends all active direct-eval scope overlays AND resets
     /// the direct-eval compilation/depth counters.  The returned IDisposable
@@ -321,6 +373,13 @@ public class JSContext : JSObject, IJSExecutionContext, IDisposable
     {
         KeyString name = variable.Name;
         var v = variable.Value;
+        if (directEvalLocalVarEnvironmentDepth > 0
+            && TryGetCurrentDirectEvalActivationOwner(out var activationOwner))
+        {
+            activationOwner.RegisterDirectEvalBinding(variable);
+            return v;
+        }
+
         var oldV = this[name];
         var hasOwnProperty = !GetInternalProperty(name, false).IsEmpty;
         var hadExistingVariable = globalVars.TryGetValue(name.Key, out var existingVariable);
@@ -350,9 +409,21 @@ public class JSContext : JSObject, IJSExecutionContext, IDisposable
 
     public override JSValue this[KeyString name]
     {
-        get => base[name];
+        get
+        {
+            if (TryResolveDirectEvalBinding(name, out var directEvalBinding))
+                return directEvalBinding.Value;
+
+            return base[name];
+        }
         set
         {
+            if (TryResolveDirectEvalBinding(name, out var directEvalBinding))
+            {
+                directEvalBinding.Value = value;
+                return;
+            }
+
             base[name] = value;
             if (globalVars.TryGetValue(name.Key, out var jsv))
                 jsv.Value = value;
@@ -443,6 +514,9 @@ public class JSContext : JSObject, IJSExecutionContext, IDisposable
             return withObject[name];
         }
 
+        if (TryResolveDirectEvalBinding(name, out var directEvalBinding))
+            return directEvalBinding.Value;
+
         if (globalVars.TryGetValue(name.Key, out var variable))
             return variable.Value;
 
@@ -465,6 +539,12 @@ public class JSContext : JSObject, IJSExecutionContext, IDisposable
 
         var hasVariable = globalVars.TryGetValue(name.Key, out var variable);
         var hasProperty = !GetInternalProperty(name).IsEmpty;
+
+        if (TryResolveDirectEvalBinding(name, out var directEvalBinding))
+        {
+            directEvalBinding.Value = value;
+            return value;
+        }
 
         if (!hasVariable && !hasProperty)
         {
@@ -508,6 +588,21 @@ public class JSContext : JSObject, IJSExecutionContext, IDisposable
     {
         if (TryResolveWithObject(name, out var withObject))
             return withObject.Delete(name);
+
+        if (TryResolveDirectEvalBinding(name, out var directEvalBinding))
+        {
+            for (var current = Top; current != null; current = current.Parent)
+            {
+                if (!current.TryGetDirectEvalBinding(name, out var existingBinding)
+                    || !ReferenceEquals(existingBinding, directEvalBinding))
+                {
+                    continue;
+                }
+
+                current.DeleteDirectEvalBinding(name);
+                return JSValue.BooleanTrue;
+            }
+        }
 
         var hasVariable = globalVars.TryGetValue(name.Key, out _);
         var property = GetInternalProperty(name, false);

@@ -3078,6 +3078,26 @@ public class BuiltInsTests
         Assert.Equal("SyntaxError|SyntaxError|SyntaxError", result.ToString());
     }
 
+    [Fact]
+    public void Direct_Eval_In_Function_Activation_Persists_Local_Eval_Binding()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = new JSContext();
+
+        var result = ctx.Eval("""
+            var originalEval = eval;
+
+            function run() {
+              eval("var eval = function (value) { return value + 1; }");
+              return [eval(1), eval(2), eval === originalEval].join("|");
+            }
+
+            [run(), eval === originalEval].join("||");
+            """);
+
+        Assert.Equal("2|3|false||true", result.ToString());
+    }
+
     // ── M2: JSMap tests ──────────────────────────────────────────────
 
     [Fact]

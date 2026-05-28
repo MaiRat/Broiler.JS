@@ -40,9 +40,9 @@ public partial class JSArray
     {
         var @this = a.This as JSObject;
         var first = a.Get1();
+        var length = (uint)@this.Length;
         var sep = first.IsUndefined ? "," : first.ToString();
         var sb = new StringBuilder();
-        var length = (uint)@this.Length;
 
         for (uint i = 0; i < length; i++)
         {

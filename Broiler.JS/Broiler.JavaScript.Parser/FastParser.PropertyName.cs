@@ -80,6 +80,9 @@ partial class FastParser
 
         if (stream.CheckAndConsume(TokenTypes.SquareBracketStart))
         {
+            if (stream.Current.Keyword == FastKeywords.@if)
+                throw stream.Unexpected();
+
             if (!Expression(out node))
                 throw stream.Unexpected();
 

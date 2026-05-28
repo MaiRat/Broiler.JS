@@ -9982,7 +9982,7 @@ public class BuiltInsTests
     public void BuiltIn_Length_Metadata_Matches_Optional_Argument_Specs()
     {
         EnsureBuiltInsLoaded();
-        using var ctx = new JSContext();
+        using var ctx = CreateContext();
         var result = ctx.Eval("""
             (function () {
                 function lengthOf(fn) {

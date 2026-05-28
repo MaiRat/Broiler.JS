@@ -52,6 +52,13 @@ partial class FastCompiler
 
     private YExpression VisitIdentifierReference(AstIdentifier identifier)
     {
+        if (identifier.Name.Equals("arguments")
+            && scope.Top.Function?.IsArrowFunction == true
+            && parameterInitializerDepth > 0)
+        {
+            return JSContextBuilder.ResolveIdentifier(KeyOfName(identifier.Name));
+        }
+
         if (TryGetStaticIdentifierVariable(identifier, out var variable) && variable != null)
             return variable.Expression;
 
@@ -68,6 +75,12 @@ partial class FastCompiler
 
         if (identifier.Name.Equals("arguments"))
         {
+            if (scope.Top.Function?.IsArrowFunction == true
+                && parameterInitializerDepth > 0)
+            {
+                return JSContextBuilder.ResolveIdentifier(KeyOfName(identifier.Name));
+            }
+
             var functionScope = scope.Top.RootScope;
             var argumentsObject = JSArgumentsBuilder.New(functionScope.ArgumentsExpression);
             if (!IsStrictMode

@@ -98,7 +98,8 @@ partial class FastCompiler
             var capturedBindings = CaptureDirectEvalBindings();
             var parameterBindings = CaptureDirectEvalParameterBindings();
             var privateNames = CaptureDirectEvalPrivateNames();
-            return YExpression.Call(null, DirectEvalMethod, paramArray, JSContextBuilder.ResolveIdentifier(KeyOfName(identifier.Name)), scope.Top.ThisExpression, scope.Top.StackItem, YExpression.Constant(IsStrictMode), YExpression.Constant(scope.Top.Function != null), lexicalBindings, capturedBindings, parameterBindings, privateNames);
+            var disallowArgumentsDeclaration = scope.Top.Function != null && !scope.Top.Function.IsArrowFunction;
+            return YExpression.Call(null, DirectEvalMethod, paramArray, JSContextBuilder.ResolveIdentifier(KeyOfName(identifier.Name)), scope.Top.ThisExpression, scope.Top.StackItem, YExpression.Constant(IsStrictMode), YExpression.Constant(disallowArgumentsDeclaration), lexicalBindings, capturedBindings, parameterBindings, privateNames);
         }
 
     skipDirectEval:

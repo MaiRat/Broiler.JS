@@ -7447,7 +7447,10 @@ public class BuiltInsTests
                 } catch (e) {
                     return e.constructor.name + '|' + array.length + '|' + calls;
                 } finally {
-                    Object.setPrototypeOf(array, Array.prototype);
+                    try {
+                        Object.setPrototypeOf(array, Array.prototype);
+                    } catch (_) {
+                    }
                 }
             })(),
             (function () {

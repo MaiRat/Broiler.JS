@@ -9,6 +9,7 @@ public class ILTryBlock(ILWriter iLWriter, Label label) : LinkedStackItem<ILTryB
 {
     private bool isCatch = false;
     private bool isFinally = false;
+    private bool hasFinally = false;
 
     internal readonly ILWriter il = iLWriter;
     private readonly ILWriterLabel label = iLWriter.DefineLabel("tryEnd");
@@ -38,6 +39,7 @@ public class ILTryBlock(ILWriter iLWriter, Label label) : LinkedStackItem<ILTryB
         if (isFinally)
             throw new InvalidOperationException($"You already in the finally block");
 
+        hasFinally = true;
         isFinally = true;
         isCatch = false;
         il.Emit(OpCodes.Leave, label);
@@ -94,12 +96,6 @@ public class ILTryBlock(ILWriter iLWriter, Label label) : LinkedStackItem<ILTryB
 
     internal void Branch(ILWriterLabel label, int index = -1)
     {
-        if (label.TryBlock == this)
-        {
-            il.Goto(label, index);
-            return;
-        }
-
         if (isFinally)
         {
             finallyJumpLabel ??= il.DefineLabel($"finally hop for {label.ID}");
@@ -108,6 +104,12 @@ public class ILTryBlock(ILWriter iLWriter, Label label) : LinkedStackItem<ILTryB
             il.Emit(OpCodes.Ldc_I4, state);
             il.EmitSaveLocal(finallyJumpState!.LocalIndex);
             il.Emit(OpCodes.Br, finallyJumpLabel);
+            return;
+        }
+
+        if (label.TryBlock == this && !(hasFinally && index >= 0))
+        {
+            il.Goto(label, index);
             return;
         }
 

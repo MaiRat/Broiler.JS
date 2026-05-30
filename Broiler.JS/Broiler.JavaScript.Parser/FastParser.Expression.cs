@@ -51,6 +51,8 @@ partial class FastParser
                 // create parameters now...
                 var parameters = VariableDeclarator.From(node);
                 functionDepth++;
+                var previousInGeneratorBody = inGeneratorBody;
+                inGeneratorBody = isGenerator;
                 try
                 {
                     if (stream.CheckAndConsume(TokenTypes.CurlyBracketStart))
@@ -70,6 +72,7 @@ partial class FastParser
                 }
                 finally
                 {
+                    inGeneratorBody = previousInGeneratorBody;
                     functionDepth--;
                 }
             }

@@ -271,6 +271,9 @@ public static void ValidateProgram(
             if (functionStrict && ContainsRestrictedBinding(functionExpression.Params))
                 throw new FastParseException(functionExpression.Start, "Invalid parameter name in strict mode");
 
+            if (functionExpression.Generator && ContainsYieldBinding(functionExpression.Params))
+                throw new FastParseException(functionExpression.Start, "Invalid generator parameter name");
+
             // Duplicate parameter names are always forbidden in:
             // - strict mode
             // - arrow functions
@@ -560,6 +563,55 @@ public static void ValidateProgram(
 
         private static bool IsPrivateName(AstIdentifier identifier)
             => identifier != null && identifier.Name.Value.StartsWith("#", StringComparison.Ordinal);
+    }
+
+    private static bool ContainsYieldBinding(IFastEnumerable<VariableDeclarator> declarators)
+    {
+        var enumerator = declarators.GetFastEnumerator();
+        while (enumerator.MoveNext(out var declarator))
+        {
+            if (ContainsYieldBinding(declarator.Identifier))
+                return true;
+        }
+
+        return false;
+    }
+
+    private static bool ContainsYieldBinding(AstExpression expression)
+    {
+        return expression switch
+        {
+            AstIdentifier identifier => identifier.Name.Value == "yield",
+            AstBinaryExpression assignment => ContainsYieldBinding(assignment.Left),
+            AstSpreadElement spread => ContainsYieldBinding(spread.Argument),
+            AstArrayPattern array => ContainsYieldBinding(array.Elements),
+            AstObjectPattern @object => ContainsYieldBinding(@object.Properties),
+            _ => false,
+        };
+    }
+
+    private static bool ContainsYieldBinding(IFastEnumerable<AstExpression> expressions)
+    {
+        var enumerator = expressions.GetFastEnumerator();
+        while (enumerator.MoveNext(out var expression))
+        {
+            if (ContainsYieldBinding(expression))
+                return true;
+        }
+
+        return false;
+    }
+
+    private static bool ContainsYieldBinding(IFastEnumerable<ObjectProperty> properties)
+    {
+        var enumerator = properties.GetFastEnumerator();
+        while (enumerator.MoveNext(out var property))
+        {
+            if (ContainsYieldBinding(property.Value))
+                return true;
+        }
+
+        return false;
     }
 
     private static bool ContainsRestrictedBinding(IFastEnumerable<VariableDeclarator> declarators)

@@ -2,7 +2,6 @@
 # When workflow_dispatch input rerun_failed_only is enabled (the default),
 # these paths are rerun before the workflow falls back to the full suite.
 
-test/annexB/built-ins/Date/prototype/setYear/time-clip.js
 test/annexB/built-ins/RegExp/RegExp-control-escape-russian-letter.js
 test/annexB/built-ins/RegExp/RegExp-decimal-escape-not-capturing.js
 test/annexB/built-ins/RegExp/RegExp-invalid-control-escape-character-class.js

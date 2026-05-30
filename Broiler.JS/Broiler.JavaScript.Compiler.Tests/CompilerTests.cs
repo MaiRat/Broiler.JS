@@ -241,6 +241,67 @@ public class CompilerTests
     }
 
     [Fact]
+    public void Compile_NonStrict_Yield_Identifier_In_Default_Parameter_Works()
+    {
+        using var ctx = new JSContext();
+        var result = ctx.Eval("""
+            (function () {
+                var yield = 23;
+                var paramValue = 0;
+                var f = (x = yield) => { paramValue = x; };
+
+                f();
+
+                return paramValue;
+            })()
+            """);
+
+        Assert.Equal(23.0, result.DoubleValue);
+    }
+
+    [Fact]
+    public void Compile_NonStrict_Yield_Identifier_In_Destructuring_Initializer_Works()
+    {
+        using var ctx = new JSContext();
+        var result = ctx.Eval("""
+            (function () {
+                var yield = 4;
+                var x = 0;
+                var vals = [];
+
+                [x = yield] = vals;
+
+                return x;
+            })()
+            """);
+
+        Assert.Equal(4.0, result.DoubleValue);
+    }
+
+    [Fact]
+    public void Compile_NonStrict_Yield_Identifier_In_Computed_Accessor_Name_Works()
+    {
+        using var ctx = new JSContext();
+        var result = ctx.Eval("""
+            (function () {
+                var yield = 'y';
+                var yieldSet = '';
+                var obj = {
+                    get [yield]() { return 'get yield'; },
+                    set [yield](param) { yieldSet = param; }
+                };
+
+                var getterValue = obj.y;
+                obj.y = 'set yield';
+
+                return getterValue + '|' + yieldSet;
+            })()
+            """);
+
+        Assert.Equal("get yield|set yield", result.ToString());
+    }
+
+    [Fact]
     public void Compile_ArrayDestructuring_DoesNotCloseExhaustedIterator()
     {
         using var ctx = new JSContext();

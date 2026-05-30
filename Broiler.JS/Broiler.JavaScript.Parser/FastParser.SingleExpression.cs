@@ -69,7 +69,9 @@ partial class FastParser
                 return ClassExpression(out node);
 
             case FastKeywords.yield:
-                return YieldExpression(out node);
+                if (inGeneratorBody)
+                    return YieldExpression(out node);
+                break;
 
             case FastKeywords.await:
                 return AwaitExpression(out node);

@@ -50,6 +50,8 @@ partial class FastParser
         try
         {
             functionDepth++;
+            var previousInGeneratorBody = inGeneratorBody;
+            inGeneratorBody = generator;
             try
             {
                 if (!Block(out var body))
@@ -59,6 +61,7 @@ partial class FastParser
             }
             finally
             {
+                inGeneratorBody = previousInGeneratorBody;
                 functionDepth--;
             }
         }

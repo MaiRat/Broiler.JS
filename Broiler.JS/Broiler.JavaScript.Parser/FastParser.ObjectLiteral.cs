@@ -93,6 +93,8 @@ partial class FastParser
                         throw stream.Unexpected();
 
                     functionDepth++;
+                    var previousInGeneratorBody = inGeneratorBody;
+                    inGeneratorBody = isGenerator;
                     AstStatement body;
                     try
                     {
@@ -101,6 +103,7 @@ partial class FastParser
                     }
                     finally
                     {
+                        inGeneratorBody = previousInGeneratorBody;
                         functionDepth--;
                     }
 

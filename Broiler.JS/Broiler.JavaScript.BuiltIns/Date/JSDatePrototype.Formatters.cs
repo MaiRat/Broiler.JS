@@ -263,11 +263,8 @@ public partial class JSDate
     [JSExport("valueOf", Length = 0)]
     internal new JSValue ValueOf(in Arguments a)
     {
-        if (value == DateTimeOffset.MinValue)
-            return JSNumber.NaN;
-
-        var result = value.ToJSDate();
-        return new JSNumber(result);
+        var result = GetTimeMs();
+        return double.IsNaN(result) ? JSNumber.NaN : new JSNumber(result);
     }
 
     internal string ToTimeZoneString()

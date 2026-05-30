@@ -60,6 +60,30 @@ public class BuiltInsTests
     }
 
     [Fact]
+    public void Native_Error_Prototypes_Have_Own_Message_Property()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = new JSContext();
+        var result = ctx.Eval("""
+            (function () {
+                var ctors = [Error, EvalError, RangeError, ReferenceError, SyntaxError, TypeError, URIError, AggregateError];
+                return ctors.map(function (Ctor) {
+                    var descriptor = Object.getOwnPropertyDescriptor(Ctor.prototype, 'message');
+                    return [
+                        Object.prototype.hasOwnProperty.call(Ctor.prototype, 'message'),
+                        descriptor.value === '',
+                        descriptor.writable,
+                        descriptor.enumerable === false,
+                        descriptor.configurable
+                    ].join(',');
+                }).join('|');
+            })();
+            """);
+
+        Assert.Equal("true,true,true,true,true|true,true,true,true,true|true,true,true,true,true|true,true,true,true,true|true,true,true,true,true|true,true,true,true,true|true,true,true,true,true|true,true,true,true,true", result.ToString());
+    }
+
+    [Fact]
     public void Function_Prototype_Apply_With_Primitive_Receiver_Throws_TypeError()
     {
         EnsureBuiltInsLoaded();

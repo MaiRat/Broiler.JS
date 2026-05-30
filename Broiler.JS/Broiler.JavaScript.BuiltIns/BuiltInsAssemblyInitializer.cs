@@ -1672,6 +1672,7 @@ internal static class BuiltInsAssemblyInitializer
         replacement.FastAddValue(KeyStrings.prototype, existing.prototype, JSPropertyAttributes.ReadonlyValue);
         replacement.FastAddValue(KeyStrings.constructor, functionMetadata, JSPropertyAttributes.ConfigurableValue);
         existing.prototype.FastAddValue(KeyStrings.name, JSValue.CreateString(name.Value), JSPropertyAttributes.ConfigurableValue);
+        existing.prototype.FastAddValue(KeyStrings.message, JSValue.CreateString(string.Empty), JSPropertyAttributes.ConfigurableValue);
 
         if (!existing[isErrorKey].IsUndefined)
             replacement.FastAddValue(isErrorKey, existing[isErrorKey], JSPropertyAttributes.ConfigurableValue);

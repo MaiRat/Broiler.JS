@@ -19,7 +19,7 @@ partial class FastCompiler
 
     private YExpression CreateFunction(AstFunctionExpression functionDeclaration, YExpression super = null, bool createClass = false, string className = null,
         IFastEnumerable<AstClassProperty> memberInits = null, bool forceStrictMode = false, bool hoistStatementDeclaration = true, string inferredFunctionName = null,
-        bool createPrototype = true, string[] directEvalPrivateNames = null)
+        bool createPrototype = true, string[] directEvalPrivateNames = null, IReadOnlyDictionary<AstClassProperty, YExpression> computedMemberNames = null)
     {
         var node = functionDeclaration;
         var functionLength = GetExpectedArgumentCount(functionDeclaration.Params);
@@ -53,7 +53,8 @@ partial class FastCompiler
             super,
             memberInits: memberInits,
             previous: functionDeclaration.IsArrowFunction ? current : null,
-            directEvalPrivateNames: directEvalPrivateNames ?? previousScope.DirectEvalPrivateNames));
+            directEvalPrivateNames: directEvalPrivateNames ?? previousScope.DirectEvalPrivateNames,
+            computedMemberNames: computedMemberNames));
         {
             cs.InParameterInitializer = previousScope.InParameterInitializer;
             var lexicalScopeVar = cs.Context;
@@ -310,7 +311,9 @@ partial class FastCompiler
 
         while (en.MoveNext(out var member))
         {
-            var name = GetName(member);
+            var name = s.ComputedMemberNames != null && s.ComputedMemberNames.TryGetValue(member, out var computedName)
+                ? computedName
+                : GetClassElementName(member);
             var value = member.Init == null ? JSUndefinedBuilder.Value : Visit(member.Init);
             var attributes = member.IsPrivate
                 ? JSPropertyAttributes.ConfigurableValue

@@ -2634,6 +2634,77 @@ public class CompilerTests
         Assert.Equal("TypeError", result.ToString());
     }
 
+
+    [Fact]
+    public void Compile_FunctionBind_NonCallableFunctionPrototypeInstance_ThrowsTypeError()
+    {
+        using var ctx = new JSContext();
+        var result = ctx.Eval("""
+            (function () {
+                function Foo() {}
+                Foo.prototype = Function.prototype;
+                var f = new Foo();
+
+                try {
+                    f.bind();
+                    return 'no-throw';
+                } catch (e) {
+                    return e.constructor.name;
+                }
+            })()
+            """);
+
+        Assert.Equal("TypeError", result.ToString());
+    }
+
+    [Fact]
+    public void Compile_ClassComputedInstanceFieldName_ToPrimitiveTypeError_HappensAtDefinition()
+    {
+        using var ctx = new JSContext();
+        var result = ctx.Eval("""
+            (function () {
+                var initialized = false;
+                var obj = {};
+                obj[Symbol.toPrimitive] = 42;
+
+                try {
+                    class C {
+                        [obj] = (initialized = true);
+                    }
+                    return 'no-throw';
+                } catch (e) {
+                    return e.constructor.name + '|' + initialized;
+                }
+            })()
+            """);
+
+        Assert.Equal("TypeError|false", result.ToString());
+    }
+
+    [Fact]
+    public void Compile_ClassComputedStaticFieldName_ToPrimitiveTypeError_PrecedesInitializer()
+    {
+        using var ctx = new JSContext();
+        var result = ctx.Eval("""
+            (function () {
+                var initialized = false;
+                var obj = {};
+                obj[Symbol.toPrimitive] = function () { return {}; };
+
+                try {
+                    class C {
+                        static [obj] = (initialized = true);
+                    }
+                    return 'no-throw';
+                } catch (e) {
+                    return e.constructor.name + '|' + initialized;
+                }
+            })()
+            """);
+
+        Assert.Equal("TypeError|false", result.ToString());
+    }
+
     #endregion
 
 }

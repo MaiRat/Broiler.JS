@@ -990,7 +990,7 @@ public abstract partial class JSValue : IDynamicMetaObjectProvider, IPropertyAcc
     internal virtual JSValue Is(JSValue value) => ReferenceEquals(this, value) ? BooleanTrue : BooleanFalse;
 
 
-    public virtual JSValue CreateInstance(in Arguments a) => throw NewTypeError($"Cannot create instance of {this}");
+    public virtual JSValue CreateInstance(in Arguments a) => throw NewTypeError("Value is not a constructor");
 
     public abstract JSValue InvokeFunction(in Arguments a);
 
@@ -1091,7 +1091,7 @@ public abstract partial class JSValue : IDynamicMetaObjectProvider, IPropertyAcc
 
     public virtual IElementEnumerator GetElementEnumerator() => ElementEnumerator.Empty;
     public virtual IElementEnumerator GetAsyncElementEnumerator() => GetElementEnumerator();
-    public virtual IElementEnumerator GetIterableEnumerator() => throw NewTypeError($"{this} is not iterable");
+    public virtual IElementEnumerator GetIterableEnumerator() => throw NewTypeError("Value is not iterable");
     public virtual IElementEnumerator GetAsyncIterableEnumerator() => GetIterableEnumerator();
 
     private readonly struct ElementEnumerator : IElementEnumerator

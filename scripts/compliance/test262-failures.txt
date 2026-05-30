@@ -1677,7 +1677,6 @@ test/built-ins/Promise/prototype/then/context-check-on-entry.js
 test/built-ins/Promise/prototype/then/ctor-custom.js
 test/built-ins/Promise/prototype/then/deferred-is-resolved-value.js
 test/built-ins/Promise/prototype/then/rxn-handler-fulfilled-invoke-nonstrict.js
-test/built-ins/Promise/prototype/then/rxn-handler-fulfilled-next-abrupt.js
 test/built-ins/Promise/prototype/then/rxn-handler-fulfilled-next.js
 test/built-ins/Promise/prototype/then/rxn-handler-rejected-invoke-nonstrict.js
 test/built-ins/Promise/prototype/then/rxn-handler-rejected-next.js
@@ -2668,7 +2667,6 @@ test/built-ins/TypedArray/from/iter-invoke-error.js
 test/built-ins/TypedArray/from/iter-next-error.js
 test/built-ins/TypedArray/from/iter-next-value-error.js
 test/built-ins/TypedArray/from/mapfn-is-not-callable.js
-test/built-ins/TypedArray/invoked.js
 test/built-ins/TypedArray/of/invoked-as-method.js
 test/built-ins/TypedArray/prototype/at/index-argument-tointeger.js
 test/built-ins/TypedArray/prototype/at/index-non-numeric-argument-tointeger.js

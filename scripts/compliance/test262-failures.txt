@@ -1669,7 +1669,6 @@ test/built-ins/Promise/prototype/finally/subclass-reject-count.js
 test/built-ins/Promise/prototype/finally/subclass-resolve-count.js
 test/built-ins/Promise/prototype/finally/this-value-proxy.js
 test/built-ins/Promise/prototype/finally/this-value-thenable.js
-test/built-ins/Promise/prototype/then/S25.4.4_A2.1_T2.js
 test/built-ins/Promise/prototype/then/S25.4.4_A2.1_T3.js
 test/built-ins/Promise/prototype/then/S25.4.5.3_A4.2_T1.js
 test/built-ins/Promise/prototype/then/S25.4.5.3_A4.2_T2.js
@@ -2998,7 +2997,6 @@ test/harness/asyncHelpers-asyncTest-rejects-non-callable.js
 test/harness/asyncHelpers-asyncTest-return-not-thenable.js
 test/harness/asyncHelpers-asyncTest-then-rejects.js
 test/harness/asyncHelpers-throwsAsync-custom-typeerror.js
-test/harness/asyncHelpers-throwsAsync-native.js
 test/harness/compare-array-arguments.js
 test/harness/decimalToHexString.js
 test/harness/deepEqual-primitives-bigint.js
@@ -5093,7 +5091,6 @@ test/language/expressions/function/scope-param-elem-var-close.js
 test/language/expressions/function/scope-param-elem-var-open.js
 test/language/expressions/function/scope-param-rest-elem-var-close.js
 test/language/expressions/function/scope-param-rest-elem-var-open.js
-test/language/expressions/function/static-init-await-binding.js
 test/language/expressions/function/static-init-await-reference.js
 test/language/expressions/generators/dstr/ary-ptrn-elem-ary-empty-init.js
 test/language/expressions/generators/dstr/ary-ptrn-elem-ary-empty-iter.js
@@ -5119,7 +5116,6 @@ test/language/expressions/generators/scope-param-elem-var-close.js
 test/language/expressions/generators/scope-param-elem-var-open.js
 test/language/expressions/generators/scope-param-rest-elem-var-close.js
 test/language/expressions/generators/scope-param-rest-elem-var-open.js
-test/language/expressions/generators/static-init-await-binding.js
 test/language/expressions/generators/static-init-await-reference.js
 test/language/expressions/greater-than-or-equal/S11.8.4_A2.2_T1.js
 test/language/expressions/greater-than/S11.8.2_A2.2_T1.js
@@ -5281,9 +5277,7 @@ test/language/expressions/object/fn-name-cover.js
 test/language/expressions/object/fn-name-fn.js
 test/language/expressions/object/fn-name-gen.js
 test/language/expressions/object/getter-super-prop.js
-test/language/expressions/object/ident-name-prop-name-literal-await-static-init.js
 test/language/expressions/object/identifier-shorthand-await-strict-mode.js
-test/language/expressions/object/identifier-shorthand-static-init-await-valid.js
 test/language/expressions/object/let-non-strict-access.js
 test/language/expressions/object/let-non-strict-syntax.js
 test/language/expressions/object/literal-property-name-bigint.js
@@ -5312,9 +5306,6 @@ test/language/expressions/object/method-definition/name-name-prop-string.js
 test/language/expressions/object/method-definition/name-name-prop-symbol.js
 test/language/expressions/object/method-definition/name-super-prop-body.js
 test/language/expressions/object/method-definition/name-super-prop-param.js
-test/language/expressions/object/method-definition/static-init-await-binding-accessor.js
-test/language/expressions/object/method-definition/static-init-await-binding-generator.js
-test/language/expressions/object/method-definition/static-init-await-binding-normal.js
 test/language/expressions/object/method-definition/static-init-await-reference-accessor.js
 test/language/expressions/object/method-definition/static-init-await-reference-generator.js
 test/language/expressions/object/method-definition/static-init-await-reference-normal.js
@@ -6708,21 +6699,6 @@ test/language/statements/class/elements/wrapped-in-sc-static-private-methods-wit
 test/language/statements/class/elements/wrapped-in-sc-static-private-methods.js
 test/language/statements/class/elements/wrapped-in-sc-string-literal-names.js
 test/language/statements/class/name-binding/in-extends-expression-assigned.js
-test/language/statements/class/static-init-abrupt.js
-test/language/statements/class/static-init-arguments-functions.js
-test/language/statements/class/static-init-arguments-methods.js
-test/language/statements/class/static-init-await-binding-valid.js
-test/language/statements/class/static-init-expr-new-target.js
-test/language/statements/class/static-init-expr-this.js
-test/language/statements/class/static-init-scope-lex-close.js
-test/language/statements/class/static-init-scope-lex-derived.js
-test/language/statements/class/static-init-scope-lex-open.js
-test/language/statements/class/static-init-scope-private.js
-test/language/statements/class/static-init-scope-var-close.js
-test/language/statements/class/static-init-scope-var-derived.js
-test/language/statements/class/static-init-scope-var-open.js
-test/language/statements/class/static-init-sequence.js
-test/language/statements/class/static-init-statement-list-optional.js
 test/language/statements/class/static-init-super-property.js
 test/language/statements/class/subclass-builtins/subclass-AggregateError.js
 test/language/statements/class/subclass/binding.js
@@ -6792,7 +6768,6 @@ test/language/statements/const/dstr/obj-ptrn-rest-getter.js
 test/language/statements/const/dstr/obj-ptrn-rest-skip-non-enumerable.js
 test/language/statements/const/dstr/obj-ptrn-rest-val-obj.js
 test/language/statements/const/global-closure-get-before-initialization.js
-test/language/statements/const/static-init-await-binding-valid.js
 test/language/statements/const/syntax/with-initializer-default-statement-list.js
 test/language/statements/continue/S12.7_A7.js
 test/language/statements/continue/S12.7_A9_T1.js
@@ -8443,7 +8418,6 @@ test/language/statements/function/scope-param-elem-var-close.js
 test/language/statements/function/scope-param-elem-var-open.js
 test/language/statements/function/scope-param-rest-elem-var-close.js
 test/language/statements/function/scope-param-rest-elem-var-open.js
-test/language/statements/function/static-init-await-binding-valid.js
 test/language/statements/generators/dstr/ary-ptrn-elem-ary-empty-init.js
 test/language/statements/generators/dstr/ary-ptrn-elem-ary-empty-iter.js
 test/language/statements/generators/dstr/ary-ptrn-elem-id-iter-val-array-prototype.js
@@ -8485,7 +8459,6 @@ test/language/statements/let/dstr/obj-ptrn-rest-skip-non-enumerable.js
 test/language/statements/let/dstr/obj-ptrn-rest-val-obj.js
 test/language/statements/let/global-closure-get-before-initialization.js
 test/language/statements/let/global-closure-set-before-initialization.js
-test/language/statements/let/static-init-await-binding-valid.js
 test/language/statements/let/syntax/let-closure-inside-initialization.js
 test/language/statements/let/syntax/with-initialisers-in-statement-positions-default-statement-list.js
 test/language/statements/let/syntax/without-initialisers-in-statement-positions-default-statement-list.js
@@ -8532,7 +8505,6 @@ test/language/statements/try/dstr/obj-ptrn-prop-eval-err.js
 test/language/statements/try/dstr/obj-ptrn-rest-getter.js
 test/language/statements/try/dstr/obj-ptrn-rest-skip-non-enumerable.js
 test/language/statements/try/dstr/obj-ptrn-rest-val-obj.js
-test/language/statements/try/static-init-await-binding-valid.js
 test/language/statements/try/tco-catch-finally.js
 test/language/statements/try/tco-catch.js
 test/language/statements/try/tco-finally.js
@@ -8544,7 +8516,6 @@ test/language/statements/variable/S12.2_A7.js
 test/language/statements/variable/dstr/ary-ptrn-elem-ary-empty-init.js
 test/language/statements/variable/dstr/ary-ptrn-elem-ary-empty-iter.js
 test/language/statements/variable/dstr/ary-ptrn-elem-id-iter-val-array-prototype.js
-test/language/statements/variable/dstr/ary-ptrn-elem-id-static-init-await-valid.js
 test/language/statements/variable/dstr/ary-ptrn-empty.js
 test/language/statements/variable/dstr/ary-ptrn-rest-ary-empty.js
 test/language/statements/variable/dstr/obj-ptrn-elem-id-static-init-await-valid.js
@@ -8552,7 +8523,6 @@ test/language/statements/variable/dstr/obj-ptrn-prop-eval-err.js
 test/language/statements/variable/dstr/obj-ptrn-rest-getter.js
 test/language/statements/variable/dstr/obj-ptrn-rest-skip-non-enumerable.js
 test/language/statements/variable/dstr/obj-ptrn-rest-val-obj.js
-test/language/statements/variable/static-init-await-binding-valid.js
 test/language/statements/while/S12.6.2_A8.js
 test/language/statements/while/tco-body.js
 test/language/statements/with/S12.10_A1.10_T1.js

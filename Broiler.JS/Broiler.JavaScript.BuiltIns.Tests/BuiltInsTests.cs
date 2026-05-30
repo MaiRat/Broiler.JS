@@ -4529,6 +4529,31 @@ public class BuiltInsTests
     }
 
     [Fact]
+    public void Date_Prototype_SetYear_TimeClip_Preserves_Valid_Extreme_Time_Value()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = new JSContext();
+        var result = ctx.Eval(@"(function () {
+            var valid = new Date(1970, 8, 10, 0, 0, 0, 0);
+            var validReturn = valid.setYear(275760);
+            var validValue = valid.valueOf();
+
+            var invalid = new Date(1970, 8, 14, 0, 0, 0, 0);
+            var invalidReturn = invalid.setYear(275760);
+            var invalidValue = invalid.valueOf();
+
+            return [
+                validReturn === validReturn,
+                validValue === validValue,
+                invalidReturn !== invalidReturn,
+                invalidValue !== invalidValue
+            ].join('|');
+        })();");
+
+        Assert.Equal("true|true|true|true", result.ToString());
+    }
+
+    [Fact]
     public void Date_Prototype_ToGMTString_Is_The_ToUTCString_Alias()
     {
         EnsureBuiltInsLoaded();

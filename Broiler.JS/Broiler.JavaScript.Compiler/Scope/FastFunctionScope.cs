@@ -282,15 +282,19 @@ public class FastFunctionScope : LinkedStackItem<FastFunctionScope>
 
     public IFastEnumerable<AstClassProperty> MemberInits { get; set; }
 
+    public IReadOnlyDictionary<AstClassProperty, YExpression> ComputedMemberNames { get; set; }
+
     public readonly FastFunctionScope RootScope;
 
     public FastFunctionScope(FastPool pool, AstFunctionExpression fx, YExpression previousThis = null, YExpression super = null, bool isAsync = false,
-        IFastEnumerable<AstClassProperty> memberInits = null, FastFunctionScope previous = null, string[] directEvalPrivateNames = null)
+        IFastEnumerable<AstClassProperty> memberInits = null, FastFunctionScope previous = null, string[] directEvalPrivateNames = null,
+        IReadOnlyDictionary<AstClassProperty, YExpression> computedMemberNames = null)
     {
         RootScope = previous ?? this;
         TopScope = this;
         var sID = Interlocked.Increment(ref scopeID);
         MemberInits = memberInits;
+        ComputedMemberNames = computedMemberNames;
         DirectEvalPrivateNames = directEvalPrivateNames;
         InParameterInitializer = previous?.InParameterInitializer ?? false;
         Function = fx;
@@ -336,6 +340,7 @@ public class FastFunctionScope : LinkedStackItem<FastFunctionScope>
         TopScope = p.TopScope;
         RootScope = p.RootScope;
         MemberInits = p.MemberInits;
+        ComputedMemberNames = p.ComputedMemberNames;
         DirectEvalPrivateNames = p.DirectEvalPrivateNames;
         InParameterInitializer = p.InParameterInitializer;
         ArgumentsExpression = p.ArgumentsExpression;

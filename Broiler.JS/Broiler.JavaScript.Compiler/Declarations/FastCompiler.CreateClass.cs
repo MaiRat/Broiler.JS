@@ -105,6 +105,15 @@ partial class FastCompiler
         }
     }
 
+
+    private YExpression GetClassElementName(AstClassProperty property)
+    {
+        var name = GetName(property);
+        return property.Computed && name.Type.IsJSValueType()
+            ? YExpression.Call(null, NormalizePropertyKeyMethod, name)
+            : name;
+    }
+
     private static YExpression ValidateStaticPropertyName(AstClassProperty property, YExpression name)
     {
         if (!property.IsStatic)
@@ -151,6 +160,8 @@ partial class FastCompiler
         YExpression retValue = tempVar.Variable;
 
         var memberInits = new Sequence<AstClassProperty>();
+        var computedMemberNames = new Dictionary<AstClassProperty, YExpression>();
+        var classScopeVariables = new Sequence<YParameterExpression> { superVar, superPrototypeVar };
         AstFunctionExpression constructor = null;
         var directEvalPrivateNames = CollectPrivateNames(body.Members);
 
@@ -169,7 +180,7 @@ partial class FastCompiler
                 case AstPropertyKind.Data:
                     if (property.IsStatic)
                     {
-                        name = ValidateStaticPropertyName(property, GetName(property));
+                        name = ValidateStaticPropertyName(property, GetClassElementName(property));
                         var value = property.Init == null ? JSUndefinedBuilder.Value : Visit(property.Init);
                         var attributes = isPrivateName
                             ? JSPropertyAttributes.ConfigurableValue
@@ -177,11 +188,19 @@ partial class FastCompiler
                         staticElements.Add(JSObjectBuilder.AddValue(name, value, attributes));
                         break;
                     }
+                    if (property.Computed)
+                    {
+                        var computedNameVar = YExpression.Parameter(typeof(JSValue), $"#classFieldName{computedMemberNames.Count}");
+                        classScopeVariables.Add(computedNameVar);
+                        stmts.Add(YExpression.Assign(computedNameVar, GetClassElementName(property)));
+                        computedMemberNames[property] = computedNameVar;
+                    }
+
                     memberInits.Add(property);
                     break;
 
                 case AstPropertyKind.Get:
-                    name = ValidateStaticPropertyName(property, GetName(property));
+                    name = ValidateStaticPropertyName(property, GetClassElementName(property));
                     if (property.IsStatic)
                     {
                         var fx = CreateFunction(property.Init as AstFunctionExpression, superVar, forceStrictMode: true,
@@ -198,7 +217,7 @@ partial class FastCompiler
                     break;
 
                 case AstPropertyKind.Set:
-                    name = ValidateStaticPropertyName(property, GetName(property));
+                    name = ValidateStaticPropertyName(property, GetClassElementName(property));
                     if (property.IsStatic)
                     {
                         var fx = CreateFunction(property.Init as AstFunctionExpression, superVar, forceStrictMode: true,
@@ -218,7 +237,7 @@ partial class FastCompiler
                     break;
 
                 case AstPropertyKind.Method:
-                    name = ValidateStaticPropertyName(property, GetName(property));
+                    name = ValidateStaticPropertyName(property, GetClassElementName(property));
                     if (property.IsStatic)
                     {
                         var fx = CreateFunction(property.Init as AstFunctionExpression, superVar, forceStrictMode: true,
@@ -242,14 +261,14 @@ partial class FastCompiler
 
         if (constructor != null)
         {
-            var fx = CreateFunction(constructor, superVar, true, className, memberInits, true, directEvalPrivateNames: directEvalPrivateNames);
+            var fx = CreateFunction(constructor, superVar, true, className, memberInits, true, directEvalPrivateNames: directEvalPrivateNames, computedMemberNames: computedMemberNames);
             staticElements.Add(JSClassBuilder.AddConstructor(fx));
         }
         else
         {
             if (memberInits.Any())
             {
-                using var s = this.scope.Push(new FastFunctionScope(null, null, memberInits: memberInits));
+                using var s = this.scope.Push(new FastFunctionScope(null, null, memberInits: memberInits, computedMemberNames: computedMemberNames));
                 var args = s.Arguments;
                 var @this = s.ThisExpression;
                 var inits = new Sequence<YExpression>() { };
@@ -295,7 +314,7 @@ partial class FastCompiler
 
         stmts.Add(retValue);
 
-        var result = YExpression.Block(new Sequence<YParameterExpression> { superVar, superPrototypeVar }, stmts);
+        var result = YExpression.Block(classScopeVariables, stmts);
         scope.Dispose();
         return result;
     }

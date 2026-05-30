@@ -370,7 +370,7 @@ public partial class JSFunction : JSObject, IPropertyAccessor, IJSFunction
     public static JSValue Bind(in Arguments a)
     {
         if (!a.This.IsFunction)
-            throw JSEngine.NewTypeError($"{a.This} is not a function");
+            throw JSEngine.NewTypeError("Bind target is not a function");
 
         var target = a.This;
         var originalFunction = target as JSFunction;

@@ -36,6 +36,7 @@ DEFAULT_BROILER_DLL = str(
 ALL_SHARDS = -1
 TEMP_DIRECTORY = Path(tempfile.gettempdir()) / "broiler-test262"
 UNSUPPORTED_FLAGS = {"module", "raw"}
+TEST_FIXTURE_SUFFIX = "_FIXTURE.js"
 UNSUPPORTED_FEATURES = {
     "Atomics",
     "SharedArrayBuffer",
@@ -180,7 +181,12 @@ class Test262Repository:
         with urllib.request.urlopen(request) as response:
             return json.load(response)
 
-    def list_paths(self, prefix: str = "", suffix: str = "") -> list[str]:
+    def list_paths(
+        self,
+        prefix: str = "",
+        suffix: str = "",
+        include_fixtures: bool = True,
+    ) -> list[str]:
         if self.suite_root is not None:
             root = self._resolve_local_path(prefix or ".")
             if root.is_file():
@@ -232,7 +238,11 @@ class Test262Repository:
                 candidates = self.tree_cache
 
         return sorted(
-            path for path in candidates if path.startswith(prefix) and path.endswith(suffix)
+            path
+            for path in candidates
+            if path.startswith(prefix)
+            and path.endswith(suffix)
+            and (include_fixtures or not path.endswith(TEST_FIXTURE_SUFFIX))
         )
 
     def read_text(self, path: str) -> str:
@@ -610,7 +620,9 @@ def select_paths(
     """Select test paths plus metadata for requested or full script-host runs."""
     selection_mode = "requested"
     if all_script_host_verifiable:
-        candidate_paths = repo.list_paths(prefix="test/", suffix=".js")
+        candidate_paths = repo.list_paths(
+            prefix="test/", suffix=".js", include_fixtures=False
+        )
         harness_dependency_cache: dict[str, bool] = {}
         expanded_paths = [
             path

@@ -522,6 +522,11 @@ public class JSContext : JSObject, IJSExecutionContext, IDisposable
                 continue;
             }
 
+            // @@unscopables lookup can run user code that deletes the binding.
+            // Re-check before resolving the object environment record.
+            if (!current.Object.HasProperty(propertyKey).BooleanValue)
+                continue;
+
             @object = current.Object;
             return true;
         }

@@ -178,6 +178,59 @@ public class CompilerTests
         Assert.Equal("RangeError|TypeError|TypeError", result.ToString());
     }
 
+    [Fact]
+    public void Compile_LogicalAssignment_ComputedPropertyNames_Parse_And_ShortCircuit()
+    {
+        using var ctx = new JSContext();
+        var result = ctx.Eval("""
+            (function () {
+                var x = 0;
+                var o = { [x &&= 1]: 2 };
+
+                var y = 0;
+                class C {
+                    [y ||= 3]() { return y; }
+                }
+
+                var z = null;
+                class D {
+                    [z ??= 'fallback'] = 4;
+                }
+
+                return [o[0], x, new C()[3](), y, new D().fallback, z].join('|');
+            })()
+            """);
+
+        Assert.Equal("2|0|3|3|4|fallback", result.ToString());
+    }
+
+    [Fact]
+    public void Compile_LogicalAssignment_ShortCircuits_RightHandSide()
+    {
+        using var ctx = new JSContext();
+        var result = ctx.Eval("""
+            (function () {
+                var calls = 0;
+                function rhs() {
+                    calls++;
+                    return 'rhs';
+                }
+
+                var falsy = 0;
+                var truthy = 'left';
+                var empty = null;
+
+                var andResult = (falsy &&= rhs());
+                var orResult = (truthy ||= rhs());
+                var coalesceResult = (empty ??= rhs());
+
+                return [andResult, falsy, orResult, truthy, coalesceResult, empty, calls].join('|');
+            })()
+            """);
+
+        Assert.Equal("0|0|left|left|rhs|rhs|1", result.ToString());
+    }
+
 
     [Fact]
     public void Compile_ClassStaticBlock_RunsWithClassThis()

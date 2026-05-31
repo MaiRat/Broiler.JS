@@ -50,6 +50,8 @@ public enum TokenTypes
     AssignRightShift,
     AssignLeftShift,
     AssignCoalesce,
+    AssignBooleanAnd,
+    AssignBooleanOr,
     AssignPower,
 
     // not used...

@@ -363,7 +363,9 @@ public class FastScanner
                 switch (Consume())
                 {
                     case '&':
-                        Consume();
+                        if (ConsumeAndNext('='))
+                            return state.Commit(TokenTypes.AssignBooleanAnd);
+
                         return state.Commit(TokenTypes.BooleanAnd);
 
                     case '=':
@@ -376,7 +378,9 @@ public class FastScanner
                 switch (Consume())
                 {
                     case '|':
-                        Consume();
+                        if (ConsumeAndNext('='))
+                            return state.Commit(TokenTypes.AssignBooleanOr);
+
                         return state.Commit(TokenTypes.BooleanOr);
 
                     case '=':

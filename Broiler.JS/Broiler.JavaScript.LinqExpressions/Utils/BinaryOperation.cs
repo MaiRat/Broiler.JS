@@ -104,12 +104,41 @@ public class BinaryOperation : SwitchExpression
             TokenTypes.AssignRightShift => Assign(left, JSNumberBuilder.New(Expression.RightShift(leftInt, Expression.And(rightInt, oneF)))),
             TokenTypes.AssignUnsignedRightShift => Assign(left, JSNumberBuilder.New(Expression.RightShift(leftInt, rightInt))),
             TokenTypes.AssignPower => Assign(left, JSNumberBuilder.New(Expression.Power(leftDouble, rightDouble))),
-            TokenTypes.AssignCoalesce => Assign(left, JSValueBuilder.Coalesce(left, right)),
+            TokenTypes.AssignCoalesce => AssignCoalesce(left, right),
+            TokenTypes.AssignBooleanAnd => AssignBooleanAnd(left, right),
+            TokenTypes.AssignBooleanOr => AssignBooleanOr(left, right),
             _ => throw new NotSupportedException(),
         };
     }
 
     private static Expression Assign(Expression left, Expression right) => JSValueExtensionsBuilder.Assign(left, right);
+
+    private static Expression AssignCoalesce(Expression left, Expression right)
+    {
+        var current = Expression.Parameter(typeof(JSValue));
+        return Expression.Block(
+            current.AsSequence(),
+            Expression.Assign(current, left),
+            Expression.Condition(JSValueBuilder.IsNullOrUndefined(current), Assign(left, right), current, typeof(JSValue)));
+    }
+
+    private static Expression AssignBooleanAnd(Expression left, Expression right)
+    {
+        var current = Expression.Parameter(typeof(JSValue));
+        return Expression.Block(
+            current.AsSequence(),
+            Expression.Assign(current, left),
+            Expression.Condition(JSValueBuilder.BooleanValue(current), Assign(left, right), current, typeof(JSValue)));
+    }
+
+    private static Expression AssignBooleanOr(Expression left, Expression right)
+    {
+        var current = Expression.Parameter(typeof(JSValue));
+        return Expression.Block(
+            current.AsSequence(),
+            Expression.Assign(current, left),
+            Expression.Condition(JSValueBuilder.BooleanValue(current), current, Assign(left, right), typeof(JSValue)));
+    }
 
     public static Expression Operation(Expression left, Expression right, TokenTypes op)
     {

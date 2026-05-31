@@ -11,16 +11,17 @@ public static class JSObjectStatic
             return @object;
 
         if (value == null || value.IsNullOrUndefined)
-            throw JSObject.NewTypeError(JSObject.Cannot_convert_undefined_or_null_to_object);
+            return JSException.ThrowTypeError<JSObject>(JSObject.Cannot_convert_undefined_or_null_to_object);
 
-        throw JSObject.NewTypeError(JSObject.Parameter_is_not_an_object);
+        return JSException.ThrowTypeError<JSObject>(JSObject.Parameter_is_not_an_object);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static bool TryAsObjectThrowIfNullOrUndefined(this JSValue value, out JSObject @object)
     {
+        @object = null;
         if (value == null || value.IsNullOrUndefined)
-            throw JSObject.NewTypeError(JSObject.Cannot_convert_undefined_or_null_to_object);
+            return JSException.ThrowTypeError<bool>(JSObject.Cannot_convert_undefined_or_null_to_object);
 
         @object = value as JSObject;
         return @object != null;
@@ -30,7 +31,7 @@ public static class JSObjectStatic
     internal static JSValue RequireObjectCoercible(this JSValue value)
     {
         if (value == null || value.IsNullOrUndefined)
-            throw JSObject.NewTypeError(JSObject.Cannot_convert_undefined_or_null_to_object);
+            return JSException.ThrowTypeError<JSValue>(JSObject.Cannot_convert_undefined_or_null_to_object);
 
         return value;
     }

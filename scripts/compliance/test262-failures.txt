@@ -609,8 +609,6 @@ test/built-ins/Array/prototype/toLocaleString/primitive_this_value.js
 test/built-ins/Array/prototype/toLocaleString/primitive_this_value_getter.js
 test/built-ins/Array/prototype/toReversed/length-exceeding-array-length-limit.js
 test/built-ins/Array/prototype/toSorted/comparefn-not-a-function.js
-test/built-ins/Array/prototype/toSorted/holes-not-preserved.js
-test/built-ins/Array/prototype/toSorted/ignores-species.js
 test/built-ins/Array/prototype/toSpliced/length-clamped-to-2pow53minus1.js
 test/built-ins/Array/prototype/toSpliced/length-exceeding-array-length-limit.js
 test/built-ins/Array/prototype/toString/call-with-boolean.js
@@ -1655,7 +1653,6 @@ test/built-ins/Promise/prototype/finally/this-value-proxy.js
 test/built-ins/Promise/prototype/finally/this-value-thenable.js
 test/built-ins/Promise/prototype/then/S25.4.4_A1.1_T1.js
 test/built-ins/Promise/prototype/then/S25.4.4_A2.1_T2.js
-test/built-ins/Promise/prototype/then/S25.4.4_A2.1_T3.js
 test/built-ins/Promise/prototype/then/S25.4.5.3_A4.2_T1.js
 test/built-ins/Promise/prototype/then/S25.4.5.3_A4.2_T2.js
 test/built-ins/Promise/prototype/then/capability-executor-called-twice.js
@@ -1667,7 +1664,6 @@ test/built-ins/Promise/prototype/then/rxn-handler-fulfilled-invoke-nonstrict.js
 test/built-ins/Promise/prototype/then/rxn-handler-fulfilled-next-abrupt.js
 test/built-ins/Promise/prototype/then/rxn-handler-fulfilled-next.js
 test/built-ins/Promise/prototype/then/rxn-handler-rejected-invoke-nonstrict.js
-test/built-ins/Promise/prototype/then/rxn-handler-rejected-next.js
 test/built-ins/Promise/race/S25.4.4.3_A2.1_T1.js
 test/built-ins/Promise/race/S25.4.4.3_A2.2_T1.js
 test/built-ins/Promise/race/S25.4.4.3_A2.2_T2.js
@@ -3582,7 +3578,6 @@ test/language/expressions/arrow-function/lexical-supercall-from-immediately-invo
 test/language/expressions/assignment/S11.13.1_A6_T1.js
 test/language/expressions/assignment/S11.13.1_A6_T2.js
 test/language/expressions/assignment/S11.13.1_A6_T3.js
-test/language/expressions/assignment/assignment-operator-calls-putvalue-lref--rval-.js
 test/language/expressions/assignment/destructuring/default-expr-throws-iterator-return-is-not-callable.js
 test/language/expressions/assignment/destructuring/iterator-destructuring-property-reference-target-evaluation-order.js
 test/language/expressions/assignment/destructuring/keyed-destructuring-property-reference-target-evaluation-order-with-bindings.js
@@ -4654,17 +4649,6 @@ test/language/expressions/compound-assignment/S11.13.2_A6.8_T1.js
 test/language/expressions/compound-assignment/S11.13.2_A6.9_T1.js
 test/language/expressions/compound-assignment/add-whitespace.js
 test/language/expressions/compound-assignment/and-whitespace.js
-test/language/expressions/compound-assignment/compound-assignment-operator-calls-putvalue-lref--v--10.js
-test/language/expressions/compound-assignment/compound-assignment-operator-calls-putvalue-lref--v--12.js
-test/language/expressions/compound-assignment/compound-assignment-operator-calls-putvalue-lref--v--14.js
-test/language/expressions/compound-assignment/compound-assignment-operator-calls-putvalue-lref--v--16.js
-test/language/expressions/compound-assignment/compound-assignment-operator-calls-putvalue-lref--v--18.js
-test/language/expressions/compound-assignment/compound-assignment-operator-calls-putvalue-lref--v--2.js
-test/language/expressions/compound-assignment/compound-assignment-operator-calls-putvalue-lref--v--20.js
-test/language/expressions/compound-assignment/compound-assignment-operator-calls-putvalue-lref--v--4.js
-test/language/expressions/compound-assignment/compound-assignment-operator-calls-putvalue-lref--v--6.js
-test/language/expressions/compound-assignment/compound-assignment-operator-calls-putvalue-lref--v--8.js
-test/language/expressions/compound-assignment/compound-assignment-operator-calls-putvalue-lref--v-.js
 test/language/expressions/compound-assignment/div-whitespace.js
 test/language/expressions/compound-assignment/lshift-whitespace.js
 test/language/expressions/compound-assignment/mod-whitespace.js
@@ -4871,7 +4855,6 @@ test/language/expressions/postfix-decrement/S11.3.2_A4_T2.js
 test/language/expressions/postfix-decrement/S11.3.2_A4_T3.js
 test/language/expressions/postfix-decrement/S11.3.2_A4_T4.js
 test/language/expressions/postfix-decrement/bigint.js
-test/language/expressions/postfix-decrement/operator-x-postfix-decrement-calls-putvalue-lhs-newvalue-.js
 test/language/expressions/postfix-increment/S11.3.1_A2.2_T1.js
 test/language/expressions/postfix-increment/S11.3.1_A3_T3.js
 test/language/expressions/postfix-increment/S11.3.1_A4_T1.js
@@ -4879,17 +4862,14 @@ test/language/expressions/postfix-increment/S11.3.1_A4_T2.js
 test/language/expressions/postfix-increment/S11.3.1_A4_T3.js
 test/language/expressions/postfix-increment/S11.3.1_A4_T4.js
 test/language/expressions/postfix-increment/bigint.js
-test/language/expressions/postfix-increment/operator-x-postfix-increment-calls-putvalue-lhs-newvalue-.js
 test/language/expressions/prefix-decrement/S11.4.5_A2.2_T1.js
 test/language/expressions/prefix-decrement/S11.4.5_A3_T3.js
 test/language/expressions/prefix-decrement/S11.4.5_A4_T3.js
 test/language/expressions/prefix-decrement/bigint.js
-test/language/expressions/prefix-decrement/operator-prefix-decrement-x-calls-putvalue-lhs-newvalue-.js
 test/language/expressions/prefix-increment/S11.4.4_A2.2_T1.js
 test/language/expressions/prefix-increment/S11.4.4_A3_T3.js
 test/language/expressions/prefix-increment/S11.4.4_A4_T3.js
 test/language/expressions/prefix-increment/bigint.js
-test/language/expressions/prefix-increment/operator-prefix-increment-x-calls-putvalue-lhs-newvalue-.js
 test/language/expressions/property-accessors/S11.2.1_A4_T3.js
 test/language/expressions/property-accessors/S11.2.1_A4_T5.js
 test/language/expressions/right-shift/bigint-non-primitive.js
@@ -5130,7 +5110,6 @@ test/language/statements/async-generator/dstr/obj-ptrn-prop-eval-err.js
 test/language/statements/async-generator/dstr/obj-ptrn-rest-getter.js
 test/language/statements/async-generator/dstr/obj-ptrn-rest-skip-non-enumerable.js
 test/language/statements/async-generator/dstr/obj-ptrn-rest-val-obj.js
-test/language/statements/async-generator/return-undefined-implicit-and-explicit.js
 test/language/statements/async-generator/yield-promise-reject-next-catch.js
 test/language/statements/async-generator/yield-promise-reject-next-for-await-of-async-iterator.js
 test/language/statements/async-generator/yield-promise-reject-next-for-await-of-sync-iterator.js

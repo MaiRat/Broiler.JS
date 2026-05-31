@@ -6,6 +6,7 @@ using Broiler.JavaScript.ExpressionCompiler.Core;
 using System.Runtime.CompilerServices;
 using Broiler.JavaScript.ExpressionCompiler.Expressions;
 using Broiler.JavaScript.LinqExpressions.LinqExpressions;
+using Broiler.JavaScript.Runtime;
 
 namespace Broiler.JavaScript.Compiler;
 
@@ -95,7 +96,22 @@ partial class FastCompiler
 
                 case FastNodeType.Identifier:
                     var id = exportStatement.Declaration as AstIdentifier;
-                    return JSValueBuilder.Index(exports.Expression, KeyOfName(id.Name));
+                    left = JSValueBuilder.Index(exports.Expression, KeyOfName(id.Name));
+
+                    if (exportStatement.Source != null)
+                    {
+                        var tempRequire = YExpression.Parameter(typeof(JSValue));
+                        var import = scope.Top.GetVariable("import");
+                        var source = VisitExpression((AstExpression)exportStatement.Source);
+                        var args = ArgumentsBuilder.New(JSUndefinedBuilder.Value, source);
+
+                        return YExpression.Block(
+                            tempRequire.AsSequence(),
+                            YExpression.Assign(tempRequire, YExpression.Yield(JSFunctionBuilder.InvokeFunction(import.Expression, args))),
+                            YExpression.Assign(left, tempRequire));
+                    }
+
+                    return left;
 
                 case FastNodeType.FunctionExpression:
                     var fe = Visit(declaration);

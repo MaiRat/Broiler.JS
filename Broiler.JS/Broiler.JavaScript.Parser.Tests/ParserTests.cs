@@ -108,6 +108,23 @@ public class ParserTests
         Assert.False(program.IsAsync);
     }
 
+
+    [Fact]
+    public void ParseProgram_ExportNamespaceFrom_Succeeds()
+    {
+        var stream = new FastTokenStream(new StringSpan("export * as ns from 'module';"));
+        var parser = new FastParser(stream);
+        var program = parser.ParseProgram();
+
+        var statement = Assert.IsType<AstExportStatement>(Assert.Single(program.Statements.ToArray()));
+        var identifier = Assert.IsType<AstIdentifier>(statement.Declaration);
+        var source = Assert.IsType<AstLiteral>(statement.Source);
+        Assert.Equal("ns", identifier.Name.Value);
+        Assert.Equal("module", source.StringValue);
+        Assert.False(statement.ExportAll);
+        Assert.True(program.IsAsync);
+    }
+
     [Fact]
     public void ParseProgram_InvalidSyntax_ThrowsFastParseException()
     {

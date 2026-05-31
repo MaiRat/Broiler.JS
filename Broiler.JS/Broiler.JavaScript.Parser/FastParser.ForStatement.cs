@@ -320,6 +320,16 @@ partial class FastParser
 
                     return temp;
 
+                case FastNodeType.EmptyExpression:
+                    return e;
+
+                case FastNodeType.BinaryExpression:
+                    var binary = e as AstBinaryExpression;
+                    if (binary!.Operator != TokenTypes.Assign)
+                        throw new FastParseException(e.Start, $"Unknown token");
+
+                    return new AstBinaryExpression(AssignTempNames(list, hoisted, binary.Left), binary.Operator, binary.Right);
+
                 case FastNodeType.SpreadElement:
                     var spreadElement = e as AstSpreadElement;
                     return new AstSpreadElement(spreadElement!.Start, spreadElement.End, AssignTempNames(list, hoisted, spreadElement.Argument));

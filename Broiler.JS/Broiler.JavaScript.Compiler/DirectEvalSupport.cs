@@ -269,6 +269,8 @@ public static class DirectEvalSupport
                     or TokenTypes.AssignBitwideAnd
                     or TokenTypes.AssignBitwideOr
                     or TokenTypes.AssignCoalesce
+                    or TokenTypes.AssignBooleanAnd
+                    or TokenTypes.AssignBooleanOr
                     or TokenTypes.AssignLeftShift
                     or TokenTypes.AssignPower
                     or TokenTypes.AssignRightShift

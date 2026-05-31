@@ -23,6 +23,9 @@ public class AstBinaryExpression(AstExpression node, TokenTypes type, AstExpress
         TokenTypes.StrictlyNotEqual => "!==",
         TokenTypes.StrictlyEqual => "===",
         TokenTypes.Assign => "=",
+        TokenTypes.AssignBooleanAnd => "&&=",
+        TokenTypes.AssignBooleanOr => "||=",
+        TokenTypes.AssignCoalesce => "??=",
         _ => type.ToString(),
     };
 

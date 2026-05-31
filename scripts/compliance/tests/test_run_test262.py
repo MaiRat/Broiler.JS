@@ -134,6 +134,16 @@ class RunTest262Tests(unittest.TestCase):
 
         self.assertEqual([file_path], repo.list_paths(prefix="test/", suffix=".js"))
 
+    def test_list_paths_can_exclude_test262_fixtures(self) -> None:
+        file_path = self.write_test("test/language/example.js", "1 + 1;\n")
+        self.write_test("test/language/example_FIXTURE.js", "0++;\n")
+        repo = run_test262.Test262Repository(TEST_SUITE_REF, str(self.suite_root))
+
+        self.assertEqual(
+            [file_path],
+            repo.list_paths(prefix="test/", suffix=".js", include_fixtures=False),
+        )
+
     def test_select_paths_all_script_host_verifiable_filters_blocked_tests_and_shards(self) -> None:
         first_path = self.write_test("test/language/a.js", "1 + 1;\n")
         self.write_test(
@@ -156,6 +166,10 @@ class RunTest262Tests(unittest.TestCase):
         second_path = self.write_test(
             "test/language/d-async.js",
             "/*---\nflags: [async]\n---*/\n$DONE();\n",
+        )
+        self.write_test(
+            "test/language/instn-resolve-empty-export_FIXTURE.js",
+            "0++;\n",
         )
         repo = run_test262.Test262Repository(TEST_SUITE_REF, str(self.suite_root))
 

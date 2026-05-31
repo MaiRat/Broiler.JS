@@ -35,7 +35,7 @@ def collect_suite_test_paths(repo: Test262Repository, suite_root: Path | None) -
         if not test_root.is_dir():
             raise FileNotFoundError(f"Missing test262 test directory: {test_root}")
 
-    return repo.list_paths(prefix="test/", suffix=".js")
+    return repo.list_paths(prefix="test/", suffix=".js", include_fixtures=False)
 
 
 def directory_bucket(path: str, depth: int) -> str:

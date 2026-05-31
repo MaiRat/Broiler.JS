@@ -59,6 +59,10 @@ class AuditTest262Tests(unittest.TestCase):
             "test/language/host-harness.js",
             "$262.createRealm();\n",
         )
+        self.write_test(
+            "test/language/instn-resolve-empty-export_FIXTURE.js",
+            "0++;\n",
+        )
 
         repo = Test262Repository("suite-ref", str(self.suite_root))
         summary = audit_test262.build_audit_summary(

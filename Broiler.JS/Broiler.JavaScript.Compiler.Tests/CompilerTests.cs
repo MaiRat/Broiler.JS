@@ -1724,6 +1724,26 @@ public class CompilerTests
     }
 
     [Fact]
+    public void Compile_Const_ForStatement_ArrayDestructuring_Defaults_And_Elisions()
+    {
+        using var ctx = new JSContext();
+        var result = ctx.Eval("""
+            (function () {
+                var iterCount = 0;
+                for (const [[x, y, z] = [4, 5, 6], , { p } = { p: 7 }] = [, , undefined]; iterCount < 1; ) {
+                    if (x !== 4 || y !== 5 || z !== 6 || p !== 7) {
+                        return 'bad-bindings';
+                    }
+                    iterCount += 1;
+                }
+                return String(iterCount);
+            })()
+            """);
+
+        Assert.Equal("1", result.ToString());
+    }
+
+    [Fact]
     public void Compile_Delete_String_Wrapper_Length_Throws_In_Strict_Mode()
     {
         using var ctx = new JSContext();

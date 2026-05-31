@@ -114,13 +114,10 @@ public class BuiltInsTests
         var result = ctx.Eval("""
             (function () {
                 var getProtoCalled = false;
-                var newTarget = new Proxy(function () {}, {
-                    get: function (target, property, receiver) {
-                        if (property === 'prototype') {
-                            getProtoCalled = true;
-                            return null;
-                        }
-                        return Reflect.get(target, property, receiver);
+                var newTarget = Object.defineProperty(function () {}.bind(null), 'prototype', {
+                    get: function () {
+                        getProtoCalled = true;
+                        return null;
                     }
                 });
 
@@ -145,13 +142,10 @@ public class BuiltInsTests
         var result = ctx.Eval("""
             (function () {
                 var getProtoCalled = false;
-                var newTarget = new Proxy(function () {}, {
-                    get: function (target, property, receiver) {
-                        if (property === 'prototype') {
-                            getProtoCalled = true;
-                            return null;
-                        }
-                        return Reflect.get(target, property, receiver);
+                var newTarget = Object.defineProperty(function () {}.bind(null), 'prototype', {
+                    get: function () {
+                        getProtoCalled = true;
+                        return null;
                     }
                 });
                 var Generator = (function* () {}).constructor;
@@ -177,13 +171,10 @@ public class BuiltInsTests
         var result = ctx.Eval("""
             (function () {
                 var getProtoCalled = false;
-                var newTarget = new Proxy(function () {}, {
-                    get: function (target, property, receiver) {
-                        if (property === 'prototype') {
-                            getProtoCalled = true;
-                            return null;
-                        }
-                        return Reflect.get(target, property, receiver);
+                var newTarget = Object.defineProperty(function () {}.bind(null), 'prototype', {
+                    get: function () {
+                        getProtoCalled = true;
+                        return null;
                     }
                 });
                 var AsyncGenerator = (async function* () {}).constructor;

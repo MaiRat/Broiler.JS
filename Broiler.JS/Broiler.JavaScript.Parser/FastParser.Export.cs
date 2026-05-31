@@ -76,6 +76,19 @@ partial class FastParser
 
         if (stream.CheckAndConsume(TokenTypes.Multiply))
         {
+            if (stream.CheckAndConsumeContextualKeyword(FastKeywords.@as))
+            {
+                if (!Identitifer(out var namespaceIdentifier))
+                    throw stream.Unexpected();
+
+                stream.ExpectContextualKeyword(FastKeywords.from);
+
+                var namespaceSource = ExpectStringLiteral();
+                isAsync = true;
+                statement = new AstExportStatement(start, namespaceIdentifier, namespaceSource);
+                return true;
+            }
+
             stream.ExpectContextualKeyword(FastKeywords.from);
 
             var literal = ExpectStringLiteral();

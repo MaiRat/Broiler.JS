@@ -1,4 +1,5 @@
-﻿using Broiler.JavaScript.Ast.Misc;
+using Broiler.JavaScript.Ast.Expressions;
+using Broiler.JavaScript.Ast.Misc;
 using Broiler.JavaScript.Ast.Statements;
 using Broiler.JavaScript.ExpressionCompiler.Core;
 using Broiler.JavaScript.ExpressionCompiler.Expressions;
@@ -86,6 +87,12 @@ partial class FastCompiler
                 out iterationValueVariable)
                 => iterationValueVariable,
             FastNodeType.VariableDeclaration => Visit(forOfStatement.Init),
+            _ when forOfStatement.Init is AstExpression expression =>
+                CreateForOfDestructuringAssignment(
+                    expression,
+                    perIterationInits,
+                    out iterationValueVariable,
+                    forOfStatement.IsAwait),
             _ => throw new FastParseException(forOfStatement.Start, $"Unexpcted"),
         };
 
@@ -164,6 +171,24 @@ partial class FastCompiler
         var scoped = Scoped(tdzScope, new Sequence<YExpression> { r });
         tdzScope.Dispose();
         return scoped;
+    }
+
+    private YExpression CreateForOfDestructuringAssignment(
+        AstExpression expression,
+        Sequence<YExpression> perIterationInits,
+        out YParameterExpression? iterationValueVariable,
+        bool forceDynamicAssignment)
+    {
+        iterationValueVariable = YExpression.Variable(typeof(JSValue), "#forOfValue");
+        CreateAssignment(
+            perIterationInits,
+            expression.ToPattern(),
+            iterationValueVariable,
+            createVariable: false,
+            newScope: false,
+            suppressAnonymousFunctionNameInference: true,
+            forceDynamicAssignment: forceDynamicAssignment);
+        return iterationValueVariable;
     }
 
     private bool TryCreateForOfDestructuringAssignment(

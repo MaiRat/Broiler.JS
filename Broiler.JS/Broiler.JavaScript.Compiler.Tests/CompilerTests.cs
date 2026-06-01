@@ -1335,6 +1335,32 @@ public class CompilerTests
     }
 
     [Fact]
+    public async Task Compile_ForOf_AssignmentPattern_Heads_Work()
+    {
+        using var ctx = new JSContext();
+
+        var syncResult = ctx.Eval("""
+            (function () {
+                var x = 0;
+                for ([x] of [[1]]) {
+                }
+                return x;
+            })()
+            """);
+
+        var asyncResult = await ctx.ExecuteAsync("""
+            (async function () {
+                var x = 0;
+                for await ([x] of [[1]]) {
+                }
+                return x;
+            })()
+            """);
+
+        Assert.Equal("1|1", syncResult.ToString() + "|" + asyncResult.ToString());
+    }
+
+    [Fact]
     public void Compile_Syntax_Errors_Are_Reported_For_Strict_And_Direct_Eval_Cases()
     {
         using var ctx = new JSContext();

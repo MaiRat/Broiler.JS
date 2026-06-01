@@ -53,13 +53,9 @@ public static class ExpressionCompiler
         TypeBuilder type, bool rewriteNestedLambda = true
         )
     {
+        LambdaRewriter.Rewrite(lambdaExpression);
         if (!lambdaExpression.This.Type.IsAssignableFrom(type))
             throw new NotSupportedException($"First parameter of an instance method must be same as the owner type");
-
-        if (rewriteNestedLambda)
-        {
-            LambdaRewriter.Rewrite(lambdaExpression);
-        }
 
         var method = type.CreateMethod(lambdaExpression, GetUniqueName(lambdaExpression.Name), true);
 
@@ -92,6 +88,7 @@ public static class ExpressionCompiler
         this YLambdaExpression lambdaExpression,
         TypeBuilder type, bool debug = false)
     {
+        LambdaRewriter.Rewrite(lambdaExpression);
         if(debug)
         {
             var m = type.DefineMethod(lambdaExpression.Name + "_Inner_Factory",

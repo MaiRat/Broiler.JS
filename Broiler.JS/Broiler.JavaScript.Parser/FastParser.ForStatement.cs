@@ -109,8 +109,10 @@ partial class FastParser
 
                 stream.Expect(TokenTypes.BracketEnd);
             }
-            else if (stream.CheckAndConsumeContextualKeyword(FastKeywords.of))
+            else if (IsOfKeyword(stream.Current))
             {
+                stream.Consume();
+
                 // Validate for-of binding restrictions
                 if (declaration != null)
                 {
@@ -225,6 +227,10 @@ partial class FastParser
                 throw new FastParseException(declaration.Start, "for-in loop variable declaration may not have an initializer");
         }
 
+        static bool IsOfKeyword(FastToken token)
+            => token.ContextualKeyword == FastKeywords.of
+                || token.CookedText == "of";
+
         static IFastEnumerable<StringSpan> GetBindingNames(AstVariableDeclaration declaration)
         {
             var names = new Sequence<StringSpan>();
@@ -285,7 +291,7 @@ partial class FastParser
 
                 var c = stream.Current;
 
-                if (c.Type == TokenTypes.In || c.ContextualKeyword == FastKeywords.of)
+                if (c.Type == TokenTypes.In || IsOfKeyword(c))
                     break;
 
                 if (stream.CheckAndConsume(TokenTypes.SemiColon))

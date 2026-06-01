@@ -15,7 +15,7 @@ public class LambdaMethodBuilder(MethodBuilder builder) : IMethodBuilder
 
     public YExpression Relay(YExpression @this, IFastEnumerable<YExpression> closures, YLambdaExpression innerLambda)
     {
-
+        LambdaRewriter.Rewrite(innerLambda);
         var derived = (typeBuilder.Module as ModuleBuilder).DefineType(
             ExpressionCompiler.GetUniqueName(innerLambda.Name + ":" + innerLambda.Name.Line),
             TypeAttributes.Public,

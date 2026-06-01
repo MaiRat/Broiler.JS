@@ -1120,6 +1120,24 @@ public class BuiltInsTests
         Assert.Equal(-1.0, result.DoubleValue);
     }
 
+    [Fact]
+    public void Object_Prototype_ToString_UsesBuiltinBrands()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = new JSContext();
+        var result = ctx.Eval("""
+            (function () {
+              var args = (function () { return arguments; }());
+              return [
+                Object.prototype.toString.call(Math),
+                Object.prototype.toString.call(JSON),
+                Object.prototype.toString.call(args)
+              ].join('|');
+            })()
+            """);
+        Assert.Equal("[object Math]|[object JSON]|[object Arguments]", result.ToString());
+    }
+
     // ── M2: JSReflect tests ──────────────────────────────────────────
 
     [Fact]

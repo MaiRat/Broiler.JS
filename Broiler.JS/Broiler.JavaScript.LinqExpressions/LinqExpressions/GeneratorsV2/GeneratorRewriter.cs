@@ -18,13 +18,15 @@ namespace Broiler.JavaScript.LinqExpressions.LinqExpressions.GeneratorsV2;
 
 
 
-public class GeneratorRewriter(ParameterExpression pe, LabelTarget @return, ParameterExpression replaceArguments, ParameterExpression replaceContext) : YExpressionMapVisitor
+public class GeneratorRewriter(ParameterExpression pe, LabelTarget @return, ParameterExpression replaceArguments, ParameterExpression replaceContext, ParameterExpression replaceScriptInfo) : YExpressionMapVisitor
 {
     private readonly ParameterExpression args = Expression.Parameter(typeof(Arguments).MakeByRefType(), "args");
     private readonly ParameterExpression nextJump = Expression.Parameter(typeof(int), "nextJump");
     private readonly ParameterExpression nextValue = Expression.Parameter(typeof(JSValue), "nextValue");
     private readonly ParameterExpression exception = Expression.Parameter(typeof(Exception), "ex");
     private readonly YFieldExpression Context = Expression.Field(pe, "Context");
+    private readonly ParameterExpression _replaceScriptInfo = replaceScriptInfo;
+    private readonly ParameterExpression _scriptInfoBox = Expression.Parameter(typeof(Box<ScriptInfo>), "scriptInfo");
     private readonly LabelTarget generatorReturn = Expression.Label(typeof(GeneratorState), "RETURN");
     private readonly Sequence<(ParameterExpression original, ParameterExpression box, int index, Expression boxField)> lifted = [];
 
@@ -34,9 +36,10 @@ public class GeneratorRewriter(ParameterExpression pe, LabelTarget @return, Para
     public static LambdaExpression Rewrite(in FunctionName name, Expression body, LabelTarget r, ParameterExpression generator, ParameterExpression replaceArgs,
        ParameterExpression replaceStackItem, ParameterExpression replaceContext, ParameterExpression replaceScriptInfo)
     {
-        var gw = new GeneratorRewriter(generator, r, replaceArgs /*,replaceStackItem,*/, replaceContext /*,replaceScriptInfo*/);
+       var gw = new GeneratorRewriter(generator, r, replaceArgs /*,replaceStackItem,*/, replaceContext, replaceScriptInfo);
+       gw.AddScriptInfoCapture();
 
-        body = MethodRewriter.Rewrite(body);
+       body = MethodRewriter.Rewrite(body);
 
         var flatten = new FlattenBlocks();
         var innerBody = flatten.Visit(gw.Visit(body));
@@ -61,6 +64,14 @@ public class GeneratorRewriter(ParameterExpression pe, LabelTarget @return, Para
         return Expression.Lambda<JSGeneratorDelegateV2>(in name, newBody, generator, gw.args, gw.nextJump, gw.nextValue, gw.exception);
     }
 
+    private void AddScriptInfoCapture()
+    {
+        if (_replaceScriptInfo == null)
+            return;
+
+        lifted.Add((_replaceScriptInfo, _scriptInfoBox, lifted.Count, Expression.Field(_scriptInfoBox, "Value")));
+    }
+
     private (Sequence<ParameterExpression> boxes, Expression init) LoadBoxes()
     {
         var boxes = new Sequence<Expression>(lifted.Count) { ClrGeneratorV2Builder.InitVariables(pe, lifted.Count) };
@@ -70,6 +81,8 @@ public class GeneratorRewriter(ParameterExpression pe, LabelTarget @return, Para
         {
             vlist.Add(box);
             boxes.Add(Expression.Assign(box, ClrGeneratorV2Builder.GetVariable(pe, index, original.Type)));
+            if (original == _replaceScriptInfo)
+                boxes.Add(Expression.Assign(Expression.Field(_scriptInfoBox, "Value"), _replaceScriptInfo));
         }
 
         if (vlist.Count == 0)
@@ -186,6 +199,9 @@ public class GeneratorRewriter(ParameterExpression pe, LabelTarget @return, Para
 
         if (node == replaceContext)
             return Context;
+
+        if (node == _replaceScriptInfo)
+            return Expression.Field(_scriptInfoBox, "Value");
 
         foreach (var (original, _, _, boxField) in lifted)
         {

@@ -57,6 +57,8 @@ public partial class JSBigInt : JSPrimitive
     public static JSValue Constructor(in Arguments a)
     {
         var f = a[0];
+        if (f is JSObject objectValue)
+            f = objectValue.ToDefaultPrimitive();
 
         switch (f)
         {

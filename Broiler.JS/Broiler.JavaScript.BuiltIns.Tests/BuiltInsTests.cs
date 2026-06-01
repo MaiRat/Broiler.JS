@@ -7710,6 +7710,34 @@ public class BuiltInsTests
     }
 
     [Fact]
+    public void BigInt_TypedArray_DefineOwnProperty_Propagates_ToPrimitive_Exceptions()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = new JSContext();
+
+        var result = ctx.Eval("""
+            (function () {
+                function Test262Error() {}
+
+                var obj = {
+                    valueOf: function () {
+                        throw new Test262Error();
+                    }
+                };
+
+                try {
+                    Object.defineProperty(new BigInt64Array([42n]), '0', { value: obj });
+                    return 'no-throw';
+                } catch (e) {
+                    return e.constructor.name;
+                }
+            })();
+            """);
+
+        Assert.Equal("Test262Error", result.ToString());
+    }
+
+    [Fact]
     public void RegExp_Prototype_Compile_TypeError_Scenarios_Match_Test262_Expectations()
     {
         EnsureBuiltInsLoaded();

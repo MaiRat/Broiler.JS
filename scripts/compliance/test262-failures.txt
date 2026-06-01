@@ -519,9 +519,7 @@ test/built-ins/Array/prototype/methods-called-as-functions.js
 test/built-ins/Array/prototype/pop/S15.4.4.6_A2_T2.js
 test/built-ins/Array/prototype/pop/S15.4.4.6_A3_T1.js
 test/built-ins/Array/prototype/pop/S15.4.4.6_A3_T2.js
-test/built-ins/Array/prototype/push/S15.4.4.7_A2_T2.js
 test/built-ins/Array/prototype/push/S15.4.4.7_A3.js
-test/built-ins/Array/prototype/push/throws-if-integer-limit-exceeded.js
 test/built-ins/Array/prototype/reduce/15.4.4.21-2-4.js
 test/built-ins/Array/prototype/reduceRight/15.4.4.22-2-4.js
 test/built-ins/Array/prototype/reduceRight/15.4.4.22-9-c-ii-5.js
@@ -2255,7 +2253,6 @@ test/built-ins/String/prototype/match/regexp-prototype-match-v-u-flag.js
 test/built-ins/String/prototype/match/this-val-obj.js
 test/built-ins/String/prototype/matchAll/regexp-is-undefined.js
 test/built-ins/String/prototype/matchAll/regexp-prototype-matchAll-v-u-flag.js
-test/built-ins/String/prototype/normalize/return-abrupt-from-form-as-symbol.js
 test/built-ins/String/prototype/repeat/empty-string-returns-empty.js
 test/built-ins/String/prototype/replace/S15.5.4.11_A1_T1.js
 test/built-ins/String/prototype/replace/S15.5.4.11_A1_T16.js
@@ -2920,10 +2917,8 @@ test/intl402/NumberFormat/prototype/format/format-significant-digits-precision.j
 test/intl402/NumberFormat/prototype/format/format-significant-digits.js
 test/intl402/NumberFormat/prototype/format/percent-formatter.js
 test/intl402/NumberFormat/prototype/format/units.js
-test/intl402/NumberFormat/prototype/formatRange/undefined-arguments-throws.js
 test/intl402/NumberFormat/prototype/formatRange/x-greater-than-y-not-throws.js
 test/intl402/NumberFormat/prototype/formatRangeToParts/en-US.js
-test/intl402/NumberFormat/prototype/formatRangeToParts/undefined-arguments-throws.js
 test/intl402/NumberFormat/prototype/formatRangeToParts/x-greater-than-y-not-throws.js
 test/intl402/NumberFormat/prototype/formatToParts/default-parameter.js
 test/intl402/NumberFormat/prototype/formatToParts/engineering-scientific-de-DE.js

@@ -5338,9 +5338,6 @@ test/language/statements/class/elements/arrow-body-derived-cls-direct-eval-conta
 test/language/statements/class/elements/arrow-body-derived-cls-direct-eval-err-contains-supercall-1.js
 test/language/statements/class/elements/arrow-body-derived-cls-direct-eval-err-contains-supercall-2.js
 test/language/statements/class/elements/arrow-body-derived-cls-direct-eval-err-contains-supercall.js
-test/language/statements/class/elements/arrow-body-derived-cls-indirect-eval-err-contains-supercall-1.js
-test/language/statements/class/elements/arrow-body-derived-cls-indirect-eval-err-contains-supercall-2.js
-test/language/statements/class/elements/arrow-body-derived-cls-indirect-eval-err-contains-supercall.js
 test/language/statements/class/elements/arrow-body-direct-eval-err-contains-arguments.js
 test/language/statements/class/elements/arrow-body-direct-eval-err-contains-newtarget.js
 test/language/statements/class/elements/arrow-body-private-derived-cls-direct-eval-contains-superproperty-1.js
@@ -5348,11 +5345,6 @@ test/language/statements/class/elements/arrow-body-private-derived-cls-direct-ev
 test/language/statements/class/elements/arrow-body-private-derived-cls-direct-eval-err-contains-supercall-1.js
 test/language/statements/class/elements/arrow-body-private-derived-cls-direct-eval-err-contains-supercall-2.js
 test/language/statements/class/elements/arrow-body-private-derived-cls-direct-eval-err-contains-supercall.js
-test/language/statements/class/elements/arrow-body-private-derived-cls-indirect-eval-contains-superproperty-1.js
-test/language/statements/class/elements/arrow-body-private-derived-cls-indirect-eval-contains-superproperty-2.js
-test/language/statements/class/elements/arrow-body-private-derived-cls-indirect-eval-err-contains-supercall-1.js
-test/language/statements/class/elements/arrow-body-private-derived-cls-indirect-eval-err-contains-supercall-2.js
-test/language/statements/class/elements/arrow-body-private-derived-cls-indirect-eval-err-contains-supercall.js
 test/language/statements/class/elements/arrow-body-private-direct-eval-err-contains-arguments.js
 test/language/statements/class/elements/arrow-body-private-direct-eval-err-contains-newtarget.js
 test/language/statements/class/elements/arrow-body-private-indirect-eval-err-contains-newtarget.js

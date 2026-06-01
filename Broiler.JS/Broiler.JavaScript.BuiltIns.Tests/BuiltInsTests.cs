@@ -1364,6 +1364,104 @@ public class BuiltInsTests
         Assert.Equal("ok:true|true:virtual|throw:TypeError|throw:TypeError|throw:TypeError", result.ToString());
     }
 
+    [Fact]
+    public void Object_BuiltIns_Respect_Proxy_OwnPropertyKey_Order_When_OwnKeys_Trap_Is_Missing()
+    {
+        EnsureBuiltInsLoaded();
+        using var ctx = new JSContext();
+        var result = ctx.Eval(@"
+            (function () {
+                function same(actual, expected) {
+                    if (actual.length !== expected.length) {
+                        return false;
+                    }
+
+                    for (var i = 0; i < expected.length; i++) {
+                        if (actual[i] !== expected[i]) {
+                            return false;
+                        }
+                    }
+
+                    return true;
+                }
+
+                function createTarget() {
+                    var target = {};
+                    var sym = Symbol();
+                    target[sym] = 1;
+                    target.foo = 2;
+                    target[0] = 3;
+                    return { target: target, sym: sym };
+                }
+
+                var definePropertiesState = createTarget();
+                var definePropertiesKeys = [];
+                Object.defineProperties({}, new Proxy(definePropertiesState.target, {
+                    getOwnPropertyDescriptor: function (_target, key) {
+                        definePropertiesKeys.push(key);
+                    }
+                }));
+
+                var getOwnPropertyDescriptorsState = createTarget();
+                var getOwnPropertyDescriptorsKeys = [];
+                Object.getOwnPropertyDescriptors(new Proxy(getOwnPropertyDescriptorsState.target, {
+                    getOwnPropertyDescriptor: function (_target, key) {
+                        getOwnPropertyDescriptorsKeys.push(key);
+                    }
+                }));
+
+                var freezeState = createTarget();
+                var freezeKeys = [];
+                Object.freeze(new Proxy(freezeState.target, {
+                    getOwnPropertyDescriptor: function (target, key) {
+                        freezeKeys.push(key);
+                        return Reflect.getOwnPropertyDescriptor(target, key);
+                    }
+                }));
+
+                var frozenState = createTarget();
+                Object.freeze(frozenState.target);
+                var isFrozenKeys = [];
+                Object.isFrozen(new Proxy(frozenState.target, {
+                    getOwnPropertyDescriptor: function (target, key) {
+                        isFrozenKeys.push(key);
+                        return Reflect.getOwnPropertyDescriptor(target, key);
+                    }
+                }));
+
+                var sealedState = createTarget();
+                Object.seal(sealedState.target);
+                var isSealedKeys = [];
+                Object.isSealed(new Proxy(sealedState.target, {
+                    getOwnPropertyDescriptor: function (target, key) {
+                        isSealedKeys.push(key);
+                        return Reflect.getOwnPropertyDescriptor(target, key);
+                    }
+                }));
+
+                var sealState = createTarget();
+                var sealKeys = [];
+                Object.seal(new Proxy(sealState.target, {
+                    defineProperty: function (target, key, descriptor) {
+                        sealKeys.push(key);
+                        return Reflect.defineProperty(target, key, descriptor);
+                    }
+                }));
+
+                return [
+                    same(definePropertiesKeys, ['0', 'foo', definePropertiesState.sym]),
+                    same(getOwnPropertyDescriptorsKeys, ['0', 'foo', getOwnPropertyDescriptorsState.sym]),
+                    same(freezeKeys, ['0', 'foo', freezeState.sym]),
+                    same(isFrozenKeys, ['0', 'foo', frozenState.sym]),
+                    same(isSealedKeys, ['0', 'foo', sealedState.sym]),
+                    same(sealKeys, ['0', 'foo', sealState.sym])
+                ].join('|');
+            })();
+        ");
+
+        Assert.Equal("true|true|true|true|true|true", result.ToString());
+    }
+
     // ── M2: JSProxy tests ────────────────────────────────────────────
 
     [Fact]

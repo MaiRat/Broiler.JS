@@ -162,6 +162,35 @@ public partial class JSObject
             throw NewTypeError("Cannot define property");
     }
 
+    private static void DefineOwnProperty(JSObject target, JSValue key, JSObject descriptor)
+    {
+        var propertyKey = key.ToKey(false);
+        switch (propertyKey.Type)
+        {
+            case KeyType.UInt:
+                DefineOwnProperty(target, propertyKey.Index, descriptor);
+                return;
+            case KeyType.String:
+                DefineOwnProperty(target, propertyKey.KeyString, descriptor);
+                return;
+            case KeyType.Symbol:
+                DefineOwnProperty(target, propertyKey.Symbol, descriptor);
+                return;
+            default:
+                throw NewTypeError($"Cannot define property {key}");
+        }
+    }
+
+    private static JSObject CreateIntegrityDescriptor(bool writable)
+    {
+        var descriptor = new JSObject();
+        descriptor.SetPropertyOrThrow(KeyStrings.configurable.ToJSValue(), JSValue.BooleanFalse);
+        if (writable)
+            descriptor.SetPropertyOrThrow(KeyStrings.writable.ToJSValue(), JSValue.BooleanFalse);
+
+        return descriptor;
+    }
+
     [JSExport("create")]
     internal static JSValue StaticCreate(in Arguments a)
     {
@@ -264,43 +293,23 @@ public partial class JSObject
 
         var pdObject = pds as JSObject ?? (JSObject)CreatePrimitiveObject(pds);
 
-        var ownElements = pds is JSObject
-            ? pdObject.GetElementEnumerator()
-            : pds.GetElementEnumerator();
-        while (ownElements.MoveNext(out var hasValue, out var item, out var index))
+        var descriptors = new List<(JSValue Key, JSObject Descriptor)>();
+        foreach (var key in GetOwnPropertyKeysInListOrder(pdObject))
         {
-            if (!hasValue)
+            if (pdObject.GetOwnPropertyDescriptor(key) is not JSObject propertyDescriptor
+                || !propertyDescriptor[KeyStrings.enumerable].BooleanValue)
+            {
                 continue;
+            }
 
-            if (item is not JSObject itemObject)
+            if (pdObject[key] is not JSObject itemObject)
                 throw NewTypeError("Property Description must be an object");
 
-            DefineOwnProperty(target, index, itemObject);
+            descriptors.Add((key, itemObject));
         }
 
-        var properties = pdObject.GetOwnProperties(false).GetEnumerator();
-        while (properties.MoveNext(out var keyString, out var property))
-        {
-            var item = pdObject.GetValue(property);
-            if (item is not JSObject itemObject)
-                throw NewTypeError("Property Description must be an object");
-
-            DefineOwnProperty(target, keyString, itemObject);
-        }
-
-        foreach (var (key, property) in pdObject.GetSymbols().AllValues())
-        {
-            if (property.IsEmpty)
-                continue;
-
-            var item = pdObject.GetValue(property);
-            if (item is not JSObject itemObject)
-                throw NewTypeError("Property Description must be an object");
-
-            var symbol = JSValue.GetSymbolByKeyFactory?.Invoke(key)
-                ?? throw new InvalidOperationException($"Unknown symbol key {key}");
-            DefineOwnProperty(target, symbol, itemObject);
-        }
+        foreach (var (key, descriptor) in descriptors)
+            DefineOwnProperty(target, key, descriptor);
 
         return target;
     }
@@ -393,28 +402,16 @@ public partial class JSObject
             throw NewTypeError("Cannot freeze object");
         }
 
-        static JSProperty FreezeProperty(uint key, in JSProperty property)
-        {
-            var attributes = property.Attributes & (~JSPropertyAttributes.Configurable);
-            if (property.IsValue)
-                attributes |= JSPropertyAttributes.Readonly;
-
-            return new JSProperty(key, property.get, property.set, property.value, attributes);
-        }
-
-        ref var ownProperties = ref @object.GetOwnProperties();
-        ownProperties.Update((uint key, ref JSProperty property) => property = FreezeProperty(key, property));
-
-        ref var elements = ref @object.GetElements();
-        foreach (var (key, property) in elements.AllValues())
-            elements.Put(key) = FreezeProperty(key, property);
-
-        ref var symbols = ref @object.GetSymbols();
-        foreach (var entry in symbols.All)
-            symbols.Put(entry.Key) = FreezeProperty(entry.Key, entry.Value);
-
         if (!@object.PreventExtensions())
             throw NewTypeError("Cannot freeze object");
+
+        foreach (var key in GetOwnPropertyKeysInListOrder(@object))
+        {
+            if (@object.GetOwnPropertyDescriptor(key) is not JSObject descriptor)
+                continue;
+
+            DefineOwnProperty(@object, key, CreateIntegrityDescriptor(IsDataDescriptor(descriptor)));
+        }
 
         @object.status |= ObjectStatus.Frozen;
         return @object;
@@ -489,16 +486,15 @@ public partial class JSObject
         if (!@object.PreventExtensions())
             throw NewTypeError("Cannot seal object");
 
+        foreach (var key in GetOwnPropertyKeysInListOrder(@object))
+        {
+            if (@object.GetOwnPropertyDescriptor(key).IsUndefined)
+                continue;
+
+            DefineOwnProperty(@object, key, CreateIntegrityDescriptor(writable: false));
+        }
+
         @object.status |= ObjectStatus.Sealed;
-        @object.GetOwnProperties().Update((uint x, ref JSProperty v) => v = new JSProperty(x, v.get, v.set, v.value, v.Attributes & (~JSPropertyAttributes.Configurable)));
-        ref var elements = ref @object.GetElements();
-        foreach (var (key, property) in elements.AllValues())
-            elements.Put(key) = new JSProperty(key, property.get, property.set, property.value, property.Attributes & (~JSPropertyAttributes.Configurable));
-
-        ref var symbols = ref @object.GetSymbols();
-        foreach (var entry in symbols.All)
-            symbols.Put(entry.Key) = new JSProperty(entry.Key, entry.Value.get, entry.Value.set, entry.Value.value, entry.Value.Attributes & (~JSPropertyAttributes.Configurable));
-
         return first;
     }
 

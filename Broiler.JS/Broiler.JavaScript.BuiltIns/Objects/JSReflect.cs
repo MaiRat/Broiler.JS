@@ -80,9 +80,6 @@ public partial class JSReflect : JSObject
         if (attributes is not JSObject pd)
             throw JSEngine.NewTypeError("Property description must be an object");
 
-        if (targetObject is not JSProxy && !targetObject.IsExtensible())
-            return JSBoolean.False;
-
         var result = key.Type switch
         {
             KeyType.UInt => targetObject.DefineProperty(key.Index, pd),

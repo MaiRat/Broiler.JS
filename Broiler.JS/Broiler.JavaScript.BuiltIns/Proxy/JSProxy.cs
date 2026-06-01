@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Broiler.JavaScript.BuiltIns.Array;
 using Broiler.JavaScript.BuiltIns.Symbol;
 using Broiler.JavaScript.Engine;
@@ -766,7 +767,25 @@ public partial class JSProxy : JSObject
             return array.GetElementEnumerator();
         }
 
-        return target.GetAllKeys(showEnumerableOnly, inherited);
+        var keys = new JSArray();
+        var fallbackKeys = target.GetAllKeys(showEnumerableOnly, inherited);
+        while (fallbackKeys.MoveNext(out var hasValue, out var value, out var _))
+        {
+            if (hasValue)
+                keys.Add(value);
+        }
+
+        foreach (var (key, property) in target.GetSymbols().AllValues())
+        {
+            if (property.IsEmpty || (showEnumerableOnly && !property.IsEnumerable))
+                continue;
+
+            var symbol = JSValue.GetSymbolByKeyFactory?.Invoke(key)
+                ?? throw new InvalidOperationException($"Unknown symbol key {key}");
+            keys.Add((JSValue)symbol);
+        }
+
+        return keys.GetElementEnumerator();
     }
 
     public override bool StrictEquals(JSValue value) => RequireTarget().StrictEquals(value);

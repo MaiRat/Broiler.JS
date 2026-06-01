@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Broiler.JavaScript.Storage;
 
 namespace Broiler.JavaScript.Runtime;
 
@@ -7,6 +8,64 @@ public partial class JSObject
 {
     private static bool ShouldIncludeOwnPropertyKey(JSValue value, bool includeSymbols) =>
         includeSymbols ? value is IJSSymbol : value is not IJSSymbol;
+
+    private static List<JSValue> GetOwnPropertyKeysInListOrder(JSObject @object)
+    {
+        var keys = new List<JSValue>();
+        HashSet<uint> emittedSymbols = null;
+
+        var en = @object.GetAllKeys(false, false);
+        while (en.MoveNext(out var hasValue, out var value, out var _))
+        {
+            if (!hasValue)
+                continue;
+
+            keys.Add(value);
+            if (value is IJSSymbol symbol)
+            {
+                emittedSymbols ??= [];
+                emittedSymbols.Add(symbol.Key);
+            }
+        }
+
+        foreach (var (key, property) in @object.GetSymbols().AllValues())
+        {
+            if (property.IsEmpty || (emittedSymbols != null && emittedSymbols.Contains(key)))
+                continue;
+
+            var symbol = JSValue.GetSymbolByKeyFactory?.Invoke(key)
+                ?? throw new InvalidOperationException($"Unknown symbol key {key}");
+            keys.Add((JSValue)symbol);
+        }
+
+        return keys;
+    }
+
+    private static bool HasDescriptorField(JSObject descriptor, KeyString key) =>
+        !descriptor.GetInternalProperty(key, false).IsEmpty;
+
+    private static bool IsDataDescriptor(JSObject descriptor) =>
+        HasDescriptorField(descriptor, KeyStrings.value) || HasDescriptorField(descriptor, KeyStrings.writable);
+
+    private static bool TestIntegrityLevel(JSObject @object, bool frozen)
+    {
+        if (@object.IsExtensible())
+            return false;
+
+        foreach (var key in GetOwnPropertyKeysInListOrder(@object))
+        {
+            if (@object.GetOwnPropertyDescriptor(key) is not JSObject descriptor)
+                continue;
+
+            if (descriptor[KeyStrings.configurable].BooleanValue)
+                return false;
+
+            if (frozen && IsDataDescriptor(descriptor) && descriptor[KeyStrings.writable].BooleanValue)
+                return false;
+        }
+
+        return true;
+    }
 
     [JSExport("entries")]
     internal static JSValue StaticEntries(in Arguments a)
@@ -70,7 +129,7 @@ public partial class JSObject
         if (value is not JSObject @object)
             return JSValue.BooleanTrue;
 
-        return @object.IsFrozen() ? JSValue.BooleanTrue : JSValue.BooleanFalse;
+        return TestIntegrityLevel(@object, frozen: true) ? JSValue.BooleanTrue : JSValue.BooleanFalse;
     }
 
     [JSExport("isSealed")]
@@ -80,7 +139,7 @@ public partial class JSObject
         if (value is not JSObject @object)
             return JSValue.BooleanTrue;
 
-        return @object.IsSealed() ? JSValue.BooleanTrue : JSValue.BooleanFalse;
+        return TestIntegrityLevel(@object, frozen: false) ? JSValue.BooleanTrue : JSValue.BooleanFalse;
     }
 
     [JSExport("keys")]
@@ -166,15 +225,14 @@ public partial class JSObject
             return JSValue.CreateArray();
 
         var r = new JSObject();
-        ref var p = ref r.GetOwnProperties(true);
-        var en = jobj.GetOwnProperties(false).GetEnumerator();
-
-        while (en.MoveNext(out var key, out var property))
+        foreach (var key in GetOwnPropertyKeysInListOrder(jobj))
         {
-            if (IsPrivateName(in key))
+            if (key.ToKey(false) is { Type: KeyType.String, KeyString: var keyString } && IsPrivateName(in keyString))
                 continue;
 
-            p.Put(key.Key) = property;
+            var descriptor = jobj.GetOwnPropertyDescriptor(key);
+            if (!descriptor.IsUndefined)
+                r.SetPropertyOrThrow(key, descriptor);
         }
 
         return r;
@@ -221,10 +279,9 @@ public partial class JSObject
         var r = JSValue.CreateArray();
         HashSet<uint> emittedSymbols = null;
 
-        var en = jobj.GetAllKeys(false, false);
-        while (en.MoveNext(out var hasValue, out var value, out var index))
+        foreach (var value in GetOwnPropertyKeysInListOrder(jobj))
         {
-            if (!hasValue || !ShouldIncludeOwnPropertyKey(value, includeSymbols: true))
+            if (!ShouldIncludeOwnPropertyKey(value, includeSymbols: true))
                 continue;
 
             r.AddArrayItem(value);

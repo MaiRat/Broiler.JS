@@ -231,6 +231,7 @@ partial class FastCompiler
 
                 lambda = GeneratorRewriter.Rewrite(in scriptFunctionName, block, cs.ReturnLabel, cs.Generator, replaceArgs: cs.Arguments, replaceStackItem: cs.StackItem,
                     replaceContext: cs.Context, replaceScriptInfo: scriptInfo);
+                Broiler.JavaScript.ExpressionCompiler.LambdaRewriter.Rewrite(lambda);
 
                 jsf = JSAsyncFunctionBuilder.Create(JSGeneratorFunctionBuilderV2.New(lambda, fxName, code, functionLength));
             }

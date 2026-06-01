@@ -107,6 +107,9 @@ partial class FastParser
 
         if (!currentType.IsOperator())
         {
+            if (!considerInOfAsOperators && current.ContextualKeyword == FastKeywords.of)
+                return true;
+
             if (m.LinesSkipped)
             {
                 m.Undo();

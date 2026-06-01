@@ -184,19 +184,21 @@ partial class FastCompiler
     }
 
     private YExpression CreateAssignment(AstExpression pattern, YExpression init, bool createVariable = false, bool newScope = false,
-        bool suppressAnonymousFunctionNameInference = false, bool initializeVariable = true, bool readOnlyAfterAssign = false)
+        bool suppressAnonymousFunctionNameInference = false, bool initializeVariable = true, bool readOnlyAfterAssign = false,
+        bool forceDynamicAssignment = false)
     {
         using var temp = scope.Top.GetTempVariable(typeof(JSValue));
         var inits = new Sequence<YExpression>();
         inits.Add(YExpression.Assign(temp.Variable, init));
-        CreateAssignment(inits, pattern, temp.Expression, createVariable, newScope, suppressAnonymousFunctionNameInference, initializeVariable, readOnlyAfterAssign);
+        CreateAssignment(inits, pattern, temp.Expression, createVariable, newScope, suppressAnonymousFunctionNameInference, initializeVariable, readOnlyAfterAssign, forceDynamicAssignment);
         inits.Add(temp.Expression);
 
         return YExpression.Block(new Sequence<YParameterExpression> { temp.Variable }, inits);
     }
 
     private void CreateAssignment(Sequence<YExpression> inits, AstExpression pattern, YExpression init, bool createVariable = false, bool newScope = false,
-        bool suppressAnonymousFunctionNameInference = false, bool initializeVariable = true, bool readOnlyAfterAssign = false)
+        bool suppressAnonymousFunctionNameInference = false, bool initializeVariable = true, bool readOnlyAfterAssign = false,
+        bool forceDynamicAssignment = false)
     {
         YExpression target;
 
@@ -220,7 +222,7 @@ partial class FastCompiler
                     }
                     else
                     {
-                        if (!TryGetStaticIdentifierVariable(id, out var variable) || variable == null)
+                        if (forceDynamicAssignment || !TryGetStaticIdentifierVariable(id, out var variable) || variable == null)
                         {
                             if (suppressAnonymousFunctionNameInference)
                             {
@@ -307,7 +309,7 @@ partial class FastCompiler
                             case FastNodeType.MemberExpression:
                             case FastNodeType.ArrayPattern:
                             case FastNodeType.ObjectPattern:
-                                CreateAssignment(inits, property.Value, start, createVariable, newScope, suppressAnonymousFunctionNameInference, initializeVariable, readOnlyAfterAssign);
+                                CreateAssignment(inits, property.Value, start, createVariable, newScope, suppressAnonymousFunctionNameInference, initializeVariable, readOnlyAfterAssign, forceDynamicAssignment);
                                 break;
                             // TODO
                             case FastNodeType.BinaryExpression:
@@ -323,7 +325,8 @@ partial class FastCompiler
                                         defaultValue),
                                     suppressAnonymousFunctionNameInference: suppressAnonymousFunctionNameInference,
                                     initializeVariable: initializeVariable,
-                                    readOnlyAfterAssign: readOnlyAfterAssign);
+                                    readOnlyAfterAssign: readOnlyAfterAssign,
+                                    forceDynamicAssignment: forceDynamicAssignment);
                                 break;
                             default:
                                 throw new NotImplementedException();
@@ -372,11 +375,11 @@ partial class FastCompiler
                                         YExpression.Block(
                                             YExpression.Assign(iterDoneVar, YExpression.Constant(true)),
                                             CreateAssignment(element, JSUndefinedBuilder.Value, createVariable, newScope,
-                                                suppressAnonymousFunctionNameInference, initializeVariable, readOnlyAfterAssign),
+                                                suppressAnonymousFunctionNameInference, initializeVariable, readOnlyAfterAssign, forceDynamicAssignment),
                                             YExpression.Empty),
                                         YExpression.Block(
                                             CreateAssignment(element, moveTemp.Expression, createVariable, newScope,
-                                                suppressAnonymousFunctionNameInference, initializeVariable, readOnlyAfterAssign),
+                                                suppressAnonymousFunctionNameInference, initializeVariable, readOnlyAfterAssign, forceDynamicAssignment),
                                             YExpression.Empty)));
                                 }
                                 break;
@@ -399,14 +402,14 @@ partial class FastCompiler
 
                                     arrayInits.Add(JSValueExtensionsBuilder.AssignCoalesce(moveTemp2.Expression, identifierDefaultValue));
                                     arrayInits.Add(CreateAssignment(be.Left, moveTemp2.Expression, createVariable, newScope,
-                                        suppressAnonymousFunctionNameInference, initializeVariable, readOnlyAfterAssign));
+                                        suppressAnonymousFunctionNameInference, initializeVariable, readOnlyAfterAssign, forceDynamicAssignment));
                                 }
                                 break;
 
                             case FastNodeType.SpreadElement:
                                 var spe = element as AstSpreadElement;
                                 CreateAssignment(arrayInits, spe.Argument, JSArrayBuilder.NewFromElementEnumerator(destExp), createVariable, newScope,
-                                    suppressAnonymousFunctionNameInference, initializeVariable, readOnlyAfterAssign);
+                                    suppressAnonymousFunctionNameInference, initializeVariable, readOnlyAfterAssign, forceDynamicAssignment);
                                 arrayInits.Add(YExpression.Assign(iterDoneVar, YExpression.Constant(true)));
                                 break;
 
@@ -424,7 +427,7 @@ partial class FastCompiler
                                             YExpression.Assign(iterDoneVar, YExpression.Constant(true)),
                                             YExpression.Assign(te.Expression, JSUndefinedBuilder.Value),
                                             YExpression.Empty)));
-                                    CreateAssignment(arrayInits, ape, te.Expression, createVariable, newScope, suppressAnonymousFunctionNameInference, initializeVariable, readOnlyAfterAssign);
+                                    CreateAssignment(arrayInits, ape, te.Expression, createVariable, newScope, suppressAnonymousFunctionNameInference, initializeVariable, readOnlyAfterAssign, forceDynamicAssignment);
                                 }
                                 break;
 

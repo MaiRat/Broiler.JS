@@ -11,6 +11,7 @@ public static class RuntimeAssembly
 
     public static object Compile(this YLambdaExpression exp)
     {
+        LambdaRewriter.Rewrite(exp);
         exp = exp.WithThis(typeof(Closures));
 
         var method = new DynamicMethod(exp.Name.FullName, exp.ReturnType, exp.ParameterTypesWithThis, typeof(Closures), true);
@@ -27,6 +28,7 @@ public static class RuntimeAssembly
 
     public static T Compile<T>(this YExpression<T> exp)
     {
+        LambdaRewriter.Rewrite(exp);
         exp = exp.WithThis<T>(typeof(Closures));
 
         // var f = new FlattenVisitor();
@@ -76,7 +78,6 @@ public static class RuntimeAssembly
     {
         var repository = new MethodRepository();
         var outerLambda = YExpression.InstanceLambda<Func<T>>(expression.Name + "_outer", expression, YExpression.Parameter(typeof(Closures)), []) as YLambdaExpression;
-
         LambdaRewriter.Rewrite(outerLambda);
         var runtimeMethodBuilder = new RuntimeMethodBuilder(repository);
 

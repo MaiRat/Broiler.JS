@@ -1,5 +1,6 @@
-﻿using System;
+using System;
 using System.Reflection;
+using Broiler.JavaScript.ExpressionCompiler;
 using Broiler.JavaScript.ExpressionCompiler.ClosureSeparator;
 using Broiler.JavaScript.ExpressionCompiler.Core;
 using Broiler.JavaScript.ExpressionCompiler.Expressions;
@@ -16,6 +17,7 @@ public class RuntimeMethodBuilder(IMethodRepository methods) : IMethodBuilder
 
     public YExpression Relay(YExpression @this, IFastEnumerable<YExpression> closures, YLambdaExpression innerLambda)
     {
+        LambdaRewriter.Rewrite(innerLambda);
         var (method, il, exp) = innerLambda.CompileToBoundDynamicMethod(methodBuilder: this);
         var repository = YExpression.Field(@this, Closures.repositoryField);
         var id = methods.RegisterNew(method, il, exp, innerLambda.Type);

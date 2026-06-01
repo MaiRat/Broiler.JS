@@ -145,6 +145,7 @@ public partial class FastCompiler : AstMapVisitor<YExpression>
         {
             var g = GeneratorRewriter.Rewrite("vm", script, fx.ReturnLabel, fx.Generator, replaceArgs: fx.Arguments, replaceStackItem: fx.StackItem,
                 replaceContext: fx.Context, replaceScriptInfo: scriptInfo);
+            Broiler.JavaScript.ExpressionCompiler.LambdaRewriter.Rewrite(g);
 
             var jsf = JSAsyncFunctionBuilder.Create(JSGeneratorFunctionBuilderV2.New(g, StringSpanBuilder.New("vm"), StringSpanBuilder.New(code.Value)));
             var np = YExpression.Parameter(ArgumentsBuilder.refType, "a");

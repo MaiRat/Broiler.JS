@@ -297,6 +297,17 @@ public class ParserTests
         Assert.NotNull(program);
     }
 
+    [Theory]
+    [InlineData("function run() { for ([x] of [[1]]) { x; } }")]
+    [InlineData("async function run() { for await ([x] of [[1]]) { x; } }")]
+    public void ParseProgram_ForOf_AssignmentPattern_Heads_Succeed(string source)
+    {
+        var stream = new FastTokenStream(new StringSpan(source));
+        var parser = new FastParser(stream);
+        var program = parser.ParseProgram();
+        Assert.NotNull(program);
+    }
+
     [Fact]
     public void ParseProgram_ForAwaitIn_ThrowsFastParseException()
     {

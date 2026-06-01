@@ -3140,7 +3140,6 @@ test/language/eval-code/indirect/var-env-func-init-multi.js
 test/language/eval-code/indirect/var-env-global-lex-non-strict.js
 test/language/expressions/addition/S11.6.1_A4_T7.js
 test/language/expressions/addition/bigint-wrapped-values.js
-test/language/expressions/array/spread-obj-spread-order.js
 test/language/expressions/arrow-function/dstr/ary-ptrn-elem-id-iter-val-array-prototype.js
 test/language/expressions/arrow-function/dstr/dflt-ary-ptrn-elem-id-iter-val-array-prototype.js
 test/language/expressions/arrow-function/dstr/dflt-obj-ptrn-prop-eval-err.js
@@ -3368,7 +3367,6 @@ test/language/expressions/bitwise-xor/bigint-non-primitive.js
 test/language/expressions/bitwise-xor/bigint-toprimitive.js
 test/language/expressions/bitwise-xor/bigint-wrapped-values.js
 test/language/expressions/call/eval-strictness-inherit-non-strict.js
-test/language/expressions/call/spread-obj-spread-order.js
 test/language/expressions/call/tco-call-args.js
 test/language/expressions/call/tco-member-args.js
 test/language/expressions/call/tco-non-eval-function-dynamic.js
@@ -4334,7 +4332,6 @@ test/language/expressions/new.target/value-via-super-property.js
 test/language/expressions/new/S11.2.2_A4_T1.js
 test/language/expressions/new/S11.2.2_A4_T2.js
 test/language/expressions/new/S11.2.2_A4_T3.js
-test/language/expressions/new/spread-obj-spread-order.js
 test/language/expressions/object/accessor-name-computed-in.js
 test/language/expressions/object/concise-generator.js
 test/language/expressions/object/cpn-obj-lit-computed-property-name-from-null.js

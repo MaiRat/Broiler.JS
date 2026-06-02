@@ -8,6 +8,7 @@ using Broiler.JavaScript.Engine;
 using Broiler.JavaScript.Engine.Core;
 using Broiler.JavaScript.Parser;
 using Broiler.JavaScript.Runtime;
+using Broiler.JavaScript.ExpressionCompiler.Runtime;
 
 using System;
 using System.Collections.Generic;
@@ -16,6 +17,11 @@ namespace Broiler.JavaScript.Compiler;
 
 public static class DirectEvalSupport
 {
+    private sealed class TransientCodeCache : ICodeCache
+    {
+        public JSFunctionDelegate GetOrCreate(in JSCode code) => code.Compiler().CompileWithNestedLambdas();
+    }
+
     private sealed class DeclaredBindingSnapshot(JSContext context, string[] names, string[] excludedNames) : IDisposable
     {
         private readonly JSContext context = context;
@@ -75,7 +81,7 @@ public static class DirectEvalSupport
         }
     }
 
-    public static JSValue Execute(Arguments arguments, JSValue callee, JSValue @this, CallStackItem activationOwner, bool inheritStrictMode, bool disallowArgumentsDeclaration, string[] lexicalBindings, JSVariable[] capturedBindings, string[] parameterBindings, string[] privateNamesInScope, bool allowSuperProperty, bool allowSuperCall, bool useActivationBinding = false)
+    public static JSValue Execute(Arguments arguments, JSValue callee, JSValue @this, CallStackItem activationOwner, bool inheritStrictMode, bool disallowArgumentsDeclaration, string[] lexicalBindings, JSVariable[] capturedBindings, string[] capturedLexicalBindingNames, string[] parameterBindings, string[] privateNamesInScope, bool allowSuperProperty, bool allowSuperCall, bool useActivationBinding = false)
     {
         if (!IsDirectEval(callee))
             return callee.InvokeFunction(arguments);
@@ -98,8 +104,11 @@ public static class DirectEvalSupport
         if (JSEngine.Current is JSContext context)
         {
             var requiresActivation = disallowArgumentsDeclaration || useActivationBinding;
-            using var _ = disallowArgumentsDeclaration
+            using var _ = capturedBindings?.Length > 0
                 ? context.PushDirectEvalScope(capturedBindings)
+                : null;
+            using var lexicalBindingScope = capturedLexicalBindingNames?.Length > 0
+                ? context.PushDirectEvalLexicalBindingNames(capturedLexicalBindingNames)
                 : null;
             using var ____ = requiresActivation
                 ? context.PushDirectEvalActivation(activationOwner)
@@ -108,7 +117,7 @@ public static class DirectEvalSupport
                 ? new DeclaredBindingSnapshot(context, declaredBindings, ExtractBindingNames(capturedBindings))
                 : null;
             using var __ = context.PushDirectEvalCompilation(requiresActivation, privateNamesInScope);
-            var result = context.Eval(text, location, @this ?? context);
+            var result = CoreScript.Compile(text, location, null, new TransientCodeCache())(new Arguments(@this ?? context));
             if (declaredBindings?.Length > 0 && capturedBindings?.Length > 0)
             {
                 foreach (var declaredBinding in declaredBindings)

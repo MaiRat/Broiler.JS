@@ -72,7 +72,13 @@ public partial class ILCodeGenerator
 
     private CodeInfo LoadParameterAddress(YParameterExpression yParameterExpression)
     {
-        var varInfo = variables[yParameterExpression];
+        if (!variables.TryGetValue(yParameterExpression, out var varInfo))
+        {
+            if (TryResolveClosureByName(yParameterExpression.Name, out var closure))
+                return LoadAddress(closure);
+
+            varInfo = variables[yParameterExpression];
+        }
         if (varInfo.IsArgument) {
             if(varInfo.IsReference)
             {

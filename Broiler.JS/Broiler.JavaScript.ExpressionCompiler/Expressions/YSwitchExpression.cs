@@ -7,7 +7,9 @@ namespace Broiler.JavaScript.ExpressionCompiler.Expressions;
 
 public class YSwitchExpression(YExpression target,
     MethodInfo? method,
-    YExpression? defaultBody, YSwitchCaseExpression[] cases) : YExpression(YExpressionType.Switch, cases.Last().Body.Type )
+    YExpression? defaultBody, YSwitchCaseExpression[] cases) : YExpression(
+        YExpressionType.Switch,
+        cases.Length > 0 ? cases[^1].Body.Type : defaultBody?.Type ?? typeof(void))
 {
     public readonly YExpression Target = target;
     public readonly MethodInfo? CompareMethod = method;

@@ -33,15 +33,22 @@ public partial class ILCodeGenerator
 
         if (!variables.TryGetValue(yParameterExpression, out var v))
         {
-            if (!TryResolveVariableByName(yParameterExpression.Name, out v)
-                && !TryResolveBoxByType(yParameterExpression.Type, out v))
+            if (TryResolveVariableByName(yParameterExpression.Name, out v)
+                || TryResolveBoxByType(yParameterExpression.Type, out v))
             {
-                if (yParameterExpression.Type == ScriptInfoType)
-                {
-                    il.EmitNew(ScriptInfoBoxCtor);
-                    return true;
-                }
-
+                // resolved through the current scope
+            }
+            else if (TryResolveClosureByName(yParameterExpression.Name, out var closure))
+            {
+                return Visit(closure);
+            }
+            else if (yParameterExpression.Type == ScriptInfoType)
+            {
+                il.EmitNew(ScriptInfoBoxCtor);
+                return true;
+            }
+            else
+            {
                 v = variables[yParameterExpression];
             }
         }
@@ -93,6 +100,8 @@ public partial class ILCodeGenerator
             return false;
 
         var resolvedName = name;
+        if (resolvedName.EndsWith('`'))
+            resolvedName = resolvedName[..^1];
         var underscore = name.LastIndexOf('_');
         if (underscore > 0 && int.TryParse(name[(underscore + 1)..], out _))
             resolvedName = name[..underscore];
@@ -118,6 +127,27 @@ public partial class ILCodeGenerator
         }
 
         variable = null;
+        return false;
+    }
+
+    private bool TryResolveClosureByName(string name, out YExpression exp)
+    {
+        if (string.IsNullOrEmpty(name))
+        {
+            exp = default!;
+            return false;
+        }
+
+        foreach (var closure in closureRepository.Closures.Values)
+        {
+            if (string.Equals(closure.local.Name, name, StringComparison.OrdinalIgnoreCase))
+            {
+                exp = closure.value;
+                return true;
+            }
+        }
+
+        exp = default!;
         return false;
     }
 }

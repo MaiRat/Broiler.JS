@@ -286,6 +286,31 @@ public class CompilerTests
     }
 
     [Fact]
+    public void Compile_DerivedClass_Constructor_CanCallSuper()
+    {
+        using var ctx = new JSContext();
+        var result = ctx.Eval("""
+            (function () {
+                class Base {
+                    constructor() {
+                        this.value = 1;
+                    }
+                }
+
+                class Derived extends Base {
+                    constructor() {
+                        super();
+                    }
+                }
+
+                return new Derived().value;
+            })()
+            """);
+
+        Assert.Equal(1.0, result.DoubleValue);
+    }
+
+    [Fact]
     public void Compile_ArrowFunction_ArrayDestructuringElisions_Work()
     {
         using var ctx = new JSContext();
@@ -1528,6 +1553,30 @@ public class CompilerTests
     }
 
     [Fact]
+    public void Compile_Direct_Eval_Arrow_Bodies_See_Lexical_Bindings()
+    {
+        using var ctx = new JSContext();
+
+        var result = ctx.Eval("""
+            (function () {
+              var lexicalRead = (() => { let x = 1; return eval('x'); })();
+              var lexicalArrow = (() => { let x = 1; return eval('(() => x)()'); })();
+              var tdzError = 'none';
+
+              try {
+                ((a = eval('(() => a)()')) => a)();
+              } catch (e) {
+                tdzError = e.name;
+              }
+
+              return [lexicalRead, lexicalArrow, tdzError].join('|');
+            })()
+            """);
+
+        Assert.Equal("1|1|ReferenceError", result.ToString());
+    }
+
+    [Fact]
     public void Compile_Shadowed_Eval_Calls_Are_Not_Treated_As_Direct_Eval()
     {
         using var ctx = new JSContext();
@@ -2118,6 +2167,7 @@ public class CompilerTests
 
         Assert.Equal(3.0, ctx.Eval("""eval("2; switch ('a') { case 'a': { 3; break; } default: }")""").DoubleValue);
         Assert.Equal(6.0, ctx.Eval("""eval("5; do { switch ('a') { case 'a': { 6; continue; } default: } } while (false)")""").DoubleValue);
+        Assert.True(ctx.Eval("""eval("switch (1) { default: }")""").IsUndefined);
 
         Assert.Equal(3.0, ctx.Eval("""eval("1; do { 2; with({}) { 3; break; } 4; } while (false)")""").DoubleValue);
         Assert.True(ctx.Eval("""eval("5; do { 6; with({}) { break; } 7; } while (false)")""").IsUndefined);

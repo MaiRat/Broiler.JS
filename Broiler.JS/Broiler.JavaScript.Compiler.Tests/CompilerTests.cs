@@ -1553,6 +1553,30 @@ public class CompilerTests
     }
 
     [Fact]
+    public void Compile_Direct_Eval_Arrow_Bodies_See_Lexical_Bindings()
+    {
+        using var ctx = new JSContext();
+
+        var result = ctx.Eval("""
+            (function () {
+              var lexicalRead = (() => { let x = 1; return eval('x'); })();
+              var lexicalArrow = (() => { let x = 1; return eval('(() => x)()'); })();
+              var tdzError = 'none';
+
+              try {
+                ((a = eval('(() => a)()')) => a)();
+              } catch (e) {
+                tdzError = e.name;
+              }
+
+              return [lexicalRead, lexicalArrow, tdzError].join('|');
+            })()
+            """);
+
+        Assert.Equal("1|1|ReferenceError", result.ToString());
+    }
+
+    [Fact]
     public void Compile_Shadowed_Eval_Calls_Are_Not_Treated_As_Direct_Eval()
     {
         using var ctx = new JSContext();

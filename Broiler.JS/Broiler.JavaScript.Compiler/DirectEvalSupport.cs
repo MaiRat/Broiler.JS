@@ -104,7 +104,7 @@ public static class DirectEvalSupport
         if (JSEngine.Current is JSContext context)
         {
             var requiresActivation = disallowArgumentsDeclaration || useActivationBinding;
-            using var _ = disallowArgumentsDeclaration
+            using var _ = capturedBindings?.Length > 0
                 ? context.PushDirectEvalScope(capturedBindings)
                 : null;
             using var ____ = requiresActivation

@@ -2584,9 +2584,6 @@ test/intl402/DateTimeFormat/constructor-options-toobject.js
 test/intl402/DateTimeFormat/date-time-options.js
 test/intl402/DateTimeFormat/intl-legacy-constructed-symbol-on-unwrap.js
 test/intl402/DateTimeFormat/intl-legacy-constructed-symbol.js
-test/intl402/DateTimeFormat/prototype/format/dayPeriod-long-en.js
-test/intl402/DateTimeFormat/prototype/format/dayPeriod-narrow-en.js
-test/intl402/DateTimeFormat/prototype/format/dayPeriod-short-en.js
 test/intl402/DateTimeFormat/prototype/format/proleptic-gregorian-calendar.js
 test/intl402/DateTimeFormat/prototype/format/related-year-zh.js
 test/intl402/DateTimeFormat/prototype/format/timedatestyle-en.js
@@ -2601,9 +2598,6 @@ test/intl402/DateTimeFormat/prototype/formatRangeToParts/date-undefined-throws.j
 test/intl402/DateTimeFormat/prototype/formatRangeToParts/en-US.js
 test/intl402/DateTimeFormat/prototype/formatRangeToParts/fractionalSecondDigits.js
 test/intl402/DateTimeFormat/prototype/formatToParts/chinese-calendar-dates.js
-test/intl402/DateTimeFormat/prototype/formatToParts/dayPeriod-long-en.js
-test/intl402/DateTimeFormat/prototype/formatToParts/dayPeriod-narrow-en.js
-test/intl402/DateTimeFormat/prototype/formatToParts/dayPeriod-short-en.js
 test/intl402/DateTimeFormat/prototype/formatToParts/era.js
 test/intl402/DateTimeFormat/prototype/formatToParts/fractionalSecondDigits.js
 test/intl402/DateTimeFormat/prototype/formatToParts/lunisolar-leap-months.js

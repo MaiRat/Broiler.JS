@@ -371,7 +371,7 @@ public class FastFunctionScope : LinkedStackItem<FastFunctionScope>
                     || variable.Variable.Type != typeof(JSVariable)
                     || variable.IsTemp
                     || variable.Name == "this"
-                    || !seen.Add(variable.Name))
+                    || !seen.Add(NormalizeVisibleName(variable.Name)))
                 {
                     continue;
                 }
@@ -411,7 +411,7 @@ public class FastFunctionScope : LinkedStackItem<FastFunctionScope>
                 if (!variable.IsLexical
                     || variable.IsTemp
                     || string.IsNullOrEmpty(variable.Name)
-                    || !seen.Add(variable.Name))
+                    || !seen.Add(NormalizeVisibleName(variable.Name)))
                 {
                     continue;
                 }
@@ -464,6 +464,21 @@ public class FastFunctionScope : LinkedStackItem<FastFunctionScope>
     }
 
     public bool IsFunctionScope => Parent?.Function != Function;
+
+    private static string NormalizeVisibleName(string name)
+    {
+        if (string.IsNullOrEmpty(name))
+            return name;
+
+        if (name[^1] == '`')
+            name = name[..^1];
+
+        var underscore = name.LastIndexOf('_');
+        if (underscore > 0 && int.TryParse(name[(underscore + 1)..], out _))
+            name = name[..underscore];
+
+        return name;
+    }
 
     public VariableScope CreateVariable(in StringSpan name, YExpression init = null, bool newScope = false, Type type = null, bool initialize = true)
     {

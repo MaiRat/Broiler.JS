@@ -18,7 +18,13 @@ public partial class ILCodeGenerator
 
 
         var pType = yParameterExpression.Type;
-        var varInfo = variables[yParameterExpression];
+        if (!variables.TryGetValue(yParameterExpression, out var varInfo))
+        {
+            if (TryResolveClosureByName(yParameterExpression.Name, out var closure))
+                return Assign(closure, exp, savedIndex);
+
+            varInfo = variables[yParameterExpression];
+        }
 
         il.Comment($"save {varInfo.Name}");
 

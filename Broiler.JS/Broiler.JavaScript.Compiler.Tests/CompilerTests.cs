@@ -286,6 +286,31 @@ public class CompilerTests
     }
 
     [Fact]
+    public void Compile_DerivedClass_Constructor_CanCallSuper()
+    {
+        using var ctx = new JSContext();
+        var result = ctx.Eval("""
+            (function () {
+                class Base {
+                    constructor() {
+                        this.value = 1;
+                    }
+                }
+
+                class Derived extends Base {
+                    constructor() {
+                        super();
+                    }
+                }
+
+                return new Derived().value;
+            })()
+            """);
+
+        Assert.Equal(1.0, result.DoubleValue);
+    }
+
+    [Fact]
     public void Compile_ArrowFunction_ArrayDestructuringElisions_Work()
     {
         using var ctx = new JSContext();
@@ -2118,6 +2143,7 @@ public class CompilerTests
 
         Assert.Equal(3.0, ctx.Eval("""eval("2; switch ('a') { case 'a': { 3; break; } default: }")""").DoubleValue);
         Assert.Equal(6.0, ctx.Eval("""eval("5; do { switch ('a') { case 'a': { 6; continue; } default: } } while (false)")""").DoubleValue);
+        Assert.True(ctx.Eval("""eval("switch (1) { default: }")""").IsUndefined);
 
         Assert.Equal(3.0, ctx.Eval("""eval("1; do { 2; with({}) { 3; break; } 4; } while (false)")""").DoubleValue);
         Assert.True(ctx.Eval("""eval("5; do { 6; with({}) { break; } 7; } while (false)")""").IsUndefined);

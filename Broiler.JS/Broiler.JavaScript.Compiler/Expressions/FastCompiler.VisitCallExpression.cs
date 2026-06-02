@@ -143,7 +143,7 @@ partial class FastCompiler
 
             if (isSuper)
             {
-                var paramArray = VisitArguments(isSuper ? target : null, arguments);
+                var paramArray = VisitArguments(ArgumentsBuilder.This(scope.Top.ArgumentsExpression), arguments);
                 var superMethod = JSValueBuilder.Index(super, name, me.Coalesce);
 
                 return JSFunctionBuilder.InvokeFunction(superMethod, paramArray, me.Coalesce);
@@ -163,7 +163,7 @@ partial class FastCompiler
             if (isSuper)
             {
                 // check if there are pending member inits...
-                var paramArray1 = VisitArguments(@this, arguments);
+                var paramArray1 = VisitArguments(ArgumentsBuilder.This(scope.Top.ArgumentsExpression), arguments);
                 FastFunctionScope top = scope.Top;
                 var root = top.RootScope;
                 var members = root.MemberInits;
